@@ -1,0 +1,12 @@
+{
+  "id": "webpush-api-env",
+  "name": "WebPush API Environment",
+  "values": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000",
+      "enabled": true,
+      "type": "default"
+    }
+  ]
+}

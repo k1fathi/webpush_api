@@ -55,3 +55,6 @@ docker-compose logs -f celery_worker
 
 RabbitMQ: Acts as the message broker, handling task queue management
 Redis: Stores task results and states (success/failure, return values, etc.)
+
+
+docker-compose down -v web && docker-compose up -d --build web
