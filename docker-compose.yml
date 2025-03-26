@@ -14,6 +14,11 @@ services:
       - PYTHONPATH=/app
     volumes:
       - .:/app
+    command: >
+      bash -c "
+        python init_db.py &&
+        uvicorn main:app --host $${API_HOST} --port $${API_PORT}
+      "
 
   celery_worker:
     build: .
