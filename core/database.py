@@ -5,6 +5,7 @@ from config.settings import settings
 import logging
 import time
 from sqlalchemy.exc import OperationalError
+from sqlalchemy import inspect
 
 logger = logging.getLogger(__name__)
 
@@ -49,16 +50,26 @@ def init_db():
         
         logger.info("Testing database connection...")
         with engine.connect() as conn:
+            # Test connection
             conn.execute("SELECT 1")
             logger.info("Database connection successful")
-        
-        logger.info("Creating database tables...")
-        Base.metadata.create_all(bind=engine)
-        logger.info("✅ Database tables created successfully")
+            
+            # Check if tables exist
+            inspector = inspect(engine)
+            existing_tables = inspector.get_table_names()
+            logger.info(f"Existing tables: {existing_tables}")
+            
+            if "notifications" not in existing_tables:
+                logger.info("Creating database tables...")
+                Base.metadata.create_all(bind=engine)
+                logger.info("✅ Database tables created successfully")
+            else:
+                logger.info("✅ Tables already exist")
+                
         return True
     except Exception as e:
         logger.error(f"❌ Failed to initialize database: {str(e)}")
-        raise  # Raise the exception to fail the startup
+        raise
 
 if __name__ == "__main__":
     init_db()

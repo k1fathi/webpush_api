@@ -17,11 +17,9 @@ app = FastAPI(title="WebPush API")
 async def startup_event():
     logger.info("Starting up FastAPI application")
     try:
-        # Test database connection
-        from core.database import engine
-        with engine.connect() as conn:
-            conn.execute("SELECT 1")
-        logger.info("Database connection successful")
+        from core.database import init_db
+        logger.info("Initializing database...")
+        init_db()
         logger.info("✅ Application startup complete")
     except Exception as e:
         logger.error(f"❌ Startup failed: {str(e)}")
