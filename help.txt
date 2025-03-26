@@ -1,0 +1,57 @@
+docker-compose exec web python test_integration.py
+
+/c:/K1/ZUZZUU/webpush/webpush_api/
+├── api/
+│   ├── __init__.py
+│   └── main.py
+├── core/
+│   ├── __init__.py
+│   ├── database.py
+│   └── models.py
+├── workers/
+│   ├── __init__.py
+│   ├── celery_worker.py
+│   └── tasks.py
+├── tests/
+│   ├── __init__.py
+│   └── test_integration.py
+├── config/
+│   ├── __init__.py
+│   └── settings.py
+├── .env
+├── docker-compose.yml
+├── Dockerfile
+└── requirements.txt
+
+
+
+## 1. Health check
+curl http://localhost:8000/health
+
+# 2. Create a notification (with properly formatted JSON)
+curl -X POST http://localhost:8000/notifications/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Test Notification",
+    "body": "This is a test message",
+    "icon": null,
+    "data": {
+      "key": "value"
+    }
+  }'
+
+# 3. List all notifications
+curl http://localhost:8000/notifications/
+
+# 4. Get specific notification (replace {id} with actual id)
+curl http://localhost:8000/notifications/1
+
+# 5. Check Celery worker logs
+docker-compose logs -f celery_worker
+
+
+
+
+
+RabbitMQ: Acts as the message broker, handling task queue management
+Redis: Stores task results and states (success/failure, return values, etc.)

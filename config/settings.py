@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     POSTGRES_DB: str
     POSTGRES_HOST: str
     POSTGRES_PORT: str
+    POSTGRES_EXTERNAL_PORT: str
     
     # RabbitMQ settings
     RABBITMQ_HOST: str

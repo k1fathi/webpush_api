@@ -1,10 +1,10 @@
 import asyncio
 import logging
 from fastapi.testclient import TestClient
-from main import app
-from database import SessionLocal
-from models import Notification
-from celery_worker import celery_app
+from api.main import app
+from core.database import SessionLocal
+from core.models import Notification
+from workers.celery_worker import celery_app
 import time
 
 logging.basicConfig(level=logging.INFO)
@@ -16,7 +16,6 @@ def test_database_connection():
     """Test PostgreSQL connection and basic operations"""
     try:
         db = SessionLocal()
-        # Try to execute a simple query
         result = db.execute("SELECT 1").fetchone()
         logger.info("✅ Database connection successful")
         return True
@@ -29,7 +28,6 @@ def test_database_connection():
 def test_rabbitmq_connection():
     """Test RabbitMQ connection"""
     try:
-        # Try to connect to RabbitMQ
         celery_app.connection().ensure_connection(timeout=3)
         logger.info("✅ RabbitMQ connection successful")
         return True
@@ -41,11 +39,6 @@ def test_celery_task():
     """Test Celery task execution"""
     db = None
     try:
-        # First ensure tables exist
-        from init_db import init_database
-        init_database()
-        
-        # Create a test notification
         response = client.post(
             "/notifications/",
             json={
@@ -60,11 +53,8 @@ def test_celery_task():
             return False
 
         notification_id = response.json()["id"]
-        
-        # Wait for task processing
         time.sleep(2)
         
-        # Check if notification was processed
         db = SessionLocal()
         notification = db.query(Notification).filter(Notification.id == notification_id).first()
         
@@ -79,23 +69,17 @@ def test_celery_task():
         logger.error(f"❌ Celery task test failed: {str(e)}")
         return False
     finally:
-        if db is not None:
+        if db:
             db.close()
 
 def run_all_tests():
     """Run all integration tests"""
     logger.info("🔍 Starting integration tests...")
     
-    # Test database
     db_ok = test_database_connection()
-    
-    # Test RabbitMQ
     rabbitmq_ok = test_rabbitmq_connection()
-    
-    # Test Celery task
     celery_ok = test_celery_task()
     
-    # Summary
     logger.info("\n=== Test Results ===")
     logger.info(f"Database: {'✅' if db_ok else '❌'}")
     logger.info(f"RabbitMQ: {'✅' if rabbitmq_ok else '❌'}")
