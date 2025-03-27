@@ -58,3 +58,9 @@ Redis: Stores task results and states (success/failure, return values, etc.)
 
 
 docker-compose down -v web && docker-compose up -d --build web
+
+
+docker-compose -f docker-compose.dev.yml up -d --build
+
+cp .env.dev .env
+

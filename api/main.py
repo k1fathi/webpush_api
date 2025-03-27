@@ -1,14 +1,16 @@
 from fastapi import FastAPI, Depends, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
+from config.settings import settings
 import logging
 from sqlalchemy.orm import Session
 from core.database import get_db
 from core.models import (
     Notification, Subscription, NotificationAction, 
     NotificationSchedule, NotificationTracking, NotificationSegment,
-    Template, Campaign, WebhookEvent, CampaignSegment  # Add CampaignSegment here
+    Template, Campaign, WebhookEvent, CampaignSegment
 )
 from workers.tasks import process_notification, process_webhook_event
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional  # Add Optional here
 from datetime import datetime
 from pydantic import BaseModel
 from api.schemas import (
@@ -18,7 +20,7 @@ from api.schemas import (
     CDPProfileSync, DashboardMetrics, SegmentPerformance,
     TemplateCreate, TemplateResponse,
     CampaignCreate, CampaignResponse,
-    AnalyticsResponse, CampaignAnalytics  # Add these imports
+    AnalyticsResponse, CampaignAnalytics
 )
 from api.services import analytics, segment_service, cdp_service
 
@@ -26,6 +28,15 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = FastAPI(title="WebPush API")
+
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.ALLOWED_HOSTS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.on_event("startup")
 async def startup_event():
@@ -303,7 +314,12 @@ async def send_user_notification(
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(
+        app,
+        host=settings.API_HOST,
+        port=settings.API_PORT,
+        workers=settings.API_WORKERS
+    )
 
 
 
