@@ -1,31 +1,31 @@
-from pydantic_settings import BaseSettings
-from typing import Optional
+from pydantic import BaseModel
+from typing import Optional, List
 
-class Settings(BaseSettings):
+class Settings(BaseModel):
     # API Settings
-    API_HOST: str = "57.129.71.50"  # Update to external IP
+    API_HOST: str = "57.129.71.50"
     API_PORT: int = 8000
     API_WORKERS: int = 4
     DEBUG: bool = False
-    ALLOWED_HOSTS: list = ["*"]
+    ALLOWED_HOSTS: List[str] = ["*"]
     
     # Database Settings
-    POSTGRES_USER: str
-    POSTGRES_PASSWORD: str
-    POSTGRES_DB: str
-    POSTGRES_HOST: str
-    POSTGRES_PORT: int
+    POSTGRES_USER: str = "webpush_user"
+    POSTGRES_PASSWORD: str = "webpush_password"
+    POSTGRES_DB: str = "webpush_db"
+    POSTGRES_HOST: str = "db"
+    POSTGRES_PORT: int = 5432
     DATABASE_URL: Optional[str] = None
 
     # RabbitMQ Settings
-    RABBITMQ_HOST: str
-    RABBITMQ_PORT: int
-    RABBITMQ_USER: str
-    RABBITMQ_PASS: str
+    RABBITMQ_HOST: str = "rabbitmq"
+    RABBITMQ_PORT: int = 5672
+    RABBITMQ_USER: str = "guest"
+    RABBITMQ_PASS: str = "guest"
 
     # Redis Settings
-    REDIS_HOST: str
-    REDIS_PORT: int
+    REDIS_HOST: str = "redis"
+    REDIS_PORT: int = 6379
 
     def __init__(self, **data):
         super().__init__(**data)
