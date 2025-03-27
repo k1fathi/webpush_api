@@ -1,0 +1,85 @@
+{
+  "id": "3",
+  "title": "Merhaba {name}, sepetinizdeki ürün tükeniyor!",
+  "body": "{product} için son {time} saat kaldı. Hemen tamamla: {link}",
+  "icon": "https://cdn.example.com/notification-icon.png",
+  "image": "https://cdn.example.com/product-image.jpg",
+  "badge": "/badge-icon.png",
+  "data": {
+    "deep_link": "/cart",
+    "campaign_id": "cart-abandoned-2023",
+    "variables": {
+      "name": "Ahmet",
+      "product": "iPhone 15",
+      "time": "24",
+      "link": "https://example.com/cart"
+    }
+  },
+  "segments": ["vip_users", "cart_abandoners"], // CDP/CEP entegrasyonlu segmentler
+  "targeting_rules": {
+    "country": "TR",
+    "last_activity": ">7d",
+    "purchase_history": ">=2"
+  },
+  "actions": [
+    {
+      "type": "button",
+      "title": "Sepete Git",
+      "action": "open_deep_link"
+    }
+  ],
+  "schedule": {
+    "type": "trigger_based", // "time_based" veya "trigger_based"
+    "trigger_type": "cart_abandoned", // Sepet terk, doğum günü vb.
+    "trigger_conditions": {
+      "abandon_time": "24h",
+      "product_category": "electronics"
+    },
+    "send_at": "2023-10-10T14:30:00.000Z" // Zamanlanmış gönderim için
+  },
+  "tracking": {
+    "enable_delivery_tracking": true,
+    "enable_open_tracking": true,
+    "enable_click_tracking": true,
+    "utm_params": {
+      "source": "webpush",
+      "campaign": "cart_abandoned"
+    }
+  },
+  "ab_test_group": "A", // A/B test gruplama
+  "variant_id": "variation-1", // Şablon varyantı
+  "priority": "high", // Aciliyet seviyesi
+  "ttl": 86400, // 24 saat (saniye cinsinden)
+  "require_interaction": true, // Kullanıcı etkileşimi zorunlu mu?
+  "webhooks": {
+    "delivery": "https://webhook.example.com/delivery",
+    "click": "https://webhook.example.com/click",
+    "conversion": "https://webhook.example.com/conversion"
+  },
+  "cep_strategy": {
+    "channel_priority": ["webpush", "email"], // CEP ile kanal önceliği
+    "optimal_time": "user_preference" // Kullanıcı etkileşim zamanı
+  },
+  "cdp_data": {
+    "user_id": "user-123",
+    "profile": {
+      "loyalty_tier": "vip",
+      "last_purchase": "2023-10-01"
+    }
+  },
+  "created_at": "2023-10-05T14:30:00.000Z"
+}
+
+
+
+ INFO:core.database:Existing tables: ['templates', 
+ 'campaigns', 
+ 'notifications', 
+ 'notification_schedules', 
+ 'notification_actions', 
+ 'notification_tracking', 
+ 'notification_segments', 
+ 'delivery_statuses', 
+ 'subscriptions', 
+ 'webhook_events']
+

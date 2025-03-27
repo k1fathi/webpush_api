@@ -1,10 +1,11 @@
 from celery import shared_task
 from workers.celery_worker import celery_app
 from core.database import SessionLocal
-from core.models import Notification, Subscription
+from core.models import Notification, Subscription, WebhookEvent
 from sqlalchemy import exc
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
+import httpx
 
 logger = logging.getLogger(__name__)
 
@@ -84,5 +85,54 @@ def cleanup_old_notifications(days: int = 30):
         logger.error(f"Failed to cleanup old notifications: {str(e)}")
         db.rollback()
         raise
+    finally:
+        db.close()
+
+@shared_task(bind=True, max_retries=3)
+def process_webhook_event(self, event_id: int):
+    """Process webhook event and send to external systems"""
+    db = SessionLocal()
+    try:
+        event = db.query(WebhookEvent).filter(WebhookEvent.id == event_id).first()
+        if not event:
+            logger.error(f"Webhook event {event_id} not found")
+            return False
+
+        # Send webhook to external system using synchronous client
+        with httpx.Client() as client:
+            webhook_data = {
+                "notification_id": event.notification_id,
+                "subscription_id": event.subscription_id,
+                "timestamp": event.created_at.isoformat(),
+                **event.payload
+            }
+
+            if event.event_type == "delivery":
+                webhook_data["event"] = "delivery"
+                response = client.post(
+                    event.payload.get("webhook_url"),
+                    json=webhook_data
+                )
+            elif event.event_type == "click":
+                webhook_data["event"] = "click"
+                response = client.post(
+                    event.payload.get("webhook_url"),
+                    json=webhook_data
+                )
+            
+            response.raise_for_status()
+
+        event.processed = True
+        db.commit()
+        return True
+
+    except httpx.HTTPError as http_error:
+        logger.error(f"HTTP error while processing webhook event {event_id}: {str(http_error)}")
+        db.rollback()
+        raise self.retry(exc=http_error, countdown=5 * (self.request.retries + 1))
+    except Exception as e:
+        logger.error(f"Error processing webhook event {event_id}: {str(e)}")
+        db.rollback()
+        raise self.retry(exc=e, countdown=5 * (self.request.retries + 1))
     finally:
         db.close()

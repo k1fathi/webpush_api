@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "WebPush API",
-    "description": "Collection for WebPush API endpoints",
+    "description": "Collection for WebPush API endpoints with CDP/CEP integration",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -12,68 +12,314 @@
   ],
   "item": [
     {
-      "name": "Health Check",
-      "request": {
-        "method": "GET",
-        "url": {
-          "raw": "{{baseUrl}}/health",
-          "host": ["{{baseUrl}}"],
-          "path": ["health"]
-        }
-      }
-    },
-    {
-      "name": "Create Notification",
-      "request": {
-        "method": "POST",
-        "url": {
-          "raw": "{{baseUrl}}/notifications/",
-          "host": ["{{baseUrl}}"],
-          "path": ["notifications", ""]
-        },
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n    \"title\": \"Test Notification\",\n    \"body\": \"This is a test message\",\n    \"icon\": null,\n    \"data\": {\n        \"key\": \"value\"\n    }\n}"
-        }
-      }
-    },
-    {
-      "name": "List Notifications",
-      "request": {
-        "method": "GET",
-        "url": {
-          "raw": "{{baseUrl}}/notifications/?skip=0&limit=100",
-          "host": ["{{baseUrl}}"],
-          "path": ["notifications", ""],
-          "query": [
-            {
-              "key": "skip",
-              "value": "0"
-            },
-            {
-              "key": "limit",
-              "value": "100"
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
             }
-          ]
+          }
         }
-      }
+      ]
     },
     {
-      "name": "Get Notification by ID",
-      "request": {
-        "method": "GET",
-        "url": {
-          "raw": "{{baseUrl}}/notifications/1",
-          "host": ["{{baseUrl}}"],
-          "path": ["notifications", "1"]
+      "name": "Segments",
+      "item": [
+        {
+          "name": "Create Segment",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/segments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "segments"
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"vip_users\",\n  \"conditions\": {\n    \"loyalty_tier\": \"vip\",\n    \"last_purchase\": \">=2023-01-01\",\n    \"country\": \"TR\",\n    \"custom_rules\": {\n      \"purchase_count\": \">5\"\n    }\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "List Segments",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/segments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "segments"
+              ]
+            }
+          }
         }
-      }
+      ]
+    },
+    {
+      "name": "Templates",
+      "item": [
+        {
+          "name": "Create Template",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/templates",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "templates"
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"cart_abandoned_vip\",\n  \"title_template\": \"Merhaba {name}, sepetinizdeki ürün tükeniyor!\",\n  \"body_template\": \"{product} için son {time} saat kaldı. Hemen tamamla: {link}\",\n  \"variables\": [\"name\", \"product\", \"time\", \"link\"],\n  \"category\": \"cart_abandonment\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get All Templates",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/templates?skip=0&limit=10&category=cart_abandonment",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "templates"
+              ],
+              "query": [
+                {
+                  "key": "skip",
+                  "value": "0"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "category",
+                  "value": "cart_abandonment",
+                  "description": "Optional category filter"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Template by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/templates/{{templateId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "templates",
+                "{{templateId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Campaign Template",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/campaigns/{{campaignId}}/template",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "campaigns",
+                "{{campaignId}}",
+                "template"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Campaigns",
+      "item": [
+        {
+          "name": "Create Campaign",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/campaigns",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "campaigns"
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"VIP Cart Recovery\",\n  \"template_id\": 1,\n  \"start_date\": \"2024-01-01T00:00:00Z\",\n  \"segments\": [\"vip_users\"],\n  \"schedule_type\": \"trigger_based\",\n  \"trigger_conditions\": {\n    \"event\": \"cart_abandoned\",\n    \"delay\": \"24h\"\n  }\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Analytics",
+      "item": [
+        {
+          "name": "Campaign Analytics",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/campaigns/{{campaignId}}?metrics=delivery_rate,ctr,conversion_rate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "analytics",
+                "campaigns",
+                "{{campaignId}}"
+              ],
+              "query": [
+                {
+                  "key": "metrics",
+                  "value": "delivery_rate,ctr,conversion_rate"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Segment Performance",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/segments?date_range=last_7_days",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dashboard",
+                "segments"
+              ],
+              "query": [
+                {
+                  "key": "date_range",
+                  "value": "last_7_days"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "A/B Testing",
+      "item": [
+        {
+          "name": "Create A/B Test",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/ab-tests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ab-tests"
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campaign_id\": \"campaign-123\",\n  \"variants\": [\n    {\"variant_id\": \"A\", \"title\": \"Son fırsat! 🔥\"},\n    {\"variant_id\": \"B\", \"title\": \"Sepetiniz sizi bekliyor\"}\n  ],\n  \"test_duration\": \"7d\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "CDP Integration",
+      "item": [
+        {
+          "name": "Sync User Profile",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/cdp/sync",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "cdp",
+                "sync"
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"user-123\",\n  \"profile\": {\n    \"loyalty_tier\": \"vip\",\n    \"last_interaction\": \"2024-01-15T14:30:00Z\",\n    \"purchase_history\": {\n      \"count\": 12,\n      \"total_value\": 5000\n    }\n  }\n}"
+            }
+          }
+        }
+      ]
     }
   ]
 }

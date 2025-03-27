@@ -45,27 +45,14 @@ def get_db():
 
 def init_db():
     try:
-        # Import models here to ensure they are registered with Base
-        from core.models import Notification, Subscription
+        # Drop all tables to ensure clean state
+        Base.metadata.drop_all(bind=engine)
+        logger.info("✅ Dropped all existing tables")
         
-        logger.info("Testing database connection...")
-        with engine.connect() as conn:
-            # Test connection
-            conn.execute("SELECT 1")
-            logger.info("Database connection successful")
-            
-            # Check if tables exist
-            inspector = inspect(engine)
-            existing_tables = inspector.get_table_names()
-            logger.info(f"Existing tables: {existing_tables}")
-            
-            if "notifications" not in existing_tables:
-                logger.info("Creating database tables...")
-                Base.metadata.create_all(bind=engine)
-                logger.info("✅ Database tables created successfully")
-            else:
-                logger.info("✅ Tables already exist")
-                
+        # Create all tables
+        Base.metadata.create_all(bind=engine)
+        logger.info("✅ Created all tables with updated schema")
+        
         return True
     except Exception as e:
         logger.error(f"❌ Failed to initialize database: {str(e)}")
