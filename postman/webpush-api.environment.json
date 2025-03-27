@@ -16,21 +16,6 @@
             "key": "campaignId",
             "value": "1",
             "enabled": true
-        },
-        {
-            "key": "userId",
-            "value": "user-123",
-            "enabled": true
-        },
-        {
-            "key": "startDate",
-            "value": "2024-01-01",
-            "enabled": true
-        },
-        {
-            "key": "endDate",
-            "value": "2024-12-31",
-            "enabled": true
         }
     ]
 }
