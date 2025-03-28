@@ -1,0 +1,20 @@
+graph TD
+    subgraph WebPush Platform
+        Actor1[Marketing Team]
+        Actor2[System Admin]
+        Actor3[Customer]
+
+        UseCase1[Create Campaign]
+        UseCase2[Segment Users]
+        UseCase3[Analyze Performance]
+        UseCase4[Send Notifications]
+        UseCase5[View Dashboard]
+
+        Actor1 --> UseCase1
+        Actor1 --> UseCase2
+        Actor1 --> UseCase3
+        Actor2 --> UseCase4
+        Actor2 --> UseCase5
+        Actor3 --> UseCase4
+    end
+                                                                                    

@@ -3,11 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from config.settings import settings
 import logging
 from sqlalchemy.orm import Session
-from core.database import get_db
-from core.models import (
+from db.config import get_db
+from db.models import (
     Notification, Subscription, NotificationAction, 
     NotificationSchedule, NotificationTracking, NotificationSegment,
-    Template, Campaign, WebhookEvent, CampaignSegment
+    Template, Campaign, WebhookEvent, CampaignSegment,
+    User, UserSegment
 )
 from workers.tasks import process_notification, process_webhook_event
 from typing import List, Dict, Any, Optional  # Add Optional here
@@ -311,6 +312,90 @@ async def send_user_notification(
     db: Session = Depends(get_db)
 ):
     return await segment_service.send_targeted_notification(user_id, notification, db)
+
+@app.post("/api/notifications/{notification_id}/cep", response_model=Dict[str, Any])
+async def update_cep_strategy(
+    notification_id: int,
+    strategy: CEPStrategyCreate,
+    db: Session = Depends(get_db)
+):
+    """Update CEP strategy for notification"""
+    notification = db.query(Notification).filter(Notification.id == notification_id).first()
+    if not notification:
+        raise HTTPException(status_code=404, detail="Notification not found")
+        
+    cep_data = CEPStrategy(
+        notification_id=notification_id,
+        **strategy.dict()
+    )
+    db.add(cep_data)
+    db.commit()
+    return {"status": "success", "strategy": strategy}
+
+@app.post("/api/notifications/{notification_id}/cdp", response_model=Dict[str, Any])
+async def update_cdp_data(
+    notification_id: int,
+    cdp_data: CDPDataCreate,
+    db: Session = Depends(get_db)
+):
+    """Update CDP data for notification"""
+    notification = db.query(Notification).filter(Notification.id == notification_id).first()
+    if not notification:
+        raise HTTPException(status_code=404, detail="Notification not found")
+        
+    cdp = CDPData(
+        notification_id=notification_id,
+        **cdp_data.dict()
+    )
+    db.add(cdp)
+    db.commit()
+    return {"status": "success", "cdp_data": cdp_data}
+
+@app.put("/api/notifications/{notification_id}/targeting", response_model=Dict[str, Any])
+async def update_targeting_rules(
+    notification_id: int,
+    rules: TargetingRules,
+    db: Session = Depends(get_db)
+):
+    """Update targeting rules for notification"""
+    notification = db.query(Notification).filter(Notification.id == notification_id).first()
+    if not notification:
+        raise HTTPException(status_code=404, detail="Notification not found")
+        
+    notification.targeting_rules = rules.dict()
+    db.commit()
+    return {"status": "success", "rules": rules}
+
+# User Management
+@app.post("/api/users", response_model=UserResponse)
+async def create_user(user: UserCreate, db: Session = Depends(get_db)):
+    """Create a new user"""
+    db_user = User(**user.dict())
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+@app.get("/api/users/{user_id}/segments", response_model=List[str])
+async def get_user_segments(user_id: int, db: Session = Depends(get_db)):
+    """Get segments for a user"""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return [segment.segment.name for segment in user.segments]
+
+@app.get("/api/users/{user_id}/notifications", response_model=List[NotificationResponse])
+async def get_user_notifications(
+    user_id: int,
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db)
+):
+    """Get all notifications for a user"""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user.notifications[skip:skip + limit]
 
 if __name__ == "__main__":
     import uvicorn

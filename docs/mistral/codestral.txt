@@ -1,0 +1,21 @@
+Explanation:
+USER: Represents the users who will receive WebPush notifications.
+SEGMENT: Represents different segments of users (e.g., VIP, loyal customers).
+WEBPUSH: Represents the WebPush notifications sent to users.
+TEMPLATE: Represents the templates used for WebPush notifications.
+CAMPAIGN: Represents the campaigns that include multiple WebPush notifications.
+TRIGGER: Represents the conditions that trigger WebPush notifications.
+ANALYTICS: Represents the analytics data for each WebPush notification.
+WEBHOOK: Represents the webhook events triggered by WebPush notifications.
+CDP: Represents the Customer Data Platform data associated with users.
+CEP: Represents the Customer Engagement Platform data associated with users.
+Relationships:
+USER belongs to a SEGMENT.
+USER sends WEBPUSH notifications.
+TEMPLATE is used by WEBPUSH.
+CAMPAIGN includes multiple WEBPUSH notifications.
+TRIGGER triggers WEBPUSH notifications.
+WEBPUSH has ANALYTICS data.
+WEBPUSH triggers WEBHOOK events.
+USER has CDP data.
+USER has CEP data.

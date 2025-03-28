@@ -1,0 +1,117 @@
+
+=============================================
+SECTION 1: ORIGINAL ERD (erd.mmd)
+=============================================
+
+erDiagram
+NOTIFICATION {
+  id string
+  title string
+  body string
+  icon string
+  image string
+  badge string
+  data NotificationData
+  segments string[]
+  targeting_rules TargetingRules
+  actions NotificationAction[]
+  schedule NotificationSchedule
+  tracking TrackingSettings
+  ab_test_group string
+  variant_id string
+  priority string
+  ttl number
+  require_interaction boolean
+  webhooks Webhooks
+  cep_strategy CEPStrategy
+  cdp_data CDPData
+  created_at string
+}
+
+# ...rest of original ERD.mmd content...
+
+=============================================
+SECTION 2: CODESTRAL ERD (erd_codestral.mmd)
+=============================================
+
+erDiagram
+USER {
+  integer user_id PK
+  string name
+  string email
+  string segment
+  datetime last_login
+  date birthday
+  date membership_date
+}
+
+SEGMENT {
+  integer segment_id PK
+  string name
+}
+
+USER ||--o{ SEGMENT : belongs_to
+
+WEBPUSH {
+  integer webpush_id PK
+  integer user_id FK
+  integer template_id FK
+  string message
+  string status
+  datetime sent_at
+  datetime opened_at
+  datetime clicked_at
+}
+
+# ...rest of Codestral ERD content...
+
+=============================================
+SECTION 3: GPT ERD (erd_gpt.mmd)
+=============================================
+
+erDiagram
+USER {
+  int id PK
+  string name
+  string email
+}
+
+SEGMENT {
+  int id PK
+  string name
+  string description
+}
+
+USER_SEGMENT {
+  int user_id FK
+  int segment_id FK
+}
+
+TEMPLATE {
+  int id PK
+  string content
+  string dynamic_variables
+}
+
+# ...rest of GPT ERD content...
+
+=============================================
+COMPARISON NOTES
+=============================================
+
+1. Original ERD focuses on notification structure
+2. Codestral ERD emphasizes user and segment relationships
+3. GPT ERD provides a balanced approach with additional entities
+
+Key Differences:
+- Data types representation
+- Relationship notation
+- Level of detail in attributes
+- Entity focus and scope
+
+Common Elements:
+- User management
+- Segmentation
+- Notification/WebPush handling
+- Template system
+- Analytics tracking

@@ -39,6 +39,39 @@ class SegmentCreate(BaseModel):
     name: str
     conditions: SegmentCondition
 
+class Variables(BaseModel):
+    name: str
+    product: str
+    time: str
+    link: str
+
+class NotificationDataCreate(BaseModel):
+    deep_link: Optional[str]
+    campaign_id: Optional[str]
+    variables: Variables
+
+class CEPStrategyCreate(BaseModel):
+    channel_priority: List[str]
+    optimal_time: str
+
+class CDPProfile(BaseModel):
+    loyalty_tier: str
+    last_purchase: str
+
+class CDPDataCreate(BaseModel):
+    user_id: str
+    profile: CDPProfile
+
+class WebhookUrls(BaseModel):
+    delivery: Optional[str]
+    click: Optional[str]
+    conversion: Optional[str]
+
+class TargetingRules(BaseModel):
+    country: Optional[str]
+    last_activity: Optional[str]
+    purchase_history: Optional[str]
+
 class NotificationCreate(BaseModel):
     title: str
     body: str
@@ -55,6 +88,11 @@ class NotificationCreate(BaseModel):
     tracking: Optional[TrackingCreate]
     actions: Optional[List[ActionCreate]]
     segments: Optional[List[SegmentCreate]]
+    data: Optional[NotificationDataCreate]
+    cep_strategy: Optional[CEPStrategyCreate]
+    cdp_data: Optional[CDPDataCreate]
+    targeting_rules: Optional[TargetingRules]
+    webhooks: Optional[WebhookUrls]
 
 class NotificationResponse(NotificationCreate):
     id: int
@@ -170,6 +208,34 @@ class AnalyticsResponse(BaseModel):
     metrics: CampaignAnalytics
     segment_performance: Dict[str, Dict[str, float]]
     ab_test_results: Optional[Dict[str, Any]] = None
+
+    class Config:
+        orm_mode = True
+
+class UserCreate(BaseModel):
+    name: str
+    email: str
+    birthday: Optional[datetime]
+    device_token: Optional[str]
+
+class UserResponse(BaseModel):
+    id: int
+    name: str
+    email: str
+    last_login: Optional[datetime]
+    membership_date: datetime
+    is_subscribed: bool
+    segments: List[str] = []
+
+    class Config:
+        orm_mode = True
+
+class DeliveryReportResponse(BaseModel):
+    notification_id: int
+    delivered: bool
+    delivered_time: Optional[datetime]
+    open_rate: float
+    click_rate: float
 
     class Config:
         orm_mode = True

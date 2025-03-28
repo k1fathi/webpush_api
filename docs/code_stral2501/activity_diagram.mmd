@@ -1,0 +1,140 @@
+graph TD
+    A[Start] --> B[Define Campaign]
+    B --> C[Select Recipients]
+    C --> D[Choose Template]
+    D --> E[Personalize Message]
+    E --> F[Schedule Campaign]
+    F --> G[Send WebPush]
+    G --> H[Track Delivery]
+    H --> I[Analyze Performance]
+    I --> J[Optimize Campaign]
+    J --> K[End]
+
+    C --> C1[All Users]
+    C --> C2[Specific Segments]
+
+    D --> D1[Predefined Templates]
+    D --> D2[Custom Templates]
+
+    E --> E1[Add Dynamic Variables]
+    E --> E2[Review Personalization]
+
+    F --> F1[Immediate Send]
+    F --> F2[Scheduled Send]
+
+    G --> G1[Send to Users]
+    G --> G2[Handle Errors]
+
+    H --> H1[Track Delivery Status]
+    H --> H2[Track Open Rate]
+    H --> H3[Track Click Rate]
+
+    I --> I1[Analyze Delivery Reports]
+    I --> I2[Analyze Open Rates]
+    I --> I3[Analyze Click Rates]
+    I --> I4[Analyze Conversion Rates]
+
+    J --> J1[Adjust Campaign]
+    J --> J2[Run A/B Tests]
+    J --> J3[Integrate CDP & CEP Data]
+
+    K --> L[End Campaign]
+
+    %% Trigger-based WebPush
+    A --> T1[Trigger Event]
+    T1 --> T2[Check Conditions]
+    T2 --> T3[Send WebPush]
+    T3 --> T4[Track Delivery]
+    T4 --> T5[Analyze Performance]
+    T5 --> T6[Optimize Trigger]
+    T6 --> T7[End]
+
+    T1 --> T11[Cart Abandonment]
+    T1 --> T12[Birthday Reminders]
+    T1 --> T13[Activity-based Triggers]
+
+    %% Webhook Integration
+    A --> W1[Webhook Event]
+    W1 --> W2[Process Webhook]
+    W2 --> W3[Send Notification]
+    W3 --> W4[Track Delivery]
+    W4 --> W5[Analyze Performance]
+    W5 --> W6[Optimize Webhook]
+    W6 --> W7[End]
+
+    %% CDP & CEP Integration
+    A --> C1[Integrate CDP Data]
+    C1 --> C2[Integrate CEP Data]
+    C2 --> C3[Personalize Messages]
+    C3 --> C4[Send WebPush]
+    C4 --> C5[Track Delivery]
+    C5 --> C6[Analyze Performance]
+    C6 --> C7[Optimize Integration]
+    C7 --> C8[End]
+
+    %% Real-time Analytics
+    A --> R1[Real-time Data Analysis]
+    R1 --> R2[Optimize WebPush]
+    R2 --> R3[Send WebPush]
+    R3 --> R4[Track Delivery]
+    R4 --> R5[Analyze Performance]
+    R5 --> R6[Optimize Analytics]
+    R6 --> R7[End]
+
+    %% Dashboard Components
+    A --> D1[WebPush Send Page]
+    D1 --> D2[Select Recipients]
+    D2 --> D3[Choose Template]
+    D3 --> D4[Personalize Message]
+    D4 --> D5[Schedule Campaign]
+    D5 --> D6[Send WebPush]
+    D6 --> D7[Track Delivery]
+    D7 --> D8[Analyze Performance]
+    D8 --> D9[Optimize Campaign]
+    D9 --> D10[End]
+
+    %% Campaign Management
+    A --> CM1[Create Campaign]
+    CM1 --> CM2[Plan Messages]
+    CM2 --> CM3[Schedule Campaign]
+    CM3 --> CM4[Send WebPush]
+    CM4 --> CM5[Track Delivery]
+    CM5 --> CM6[Analyze Performance]
+    CM6 --> CM7[Optimize Campaign]
+    CM7 --> CM8[End]
+
+    %% Delivery Reports & Analytics
+    A --> DR1[Generate Reports]
+    DR1 --> DR2[Analyze Delivery Status]
+    DR2 --> DR3[Analyze Open Rates]
+    DR3 --> DR4[Analyze Click Rates]
+    DR4 --> DR5[Analyze Conversion Rates]
+    DR5 --> DR6[Optimize Reports]
+    DR6 --> DR7[End]
+
+    %% Automation & Triggers
+    A --> AT1[Set Triggers]
+    AT1 --> AT2[Check Conditions]
+    AT2 --> AT3[Send WebPush]
+    AT3 --> AT4[Track Delivery]
+    AT4 --> AT5[Analyze Performance]
+    AT5 --> AT6[Optimize Triggers]
+    AT6 --> AT7[End]
+
+    %% Delivery Reports & Analytics Module
+    A --> DRM1[Generate Reports]
+    DRM1 --> DRM2[Analyze Delivery Status]
+    DRM2 --> DRM3[Analyze Open Rates]
+    DRM3 --> DRM4[Analyze Click Rates]
+    DRM4 --> DRM5[Analyze Conversion Rates]
+    DRM5 --> DRM6[Optimize Reports]
+    DRM6 --> DRM7[End]
+
+    %% Webhook Integration
+    A --> WI1[Webhook Event]
+    WI1 --> WI2[Process Webhook]
+    WI2 --> WI3[Send Notification]
+    WI3 --> WI4[Track Delivery]
+    WI4 --> WI5[Analyze Performance]
+    WI5 --> WI6[Optimize Webhook]
+    WI6 --> WI7[End]

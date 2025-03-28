@@ -1,0 +1,108 @@
+erDiagram
+
+NOTIFICATION {
+  id string
+  title string
+  body string
+  icon string
+  image string
+  badge string
+  data NotificationData
+  segments string[]
+  targeting_rules TargetingRules
+  actions NotificationAction[]
+  schedule NotificationSchedule
+  tracking TrackingSettings
+  ab_test_group string
+  variant_id string
+  priority string
+  ttl number
+  require_interaction boolean
+  webhooks Webhooks
+  cep_strategy CEPStrategy
+  cdp_data CDPData
+  created_at string
+}
+
+NOTIFICATIONDATA {
+  deep_link string
+  campaign_id string
+  variables Variables
+}
+
+VARIABLES {
+  name string
+  product string
+  time string
+  link string
+}
+
+TARGETINGRULES {
+  country string
+  last_activity string
+  purchase_history string
+}
+
+NOTIFICATIONACTION {
+  type string
+  title string
+  action string
+}
+
+NOTIFICATIONSCHEDULE {
+  type string
+  trigger_type string
+  trigger_conditions TriggerConditions
+  send_at string
+}
+
+TRIGGERCONDITIONS {
+  abandon_time string
+  product_category string
+}
+
+TRACKINGSETTINGS {
+  enable_delivery_tracking boolean
+  enable_open_tracking boolean
+  enable_click_tracking boolean
+  utm_params UTMParams
+}
+
+UTMPARAMS {
+  source string
+  campaign string
+}
+
+WEBHOOKS {
+  delivery string
+  click string
+  conversion string
+}
+
+CEPSTRATEGY {
+  channel_priority string[]
+  optimal_time string
+}
+
+CDPDATA {
+  user_id string
+  profile Profile
+}
+
+PROFILE {
+  loyalty_tier string
+  last_purchase string
+}
+
+NOTIFICATION ||--|| NOTIFICATIONDATA : has
+NOTIFICATIONDATA ||--|| VARIABLES : contains
+NOTIFICATION ||--|| TARGETINGRULES : has
+NOTIFICATION ||--|| NOTIFICATIONACTION : has
+NOTIFICATION ||--|| NOTIFICATIONSCHEDULE : has
+NOTIFICATIONSCHEDULE ||--|| TRIGGERCONDITIONS : contains
+NOTIFICATION ||--|| TRACKINGSETTINGS : has
+TRACKINGSETTINGS ||--|| UTMPARAMS : contains
+NOTIFICATION ||--|| WEBHOOKS : has
+NOTIFICATION ||--|| CEPSTRATEGY : has
+NOTIFICATION ||--|| CDPDATA : has
+CDPDATA ||--|| PROFILE : contains

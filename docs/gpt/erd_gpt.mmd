@@ -1,0 +1,68 @@
+erDiagram
+    USER {
+      int id PK
+      string name
+      string email
+    }
+    SEGMENT {
+      int id PK
+      string name
+      string description
+    }
+    USER_SEGMENT {
+      int user_id FK
+      int segment_id FK
+    }
+    TEMPLATE {
+      int id PK
+      string content
+      string dynamic_variables
+    }
+    CAMPAIGN {
+      int id PK
+      string name
+      enum type "bulk/automated/scheduled"
+      datetime scheduled_time
+      int template_id FK
+    }
+    NOTIFICATION {
+      int id PK
+      int campaign_id FK
+      int user_id FK
+      datetime send_time
+      string status "Delivered/Failed/Pending"
+      string dynamic_content "Personalized message content"
+    }
+    DELIVERY_REPORT {
+      int id PK
+      int notification_id FK
+      boolean delivered
+      datetime delivered_time
+      float open_rate "View Rate"
+      float click_rate "CTR"
+    }
+    TRIGGER_EVENT {
+      int id PK
+      string event_type "e.g., Abandoned Cart, Birthday"
+      string description
+      datetime event_time
+      int user_id FK
+    }
+    WEBHOOK {
+      int id PK
+      string endpoint
+      string description
+    }
+    
+    USER ||--o{ USER_SEGMENT : "belongs to"
+    SEGMENT ||--o{ USER_SEGMENT : "includes"
+    
+    CAMPAIGN ||--|| TEMPLATE : "uses"
+    CAMPAIGN ||--o{ NOTIFICATION : "sends"
+    USER ||--o{ NOTIFICATION : "receives"
+    
+    NOTIFICATION ||--|| DELIVERY_REPORT : "tracked by"
+    
+    TRIGGER_EVENT ||--o{ NOTIFICATION : "triggers"
+    
+    CAMPAIGN ||--o{ WEBHOOK : "integrates with"

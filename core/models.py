@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, JSON, Boolean, ForeignKey, Enum as SQLEnum, func, Index
+from sqlalchemy import Column, Integer, String, DateTime, JSON, Boolean, ForeignKey, Enum as SQLEnum, func, Index, Float
 from sqlalchemy.orm import relationship
 from datetime import datetime
 import enum
@@ -31,6 +31,9 @@ class Notification(Base):
     ab_test_group = Column(String)
     campaign_id = Column(Integer, ForeignKey('campaigns.id'), nullable=True)
     template_id = Column(Integer, ForeignKey('templates.id'), nullable=True)
+    targeting_rules = Column(JSON)  # country, last_activity, purchase_history
+    webhooks = Column(JSON)  # delivery, click, conversion URLs
+    user_id = Column(Integer, ForeignKey('users.id'))
 
     # Relationships
     schedule = relationship("NotificationSchedule", back_populates="notification", uselist=False)
@@ -41,6 +44,42 @@ class Notification(Base):
     template = relationship("Template")
     delivery_statuses = relationship("DeliveryStatus", back_populates="notification")
     webhook_events = relationship("WebhookEvent", back_populates="notification")
+    data = relationship("NotificationData", back_populates="notification", uselist=False)
+    cep_strategy = relationship("CEPStrategy", back_populates="notification", uselist=False)
+    cdp_data = relationship("CDPData", back_populates="notification", uselist=False)
+    user = relationship("User", back_populates="notifications")
+    delivery_report = relationship("DeliveryReport", back_populates="notification", uselist=False)
+
+class NotificationData(Base):
+    __tablename__ = "notification_data"
+    
+    id = Column(Integer, primary_key=True)
+    notification_id = Column(Integer, ForeignKey('notifications.id'))
+    deep_link = Column(String)
+    campaign_id = Column(String)
+    variables = Column(JSON)  # name, product, time, link
+    
+    notification = relationship("Notification", back_populates="data")
+
+class CEPStrategy(Base):
+    __tablename__ = "cep_strategies"
+    
+    id = Column(Integer, primary_key=True)
+    notification_id = Column(Integer, ForeignKey('notifications.id'))
+    channel_priority = Column(JSON)  # Array of channels
+    optimal_time = Column(String)
+    
+    notification = relationship("Notification", back_populates="cep_strategy")
+
+class CDPData(Base):
+    __tablename__ = "cdp_data"
+    
+    id = Column(Integer, primary_key=True)
+    notification_id = Column(Integer, ForeignKey('notifications.id'))
+    user_id = Column(String)
+    profile = Column(JSON)  # loyalty_tier, last_purchase
+    
+    notification = relationship("Notification", back_populates="cdp_data")
 
 class NotificationSchedule(Base):
     __tablename__ = "notification_schedules"
@@ -167,3 +206,49 @@ class WebhookEvent(Base):
     
     notification = relationship("Notification")
     subscription = relationship("Subscription")
+
+class User(Base):
+    __tablename__ = "users"
+    
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    email = Column(String, unique=True)
+    last_login = Column(DateTime)
+    birthday = Column(DateTime, nullable=True)
+    membership_date = Column(DateTime, default=datetime.utcnow)
+    device_token = Column(String, nullable=True)
+    is_subscribed = Column(Boolean, default=True)
+    
+    segments = relationship("UserSegment", back_populates="user")
+    notifications = relationship("Notification", back_populates="user")
+    cdp_profile = relationship("CDPProfile", back_populates="user", uselist=False)
+
+class UserSegment(Base):
+    __tablename__ = "user_segments"
+    
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'))
+    segment_id = Column(Integer, ForeignKey('segments.id'))
+    
+    user = relationship("User", back_populates="segments")
+    segment = relationship("Segment", back_populates="users")
+
+class Segment(Base):
+    __tablename__ = "segments"
+    
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+    description = Column(String)
+    criteria = Column(JSON)  # For segmentation rules
+
+class DeliveryReport(Base):
+    __tablename__ = "delivery_reports"
+    
+    id = Column(Integer, primary_key=True)
+    notification_id = Column(Integer, ForeignKey('notifications.id'))
+    delivered = Column(Boolean, default=False)
+    delivered_time = Column(DateTime)
+    open_rate = Column(Float, default=0.0)
+    click_rate = Column(Float, default=0.0)
+    
+    notification = relationship("Notification", back_populates="delivery_report")

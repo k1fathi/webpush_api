@@ -1,0 +1,62 @@
+---------------------------------------------
+Actors: Represent different types of users interacting with the system.
+
+Marketing Team: Responsible for creating campaigns, segmenting users, and analyzing performance.
+System Admin: Manages notifications and views the dashboard.
+Customer: Receives notifications.
+---------------------------------------------
+Use Cases: Represent the functionalities or services provided by the system.
+
+Create Campaign: Allows the marketing team to set up new campaigns.
+Segment Users: Allows the marketing team to categorize users into different segments.
+Analyze Performance: Provides tools for the marketing team to evaluate campaign performance.
+Send Notifications: Allows the system admin to send out notifications to users.
+View Dashboard: Provides an overview of system performance and activities.
+
+
+
+
+-------------------------------------------------------------------------
+
+Explanation:
+
+User: enduser
+Receives WebPush notifications.
+Opens WebPush notifications.
+Clicks WebPush notifications.
+
+Marketing Team: role
+Defines the campaign.
+Selects recipients.
+Chooses a template.
+Personalizes the message.
+Schedules the campaign.
+Sends WebPush notifications.
+
+
+Data Analyst: role
+Tracks delivery status.
+Analyzes performance.
+Optimizes the campaign.
+
+Technical Team:
+Sets up webhooks.
+Processes webhooks.
+Performs real-time data analysis.
+
+CDP:
+Integrates CDP data.
+
+CEP:
+Integrates CEP data.
+External Systems:
+
+Receives webhook events.
+Sends notifications.
+Connections:
+The Marketing Team defines the campaign and selects recipients, chooses a template, personalizes the message, schedules the campaign, and sends WebPush notifications.
+The User receives, opens, and clicks WebPush notifications.
+The Data Analyst tracks delivery status, analyzes performance, and optimizes the campaign.
+The Technical Team sets up webhooks, processes webhooks, and performs real-time data analysis.
+The CDP and CEP integrate their data to help personalize messages.
+External Systems receive webhook events and send notifications.

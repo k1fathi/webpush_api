@@ -1,7 +1,10 @@
 from celery import shared_task
 from workers.celery_worker import celery_app
-from core.database import SessionLocal
-from core.models import Notification, Subscription, WebhookEvent
+from db.config import SessionLocal
+from db.models import (
+    Notification, WebhookEvent, DeliveryStatus
+)
+from core.models import Subscription
 from sqlalchemy import exc
 from datetime import datetime, timedelta
 import logging

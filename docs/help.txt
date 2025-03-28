@@ -64,3 +64,12 @@ docker-compose -f docker-compose.dev.yml up -d --build
 
 cp .env.dev .env
 
+
+update databse FATAPI
+docker-compose exec web alembic revision --autogenerate -m "add_cdp_cep_models"
+docker-compose exec web alembic upgrade head
+
+
+
+Run the following command to auto-detect changes in your models and generate a migration script:
+alembic revision --autogenerate -m "Initial migration"

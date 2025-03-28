@@ -1,0 +1,68 @@
+flowchart TD
+    subgraph User
+        direction TB
+        U1[Receive WebPush]
+        U2[Open WebPush]
+        U3[Click WebPush]
+    end
+
+    subgraph Marketing Team
+        direction TB
+        M1[Define Campaign]
+        M2[Select Recipients]
+        M3[Choose Template]
+        M4[Personalize Message]
+        M5[Schedule Campaign]
+        M6[Send WebPush]
+    end
+
+    subgraph Data Analyst
+        direction TB
+        D1[Track Delivery]
+        D2[Analyze Performance]
+        D3[Optimize Campaign]
+    end
+
+    subgraph Technical Team
+        direction TB
+        T1[Set Up Webhook]
+        T2[Process Webhook]
+        T3[Real-time Data Analysis]
+    end
+
+    subgraph CDP
+        direction TB
+        C1[Integrate CDP Data]
+    end
+
+    subgraph CEP
+        direction TB
+        E1[Integrate CEP Data]
+    end
+
+    subgraph External Systems
+        direction TB
+        ES1[Receive Webhook]
+        ES2[Send Notification]
+    end
+
+    %% Connections between swimlanes
+    M1 --> M2
+    M2 --> M3
+    M3 --> M4
+    M4 --> M5
+    M5 --> M6
+    M6 --> U1
+    U1 --> U2
+    U2 --> U3
+    U3 --> D1
+    D1 --> D2
+    D2 --> D3
+    D3 --> M1
+    T1 --> T2
+    T2 --> T3
+    T3 --> D1
+    C1 --> M4
+    E1 --> M4
+    ES1 --> T2
+    T2 --> ES2

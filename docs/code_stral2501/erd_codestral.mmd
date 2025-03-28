@@ -1,0 +1,94 @@
+erDiagram
+
+USER {
+  integer user_id PK
+  string name
+  string email
+  string segment
+  datetime last_login
+  date birthday
+  date membership_date
+}
+
+SEGMENT {
+  integer segment_id PK
+  string name
+}
+
+USER ||--o{ SEGMENT : belongs_to
+
+WEBPUSH {
+  integer webpush_id PK
+  integer user_id FK
+  integer template_id FK
+  string message
+  string status
+  datetime sent_at
+  datetime opened_at
+  datetime clicked_at
+}
+
+USER ||--o{ WEBPUSH : sends
+
+TEMPLATE {
+  integer template_id PK
+  string name
+  string content
+}
+
+TEMPLATE ||--o{ WEBPUSH : uses
+
+CAMPAIGN {
+  integer campaign_id PK
+  string name
+  datetime start_time
+  datetime end_time
+  string status
+}
+
+CAMPAIGN ||--o{ WEBPUSH : includes
+
+TRIGGER {
+  integer trigger_id PK
+  string name
+  string condition
+}
+
+TRIGGER ||--o{ WEBPUSH : triggers
+
+ANALYTICS {
+  integer analytics_id PK
+  integer webpush_id FK
+  string delivery_status
+  float open_rate
+  float click_rate
+  float conversion_rate
+}
+
+WEBPUSH ||--o{ ANALYTICS : has
+
+WEBHOOK {
+  integer webhook_id PK
+  string event
+  string payload
+  string status
+  datetime sent_at
+}
+
+WEBPUSH ||--o{ WEBHOOK : triggers
+
+CDP {
+  integer cdp_id PK
+  integer user_id FK
+  json data
+}
+
+USER ||--o{ CDP : has
+
+CEP {
+  integer cep_id PK
+  integer user_id FK
+  json data
+}
+
+USER ||--o{ CEP : has
