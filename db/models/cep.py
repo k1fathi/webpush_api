@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, JSON, ForeignKey
-from db.database import Base
+from .base import Base
 
 class CEP(Base):
     __tablename__ = 'cep'

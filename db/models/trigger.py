@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String
-from db.database import Base
+from sqlalchemy.orm import relationship
+from .base import Base
 
 class Trigger(Base):
     __tablename__ = 'triggers'
@@ -7,3 +8,6 @@ class Trigger(Base):
     trigger_id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     condition = Column(String, nullable=False)
+    
+    # Relationship
+    webpushes = relationship("WebPush", back_populates="trigger")
