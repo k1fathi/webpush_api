@@ -59,3 +59,48 @@ The Data Analyst tracks delivery status, analyzes performance, and optimizes the
 The Technical Team sets up webhooks, processes webhooks, and performs real-time data analysis.
 The CDP and CEP integrate their data to help personalize messages.
 External Systems receive webhook events and send notifications.
+
+
+
+
+
+
+Explanation:
+End User (No special permissions):
+
+Receives, opens, and clicks WebPush notifications.
+Marketing Team (Role: MARKETER):
+
+Defines campaigns, selects recipients, chooses templates, personalizes messages, schedules campaigns, and sends WebPush notifications.
+Permission: campaign_management.
+Data Analytics Team (Role: ANALYST):
+
+Tracks delivery, analyzes performance, and optimizes campaigns.
+Permission: analytics_access.
+Technical Team (Role: TECH_ADMIN):
+
+Sets up and processes webhooks, performs real-time data analysis.
+Permission: system_configuration.
+System Administration (Role: ADMIN):
+
+Manages users, configures permissions, and sets system settings.
+Permission: full_access.
+CDP Integration (Role: TECH_ADMIN):
+
+Integrates CDP data.
+Permission: integration_management.
+CEP Integration (Role: TECH_ADMIN):
+
+Integrates CEP data.
+Permission: integration_management.
+External Systems:
+
+Receives webhooks and sends notifications.
+Connections:
+System Admin configures permissions for Marketing, Data Analytics, and Technical teams.
+Marketing team defines and sends campaigns.
+End users interact with WebPush notifications.
+Data Analytics team tracks and analyzes campaign performance.
+Technical team sets up and processes webhooks.
+CDP and CEP integrations provide data for personalization and optimization.
+This diagram provides a clear view of the roles, permissions, and workflow within the application.

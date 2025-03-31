@@ -11,23 +11,26 @@ class PermissionDenied(HTTPException):
         )
 
 ROLE_PERMISSIONS = {
-    Role.ADMIN: [
-        Permission.FULL_ACCESS,
-    ],
-    Role.TECH_ADMIN: [
-        Permission.SYSTEM_CONFIGURATION,
-        Permission.INTEGRATION_MANAGEMENT,
-    ],
+    Role.END_USER: [],
     Role.MARKETER: [
         Permission.CAMPAIGN_MANAGEMENT,
     ],
     Role.ANALYST: [
         Permission.ANALYTICS_ACCESS,
     ],
-    Role.END_USER: []
+    Role.TECH_ADMIN: [
+        Permission.SYSTEM_CONFIGURATION,
+        Permission.INTEGRATION_MANAGEMENT,
+    ],
+    Role.ADMIN: [
+        Permission.FULL_ACCESS,
+    ]
 }
 
 SWIMLANE_PERMISSIONS = {
+    "End User": {
+        "Interact with WebPush": [],
+    },
     "Marketing Team": {
         "Define Campaign": [Permission.CAMPAIGN_MANAGEMENT],
         "Select Recipients": [Permission.CAMPAIGN_MANAGEMENT],
@@ -36,7 +39,7 @@ SWIMLANE_PERMISSIONS = {
         "Schedule Campaign": [Permission.CAMPAIGN_MANAGEMENT],
         "Send WebPush": [Permission.CAMPAIGN_MANAGEMENT],
     },
-    "Data Analyst": {
+    "Data Analytics": {
         "Track Delivery": [Permission.ANALYTICS_ACCESS],
         "Analyze Performance": [Permission.ANALYTICS_ACCESS],
         "Optimize Campaign": [Permission.ANALYTICS_ACCESS],
@@ -45,12 +48,13 @@ SWIMLANE_PERMISSIONS = {
         "Set Up Webhook": [Permission.SYSTEM_CONFIGURATION],
         "Process Webhook": [Permission.SYSTEM_CONFIGURATION],
         "Real-time Data Analysis": [Permission.SYSTEM_CONFIGURATION],
+        "Manage CDP Integration": [Permission.INTEGRATION_MANAGEMENT],
+        "Manage CEP Integration": [Permission.INTEGRATION_MANAGEMENT],
     },
-    "CDP": {
-        "Integrate CDP Data": [Permission.INTEGRATION_MANAGEMENT],
-    },
-    "CEP": {
-        "Integrate CEP Data": [Permission.INTEGRATION_MANAGEMENT],
+    "System Admin": {
+        "Manage Users": [Permission.FULL_ACCESS],
+        "Configure Permissions": [Permission.FULL_ACCESS],
+        "System Settings": [Permission.FULL_ACCESS],
     }
 }
 

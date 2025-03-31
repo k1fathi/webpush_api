@@ -2,20 +2,13 @@ from db.models.roles import Role, Permission
 from typing import Dict, List
 
 SWIMLANE_ACTIVITY_PERMISSIONS: Dict[str, Dict[str, List[str]]] = {
-    Role.ADMIN: {
+    Role.END_USER: {
         "activities": [
-            "Manage Users",
-            "Configure Permissions",
-            "System Settings",
-            "Access All Features"
+            "Receive WebPush",
+            "Open WebPush",
+            "Click WebPush"
         ],
-        "permissions": [
-            Permission.FULL_ACCESS,
-            Permission.CAMPAIGN_MANAGEMENT,
-            Permission.ANALYTICS_ACCESS,
-            Permission.SYSTEM_CONFIGURATION,
-            Permission.INTEGRATION_MANAGEMENT
-        ]
+        "permissions": []
     },
     Role.MARKETER: {
         "activities": [
@@ -34,8 +27,7 @@ SWIMLANE_ACTIVITY_PERMISSIONS: Dict[str, Dict[str, List[str]]] = {
         "activities": [
             "Track Delivery",
             "Analyze Performance",
-            "Optimize Campaign",
-            "View Analytics"
+            "Optimize Campaign"
         ],
         "permissions": [
             Permission.ANALYTICS_ACCESS
@@ -47,21 +39,23 @@ SWIMLANE_ACTIVITY_PERMISSIONS: Dict[str, Dict[str, List[str]]] = {
             "Process Webhook",
             "Real-time Data Analysis",
             "Integrate CDP Data",
-            "Integrate CEP Data",
-            "Manage System Configuration"
+            "Integrate CEP Data"
         ],
         "permissions": [
             Permission.SYSTEM_CONFIGURATION,
             Permission.INTEGRATION_MANAGEMENT
         ]
     },
-    Role.END_USER: {
+    Role.ADMIN: {
         "activities": [
-            "Receive WebPush",
-            "Open WebPush",
-            "Click WebPush"
+            "Manage Users",
+            "Configure Permissions",
+            "System Settings",
+            "Access All Features"
         ],
-        "permissions": []
+        "permissions": [
+            Permission.FULL_ACCESS
+        ]
     }
 }
 

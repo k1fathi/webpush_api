@@ -1,0 +1,96 @@
+flowchart TD
+    %% Role definitions
+    classDef admin fill:#f9d,stroke:#333
+    classDef analyst fill:#afd,stroke:#333
+    classDef marketer fill:#daf,stroke:#333
+    classDef tech fill:#fda,stroke:#333
+    classDef enduser fill:#ddd,stroke:#333
+
+    subgraph User["End User (No special permissions)"]
+        direction TB
+        U1[Receive WebPush]
+        U2[Open WebPush]
+        U3[Click WebPush]
+    end
+
+    subgraph Marketing Team["Marketing Team (Role: MARKETER)"]
+        direction TB
+        M1[Define Campaign]:::marketer
+        M2[Select Recipients]:::marketer
+        M3[Choose Template]:::marketer
+        M4[Personalize Message]:::marketer
+        M5[Schedule Campaign]:::marketer
+        M6[Send WebPush]:::marketer
+        MP[Permission: campaign_management]
+    end
+
+    subgraph Data Analyst["Data Analytics Team (Role: ANALYST)"]
+        direction TB
+        D1[Track Delivery]:::analyst
+        D2[Analyze Performance]:::analyst
+        D3[Optimize Campaign]:::analyst
+        DP[Permission: analytics_access]
+    end
+
+    subgraph Technical Team["Technical Team (Role: TECH_ADMIN)"]
+        direction TB
+        T1[Set Up Webhook]:::tech
+        T2[Process Webhook]:::tech
+        T3[Real-time Data Analysis]:::tech
+        TP[Permission: system_configuration]
+    end
+
+    subgraph System Admin["System Administration (Role: ADMIN)"]
+        direction TB
+        A1[Manage Users]:::admin
+        A2[Configure Permissions]:::admin
+        A3[System Settings]:::admin
+        AP[Permission: full_access]
+    end
+
+    subgraph CDP["CDP Integration (Role: TECH_ADMIN)"]
+        direction TB
+        C1[Integrate CDP Data]:::tech
+        CP[Permission: integration_management]
+    end
+
+    subgraph CEP["CEP Integration (Role: TECH_ADMIN)"]
+        direction TB
+        E1[Integrate CEP Data]:::tech
+        EP[Permission: integration_management]
+    end
+
+    subgraph External Systems
+        direction TB
+        ES1[Receive Webhook]
+        ES2[Send Notification]
+    end
+
+    %% Connections showing role-based workflow
+    A2 --> MP
+    A2 --> DP
+    A2 --> TP
+    M1 --> |MARKETER| M2
+    M2 --> |MARKETER| M3
+    M3 --> |MARKETER| M4
+    M4 --> |MARKETER| M5
+    M5 --> |MARKETER| M6
+    M6 --> U1
+    U1 --> U2
+    U2 --> U3
+    U3 --> |ANALYST| D1
+    D1 --> |ANALYST| D2
+    D2 --> |ANALYST| D3
+    D3 --> |ANALYST| M1
+    T1 --> |TECH_ADMIN| T2
+    T2 --> |TECH_ADMIN| T3
+    T3 --> D1
+    C1 --> |TECH_ADMIN| M4
+    E1 --> |TECH_ADMIN| M4
+    ES1 --> |TECH_ADMIN| T2
+    T2 --> ES2
+
+    %% Role-based styling
+    A1:::admin
+    A2:::admin
+    A3:::admin
