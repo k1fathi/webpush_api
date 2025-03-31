@@ -24,6 +24,7 @@ from api.schemas import (
     AnalyticsResponse, CampaignAnalytics
 )
 from api.services import analytics, segment_service, cdp_service
+from api.dependencies import verify_permissions
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -49,6 +50,14 @@ async def startup_event():
         logger.info("✅ Application startup complete")
     except Exception as e:
         logger.error(f"❌ Startup failed: {str(e)}")
+        raise
+
+    try:
+        db = next(get_db())
+        setup_default_permissions(db)
+        logger.info("✅ Default permissions initialized")
+    except Exception as e:
+        logger.error(f"❌ Failed to initialize permissions: {str(e)}")
         raise
 
 class NotificationCreate(BaseModel):
@@ -199,7 +208,11 @@ async def get_campaign_template(campaign_id: int, db: Session = Depends(get_db))
 
 # Update campaign endpoints
 @app.post("/api/campaigns", response_model=CampaignResponse)
-async def create_campaign(campaign: CampaignCreate, db: Session = Depends(get_db)):
+async def create_campaign(
+    campaign: CampaignCreate,
+    db: Session = Depends(get_db),
+    _=Depends(verify_permissions([Permission.CAMPAIGN_MANAGEMENT]))
+):
     """Create a new campaign with segments"""
     # First check if template exists
     template = db.query(Template).filter(Template.id == campaign.template_id).first()
@@ -276,7 +289,8 @@ async def list_segments(db: Session = Depends(get_db)):
 async def get_campaign_analytics(
     campaign_id: str,
     metrics: List[str] = Query(["delivery_rate", "ctr", "conversion_rate"]),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    _=Depends(verify_permissions([Permission.ANALYTICS_ACCESS]))
 ):
     return await analytics.get_campaign_metrics(campaign_id, metrics, db)
 
@@ -288,8 +302,18 @@ async def create_ab_test(test: ABTestCreate, db: Session = Depends(get_db)):
 
 # Webhooks
 @app.post("/api/webhooks")
-async def register_webhook(webhook: WebhookCreate, db: Session = Depends(get_db)):
+async def register_webhook(
+    webhook: WebhookCreate,
+    db: Session = Depends(get_db),
+    _=Depends(verify_permissions([Permission.SYSTEM_CONFIGURATION]))
+):
     return await segment_service.register_webhook(webhook, db)
+
+# Add endpoint to check if user is admin
+@app.get("/api/users/me/is-admin")
+async def check_admin_status(current_user = Depends(get_current_user)):
+    """Check if current user has admin privileges"""
+    return {"is_admin": is_admin(current_user)}
 
 # CDP Integration
 @app.post("/api/cdp/sync")
@@ -396,6 +420,50 @@ async def get_user_notifications(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user.notifications[skip:skip + limit]
+
+@app.post("/api/users/{user_id}/roles")
+async def assign_user_role(
+    user_id: int,
+    role_name: str,
+    db: Session = Depends(get_db)
+):
+    """Assign a role to a user with default permissions"""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    try:
+        assign_default_role_permissions(user, role_name, db)
+        return {"status": "success", "message": f"Role {role_name} assigned to user"}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/api/users/{user_id}/permissions")
+async def get_user_permissions(user_id: int, db: Session = Depends(get_db)):
+    """Get all permissions for a user based on their roles"""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    all_permissions = set()
+    for role in user.roles:
+        all_permissions.update(perm.name for perm in role.permissions)
+    
+    return {"user_id": user_id, "permissions": list(all_permissions)}
+
+@app.get("/api/roles/{role_name}/activities")
+async def get_role_activities(role_name: str, db: Session = Depends(get_db)):
+    """Get all activities allowed for a specific role"""
+    from db.seeders.role_permission_seeder import SWIMLANE_ACTIVITY_PERMISSIONS
+    
+    if role_name not in SWIMLANE_ACTIVITY_PERMISSIONS:
+        raise HTTPException(status_code=404, detail="Role not found")
+    
+    return {
+        "role": role_name,
+        "activities": SWIMLANE_ACTIVITY_PERMISSIONS[role_name]["activities"],
+        "permissions": SWIMLANE_ACTIVITY_PERMISSIONS[role_name]["permissions"]
+    }
 
 if __name__ == "__main__":
     import uvicorn

@@ -24,7 +24,7 @@ User: enduser
 Receives WebPush notifications.
 Opens WebPush notifications.
 Clicks WebPush notifications.
-
+-------------------
 Marketing Team: role
 Defines the campaign.
 Selects recipients.
@@ -32,25 +32,24 @@ Chooses a template.
 Personalizes the message.
 Schedules the campaign.
 Sends WebPush notifications.
-
-
+---------------------------
 Data Analyst: role
 Tracks delivery status.
 Analyzes performance.
 Optimizes the campaign.
-
-Technical Team:
+---------------------------
+Technical Team: role
 Sets up webhooks.
 Processes webhooks.
 Performs real-time data analysis.
-
-CDP:
+----------------------------
+CDP: role
 Integrates CDP data.
-
-CEP:
+----------------------------
+CEP: role
 Integrates CEP data.
 External Systems:
-
+------------------------------
 Receives webhook events.
 Sends notifications.
 Connections:

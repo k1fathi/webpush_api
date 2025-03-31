@@ -1,43 +1,63 @@
 flowchart TD
-    subgraph User
+    %% Role definitions
+    classDef admin fill:#f9d,stroke:#333
+    classDef analyst fill:#afd,stroke:#333
+    classDef marketer fill:#daf,stroke:#333
+    classDef tech fill:#fda,stroke:#333
+    classDef enduser fill:#ddd,stroke:#333
+
+    subgraph User["End User (No special permissions)"]
         direction TB
         U1[Receive WebPush]
         U2[Open WebPush]
         U3[Click WebPush]
     end
 
-    subgraph Marketing Team
+    subgraph Marketing Team["Marketing Team (Role: MARKETER)"]
         direction TB
-        M1[Define Campaign]
-        M2[Select Recipients]
-        M3[Choose Template]
-        M4[Personalize Message]
-        M5[Schedule Campaign]
-        M6[Send WebPush]
+        M1[Define Campaign]:::marketer
+        M2[Select Recipients]:::marketer
+        M3[Choose Template]:::marketer
+        M4[Personalize Message]:::marketer
+        M5[Schedule Campaign]:::marketer
+        M6[Send WebPush]:::marketer
+        MP[Permission: campaign_management]
     end
 
-    subgraph Data Analyst
+    subgraph Data Analyst["Data Analytics Team (Role: ANALYST)"]
         direction TB
-        D1[Track Delivery]
-        D2[Analyze Performance]
-        D3[Optimize Campaign]
+        D1[Track Delivery]:::analyst
+        D2[Analyze Performance]:::analyst
+        D3[Optimize Campaign]:::analyst
+        DP[Permission: analytics_access]
     end
 
-    subgraph Technical Team
+    subgraph Technical Team["Technical Team (Role: TECH_ADMIN)"]
         direction TB
-        T1[Set Up Webhook]
-        T2[Process Webhook]
-        T3[Real-time Data Analysis]
+        T1[Set Up Webhook]:::tech
+        T2[Process Webhook]:::tech
+        T3[Real-time Data Analysis]:::tech
+        TP[Permission: system_configuration]
     end
 
-    subgraph CDP
+    subgraph System Admin["System Administration (Role: ADMIN)"]
         direction TB
-        C1[Integrate CDP Data]
+        A1[Manage Users]:::admin
+        A2[Configure Permissions]:::admin
+        A3[System Settings]:::admin
+        AP[Permission: full_access]
     end
 
-    subgraph CEP
+    subgraph CDP["CDP Integration (Role: TECH_ADMIN)"]
         direction TB
-        E1[Integrate CEP Data]
+        C1[Integrate CDP Data]:::tech
+        CP[Permission: integration_management]
+    end
+
+    subgraph CEP["CEP Integration (Role: TECH_ADMIN)"]
+        direction TB
+        E1[Integrate CEP Data]:::tech
+        EP[Permission: integration_management]
     end
 
     subgraph External Systems
@@ -46,23 +66,31 @@ flowchart TD
         ES2[Send Notification]
     end
 
-    %% Connections between swimlanes
-    M1 --> M2
-    M2 --> M3
-    M3 --> M4
-    M4 --> M5
-    M5 --> M6
+    %% Connections showing role-based workflow
+    A2 --> MP
+    A2 --> DP
+    A2 --> TP
+    M1 --> |MARKETER| M2
+    M2 --> |MARKETER| M3
+    M3 --> |MARKETER| M4
+    M4 --> |MARKETER| M5
+    M5 --> |MARKETER| M6
     M6 --> U1
     U1 --> U2
     U2 --> U3
-    U3 --> D1
-    D1 --> D2
-    D2 --> D3
-    D3 --> M1
-    T1 --> T2
-    T2 --> T3
+    U3 --> |ANALYST| D1
+    D1 --> |ANALYST| D2
+    D2 --> |ANALYST| D3
+    D3 --> |ANALYST| M1
+    T1 --> |TECH_ADMIN| T2
+    T2 --> |TECH_ADMIN| T3
     T3 --> D1
-    C1 --> M4
-    E1 --> M4
-    ES1 --> T2
+    C1 --> |TECH_ADMIN| M4
+    E1 --> |TECH_ADMIN| M4
+    ES1 --> |TECH_ADMIN| T2
     T2 --> ES2
+
+    %% Role-based styling
+    A1:::admin
+    A2:::admin
+    A3:::admin
