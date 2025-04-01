@@ -1,27 +1,23 @@
-FROM python:3.9
+FROM python:3.9-slim
 
 WORKDIR /app
 
-# Install required packages with correct package names
-RUN apt-get update && apt-get install -y \
-    postgresql-client \
-    curl \
-    netcat-traditional \
-    && rm -rf /var/lib/apt/lists/*
-
+# Copy requirements file
 COPY requirements.txt .
+
+# Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Copy project files
 COPY . .
 
-# Make the wait-for-it script executable
-RUN chmod +x /app/scripts/wait-for-it.sh
-
+# Set environment variables
 ENV PYTHONPATH=/app
+ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# The actual command will be provided by docker-compose
+# Expose port
+EXPOSE 8000
 
-# Add healthcheck
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:${API_PORT}/health || exit 1
+# Command to run the application
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

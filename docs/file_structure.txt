@@ -1,154 +1,150 @@
 fathiapp/
-├── main.py
-├── core/
+├── main.py                             # Application entry point
+├── core/                               # Core functionality and configurations
 │   ├── __init__.py
-│   ├── config.py
-│   ├── security.py
-│   ├── dependencies.py
-│   ├── celery_app.py
-│   ├── permissions/
+│   ├── config.py                       # Application settings
+│   ├── security.py                     # Authentication and authorization
+│   ├── dependencies.py                 # FastAPI dependencies
+│   ├── celery_app.py                   # Celery configuration
+│   ├── permissions/                    # Role-based access control
 │   │   ├── __init__.py
-│   │   ├── role.py
-│   │   ├── permission.py
-│   │   └── dependencies.py
-│   ├── logging/
+│   │   ├── role.py                     # Role definitions
+│   │   ├── permission.py               # Permission definitions
+│   │   └── dependencies.py             # Permission dependency injectors
+│   ├── logging/                        # Logging configuration
 │   │   ├── __init__.py
-│   │   ├── config.py
-│   │   ├── formatters.py
-│   │   └── handlers.py
-│   └── exceptions/
+│   │   ├── config.py                   # Logger setup
+│   │   ├── formatters.py               # Custom log formatters
+│   │   └── handlers.py                 # Log handlers configuration
+│   └── exceptions/                     # Exception handling
 │       ├── __init__.py
-│       ├── base.py
-│       ├── http.py
-│       ├── domain.py
-│       └── handlers.py
-├── models/
-│   ├── __init__.py
-│   ├── domain/
+│       ├── base.py                     # Base exceptions
+│       ├── http.py                     # HTTP exceptions
+│       ├── domain.py                   # Domain exceptions
+│       └── handlers.py                 # Exception handlers
+├── models/                             # Data models
+│   ├── __init__.py                     # Model exports
+│   ├── domain/                         # Domain models (SQLAlchemy)
 │   │   ├── __init__.py
-│   │   ├── user.py
-│   │   ├── role.py           # New file for role models
-│   │   ├── permission.py     # New file for permission models
-│   │   ├── segment.py
-│   │   ├── webpush.py
-│   │   ├── template.py
-│   │   ├── campaign.py
-│   │   ├── trigger.py
-│   │   ├── analytics.py
-│   │   ├── webhook.py
-│   │   ├── cdp.py
-│   │   └── cep.py
-│   └── schemas/
+│   │   ├── user.py                     # User model
+│   │   ├── role.py                     # Role model
+│   │   ├── permission.py               # Permission model
+│   │   ├── segment.py                  # Segment model
+│   │   ├── webpush.py                  # WebPush subscription model
+│   │   ├── template.py                 # Template model
+│   │   ├── campaign.py                 # Campaign model
+│   │   ├── trigger.py                  # Trigger model
+│   │   ├── analytics.py                # Analytics model
+│   │   ├── webhook.py                  # Webhook model
+│   │   ├── cdp.py                      # CDP integration model
+│   │   └── cep.py                      # CEP decision model
+│   └── schemas/                        # Pydantic schemas for API
 │       ├── __init__.py
-│       ├── user.py
-│       ├── role.py           # New file for role schemas
-│       ├── permission.py     # New file for permission schemas
-│       ├── segment.py
-│       ├── webpush.py
-│       ├── template.py
-│       ├── campaign.py
-│       ├── trigger.py
-│       ├── analytics.py
-│       ├── webhook.py
-│       ├── cdp.py
-│       └── cep.py
-├── repositories/
+│       ├── user.py                     # User schemas
+│       ├── role.py                     # Role schemas
+│       ├── permission.py               # Permission schemas
+│       ├── segment.py                  # Segment schemas
+│       ├── webpush.py                  # WebPush schemas
+│       ├── template.py                 # Template schemas
+│       ├── campaign.py                 # Campaign schemas
+│       ├── trigger.py                  # Trigger schemas
+│       ├── analytics.py                # Analytics schemas
+│       ├── webhook.py                  # Webhook schemas
+│       ├── cdp.py                      # CDP integration schemas
+│       └── cep.py                      # CEP decision schemas
+├── repositories/                       # Data access layer
 │   ├── __init__.py
-│   ├── base.py
-│   ├── user.py
-│   ├── role.py              # New file for role repository
-│   ├── permission.py        # New file for permission repository
-│   ├── segment.py
-│   ├── webpush.py
-│   ├── template.py
-│   ├── campaign.py
-│   ├── trigger.py
-│   ├── analytics.py
-│   ├── webhook.py
-│   ├── cdp.py
-│   └── cep.py
-├── services/
+│   ├── base.py                         # Base repository
+│   ├── user.py                         # User repository
+│   ├── role.py                         # Role repository
+│   ├── permission.py                   # Permission repository
+│   ├── segment.py                      # Segment repository
+│   ├── webpush.py                      # WebPush repository
+│   ├── template.py                     # Template repository
+│   ├── campaign.py                     # Campaign repository
+│   ├── trigger.py                      # Trigger repository
+│   ├── analytics.py                    # Analytics repository
+│   ├── webhook.py                      # Webhook repository
+│   ├── cdp.py                          # CDP integration repository
+│   └── cep.py                          # CEP decision repository
+├── services/                           # Business logic layer
 │   ├── __init__.py
-│   ├── user.py
-│   ├── role.py              # New file for role service
-│   ├── permission.py        # New file for permission service
-│   ├── segment.py
-│   ├── webpush.py
-│   ├── template.py
-│   ├── campaign.py
-│   ├── trigger.py
-│   ├── analytics.py
-│   ├── webhook.py
-│   ├── cdp.py
-│   └── cep.py
-├── tasks/
+│   ├── user.py                         # User service
+│   ├── role.py                         # Role service
+│   ├── permission.py                   # Permission service
+│   ├── segment.py                      # Segment service
+│   ├── webpush.py                      # WebPush service
+│   ├── template.py                     # Template service
+│   ├── campaign.py                     # Campaign service
+│   ├── trigger.py                      # Trigger service
+│   ├── analytics.py                    # Analytics service
+│   ├── webhook.py                      # Webhook service
+│   ├── cdp.py                          # CDP integration service
+│   └── cep.py                          # CEP decision service
+├── tasks/                              # Background tasks
 │   ├── __init__.py
-│   ├── user_tasks.py
-│   ├── webpush_tasks.py
-│   ├── campaign_tasks.py
-│   └── ...
-├── api/
+│   ├── user_tasks.py                   # User-related tasks
+│   ├── webpush_tasks.py                # WebPush notification tasks
+│   ├── campaign_tasks.py               # Campaign processing tasks
+│   ├── analytics_tasks.py              # Analytics processing tasks
+│   ├── ab_test_tasks.py                # A/B testing tasks
+│   ├── webhook_tasks.py                # Webhook processing tasks
+│   └── cdp_tasks.py                    # CDP integration tasks
+├── api/                                # API layer
 │   ├── __init__.py
-│   ├── deps.py
-│   ├── error_handlers.py    # New file for API-level error handlers
-│   ├── v1/
+│   ├── deps.py                         # API dependencies
+│   ├── error_handlers.py               # API error handlers
+│   ├── v1/                             # API v1
 │   │   ├── __init__.py
-│   │   ├── endpoints/
+│   │   ├── endpoints/                  # API endpoints
 │   │   │   ├── __init__.py
-│   │   │   ├── users.py
-│   │   │   ├── roles.py     # New file for role endpoints
-│   │   │   ├── permissions.py # New file for permission endpoints
-│   │   │   ├── segments.py
-│   │   │   ├── webpush.py
-│   │   │   ├── templates.py
-│   │   │   ├── campaigns.py
-│   │   │   ├── triggers.py
-│   │   │   ├── analytics.py
-│   │   │   ├── webhooks.py
-│   │   │   ├── cdps.py
-│   │   │   └── ceps.py
-│   │   └── router.py
-│   └── router.py
-├── migrations/
+│   │   │   ├── users.py                # User endpoints
+│   │   │   ├── roles.py                # Role endpoints
+│   │   │   ├── permissions.py          # Permission endpoints
+│   │   │   ├── segments.py             # Segment endpoints
+│   │   │   ├── webpush.py              # WebPush endpoints
+│   │   │   ├── templates.py            # Template endpoints
+│   │   │   ├── campaigns.py            # Campaign endpoints
+│   │   │   ├── triggers.py             # Trigger endpoints
+│   │   │   ├── analytics.py            # Analytics endpoints
+│   │   │   ├── webhooks.py             # Webhook endpoints
+│   │   │   ├── cdps.py                 # CDP integration endpoints
+│   │   │   └── ceps.py                 # CEP decision endpoints
+│   │   └── router.py                   # API v1 router
+│   └── router.py                       # Main API router
+├── migrations/                         # Database migrations
 │   ├── __init__.py
-│   ├── env.py
-│   ├── script.py.mako
-│   └── versions/
+│   ├── env.py                          # Alembic environment
+│   ├── script.py.mako                  # Migration script template
+│   └── versions/                       # Migration versions
 │       ├── __init__.py
-│       └── ... (migration scripts)
-├── utils/
+│       └── ...                         # Migration scripts
+├── utils/                              # Utility functions
 │   ├── __init__.py
-│   ├── helpers.py
-│   └── audit.py            # New file for audit logging utilities
-├── logs/                   # Directory to store log files
+│   ├── helpers.py                      # Helper functions
+│   └── audit.py                        # Audit logging utilities
+├── logs/                               # Log files directory
 │   └── .gitkeep
-└── tests/
+├── docs/                               # Documentation 
+│   ├── file_structure.txt              # Project structure overview
+│   ├── webpush_erd.mmd                 # Entity relationship diagram
+│   ├── roles_permissions.md            # Roles and permissions document
+│   ├── cdp_integration_docs.md         # CDP integration documentation
+│   └── activity_diagrams/              # Mermaid activity diagrams
+│       ├── user_subscription_flow.mmd  # User subscription process
+│       ├── campaign_creation_flow.mmd  # Campaign creation process
+│       ├── notification_delivery_flow.mmd # Notification delivery process
+│       ├── segment_management_flow.mmd # Segment management process
+│       ├── template_creation_flow.mmd  # Template creation process
+│       ├── analytics_tracking_flow.mmd # Analytics tracking process
+│       ├── webhook_processing_flow.mmd # Webhook processing flow
+│       ├── ab_test_flow.mmd            # A/B testing process
+│       ├── trigger_based_flow.mmd      # Trigger-based notifications process
+│       ├── cdp_integration_flow.mmd    # CDP integration process
+│       └── cep_decision_flow.mmd       # CEP decision process
+└── tests/                              # Test suite
     ├── __init__.py
-    ├── conftest.py
-    ├── test_api/
-    ├── test_services/
-    └── test_repositories/
-
-
-
-    Role Permissions:
-
-core/permissions/role.py: Define role classes and hierarchies
-core/permissions/permission.py: Define permission classes and constants
-core/permissions/dependencies.py: FastAPI dependency injectors for permission checks
-Logging System:
-
-core/logging/config.py: Configure logging (file handlers, log levels, formats)
-core/logging/formatters.py: Custom log formatters (e.g., JSON)
-core/logging/handlers.py: Custom log handlers (e.g., rotating file, Sentry)
-logs/: Directory to store log files
-Exception Handling:
-
-core/exceptions/base.py: Base exception classes for the application
-core/exceptions/http.py: HTTP-specific exceptions
-core/exceptions/domain.py: Domain-specific exceptions
-core/exceptions/handlers.py: Global exception handlers
-api/error_handlers.py: API-level error handlers
-Audit Logging:
-
-utils/audit.py: Utilities for audit logging (user actions, CRUD operations)
+    ├── conftest.py                     # Test configurations
+    ├── test_api/                       # API tests
+    ├── test_services/                  # Service tests
+    └── test_repositories/              # Repository tests
