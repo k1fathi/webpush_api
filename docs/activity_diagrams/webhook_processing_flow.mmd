@@ -1,0 +1,41 @@
+flowchart TD
+    start([Start]) --> eventOccurs[Event occurs in system]
+    eventOccurs --> checkHooks[Check registered webhooks]
+    checkHooks --> hooksExist{Matching\nwebhooks?}
+    
+    hooksExist -->|No| end
+    hooksExist -->|Yes| preparePayload[Prepare webhook payload]
+    preparePayload --> addSignature[Add security signature]
+    addSignature --> loopWebhooks[["For each matching webhook"]]
+    
+    loopWebhooks --> checkActive{Webhook\nactive?}
+    checkActive -->|No| nextWebhook{More webhooks?}
+    checkActive -->|Yes| sendRequest[Send HTTP request to endpoint]
+    
+    sendRequest --> awaitResponse[Wait for response]
+    awaitResponse --> responseReceived{Response\nreceived?}
+    
+    responseReceived -->|No| retryPolicy{Retry\nallowed?}
+    retryPolicy -->|Yes| determineBackoff[Determine backoff interval]
+    determineBackoff --> scheduleRetry[Schedule retry]
+    scheduleRetry --> logRetry[Log retry attempt]
+    logRetry --> nextWebhook
+    
+    retryPolicy -->|No| logFailure[Log permanent failure]
+    logFailure --> alertAdmin[Alert administrators]
+    alertAdmin --> nextWebhook
+    
+    responseReceived -->|Yes| validateResponse[Validate response]
+    validateResponse --> responseValid{Response\nvalid?}
+    
+    responseValid -->|No| handleError[Handle error response]
+    handleError --> logIssue[Log issue details]
+    logIssue --> nextWebhook
+    
+    responseValid -->|Yes| processResponse[Process response]
+    processResponse --> logSuccess[Log successful delivery]
+    logSuccess --> updateLastTriggered[Update last triggered timestamp]
+    updateLastTriggered --> nextWebhook
+    
+    nextWebhook -->|Yes| loopWebhooks
+    nextWebhook -->|No| end([End])

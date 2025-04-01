@@ -1,0 +1,34 @@
+flowchart TD
+    start([Start]) --> createSegment[Create new segment]
+    createSegment --> setBasicInfo[Set name & description]
+    setBasicInfo --> selectSegmentType{Select segment type}
+    
+    selectSegmentType -->|Static| manualSelection[Manually select users]
+    selectSegmentType -->|Dynamic| defineCriteria[Define filter criteria]
+    selectSegmentType -->|Import| importUsers[Import user list]
+    
+    manualSelection --> reviewMembers[Review segment members]
+    defineCriteria --> buildFilter[Build filter expression]
+    buildFilter --> testFilter[Test filter results]
+    testFilter --> filterOk{Results\nsatisfactory?}
+    
+    filterOk -->|No| adjustFilter[Adjust filter criteria]
+    adjustFilter --> testFilter
+    filterOk -->|Yes| reviewMembers
+    
+    importUsers --> validateImport[Validate imported data]
+    validateImport --> importOk{Import\nvalid?}
+    importOk -->|No| fixImport[Fix import data]
+    fixImport --> importUsers
+    importOk -->|Yes| reviewMembers
+    
+    reviewMembers --> saveSegment[Save segment]
+    saveSegment --> calculateSize[Calculate segment size]
+    calculateSize --> integrateCDP{CDP integration\nenabled?}
+    
+    integrateCDP -->|Yes| enrichSegment[Enrich with CDP data]
+    enrichSegment --> tagSegment[Add segment tags]
+    integrateCDP -->|No| tagSegment
+    
+    tagSegment --> saveChanges[Save final segment]
+    saveChanges --> end([End])

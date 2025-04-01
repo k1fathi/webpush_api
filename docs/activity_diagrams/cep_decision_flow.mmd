@@ -1,0 +1,34 @@
+flowchart TD
+    start([Start]) --> triggerCommunication[Communication triggered]
+    triggerCommunication --> fetchUserProfile[Fetch user profile]
+    fetchUserProfile --> fetchContextData[Fetch contextual data]
+    
+    fetchContextData --> analyzeUser[Analyze user history]
+    analyzeUser --> checkPreferences[Check channel preferences]
+    checkPreferences --> determineTime[Determine optimal timing]
+    
+    determineTime --> evaluateChannels[Evaluate available channels]
+    evaluateChannels --> loopChannels[["For each channel"]]
+    
+    loopChannels --> calculateScore[Calculate channel score]
+    calculateScore --> nextChannel{More\nchannels?}
+    
+    nextChannel -->|Yes| loopChannels
+    nextChannel -->|No| compareScores[Compare channel scores]
+    
+    compareScores --> selectBestChannel[Select highest scoring channel]
+    selectBestChannel --> isWebPush{WebPush\nselected?}
+    
+    isWebPush -->|No| recordDecision[Record CEP decision]
+    recordDecision --> executeAlt[Execute on alternative channel]
+    executeAlt --> end
+    
+    isWebPush -->|Yes| recordWebPushSelection[Record WebPush selection]
+    recordWebPushSelection --> optimizeParams[Optimize notification parameters]
+    optimizeParams --> scheduleOptimalTime[Schedule for optimal time]
+    scheduleOptimalTime --> executeWebPush[Execute WebPush notification]
+    executeWebPush --> storeDecisionFactors[Store decision factors]
+    
+    storeDecisionFactors --> trackPerformance[Track notification performance]
+    trackPerformance --> feedbackLoop[Feed results back to CEP]
+    feedbackLoop --> end([End])

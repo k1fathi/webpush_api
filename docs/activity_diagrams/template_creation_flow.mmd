@@ -1,0 +1,29 @@
+flowchart TD
+    start([Start]) --> createTemplate[Create new template]
+    createTemplate --> setName[Set template name]
+    setName --> editTitle[Define notification title]
+    editTitle --> editBody[Write notification body]
+    
+    editBody --> addMedia{Add media?}
+    addMedia -->|Yes| uploadImage[Upload image]
+    addMedia -->|No| setAction
+    
+    uploadImage --> optimizeImage[Optimize image size]
+    optimizeImage --> setAction[Set action URL]
+    
+    setAction --> addVariables{Add dynamic\nvariables?}
+    addVariables -->|No| previewTemplate
+    addVariables -->|Yes| defineVars[Define dynamic variables]
+    defineVars --> setDefaultValues[Set default values]
+    setDefaultValues --> previewTemplate[Preview template]
+    
+    previewTemplate --> checkDevices[Check appearance on different devices]
+    checkDevices --> templateOk{Template\nlooks good?}
+    
+    templateOk -->|No| reviseTemplate[Revise template]
+    reviseTemplate --> previewTemplate
+    templateOk -->|Yes| saveTemplate[Save template]
+    
+    saveTemplate --> categoryTags[Add category tags]
+    categoryTags --> saveVersion[Save version]
+    saveVersion --> end([End])

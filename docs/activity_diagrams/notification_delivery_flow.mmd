@@ -1,0 +1,48 @@
+flowchart TD
+    start([Start]) --> campaignTime{Campaign time\nreached?}
+    
+    campaignTime -->|No| waitForTime[Wait for scheduled time]
+    waitForTime --> campaignTime
+    
+    campaignTime -->|Yes| fetchCampaign[Fetch campaign details]
+    fetchCampaign --> fetchSegment[Get target segment users]
+    fetchSegment --> fetchTemplate[Get notification template]
+    
+    fetchTemplate --> loopUsers[["For each user in segment"]]
+    loopUsers --> checkOpted{User opted in?}
+    
+    checkOpted -->|No| skipUser[Skip user]
+    checkOpted -->|Yes| personalize[Personalize message]
+    
+    personalize --> checkCEP{CEP integration\nenabled?}
+    checkCEP -->|Yes| determineBestChannel[Determine optimal channel]
+    determineBestChannel --> isBestChannel{WebPush is\nbest channel?}
+    isBestChannel -->|No| logDecision[Log CEP decision & skip]
+    isBestChannel -->|Yes| prepareNotification[Prepare notification]
+    
+    checkCEP -->|No| prepareNotification
+    
+    prepareNotification --> sendNotification[Send WebPush notification]
+    sendNotification --> logDeliveryAttempt[Log delivery attempt]
+    logDeliveryAttempt --> checkDelivery{Delivery\nsuccessful?}
+    
+    checkDelivery -->|Yes| markDelivered[Mark as delivered]
+    checkDelivery -->|No| markFailed[Mark as failed]
+    markFailed --> checkRetry{Retry\nallowed?}
+    
+    checkRetry -->|Yes| scheduleRetry[Schedule retry]
+    checkRetry -->|No| updateStatus[Update final status]
+    
+    markDelivered --> trackOpen[Set up tracking for opens]
+    trackOpen --> trackClick[Set up tracking for clicks]
+    trackClick --> updateStatus
+    
+    skipUser --> nextUser{More users?}
+    logDecision --> nextUser
+    scheduleRetry --> nextUser
+    updateStatus --> nextUser
+    
+    nextUser -->|Yes| loopUsers
+    nextUser -->|No| updateCampaignStats[Update campaign statistics]
+    updateCampaignStats --> triggerWebhooks[Trigger relevant webhooks]
+    triggerWebhooks --> end([End])

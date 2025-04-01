@@ -1,0 +1,29 @@
+flowchart TD
+    start([Start]) --> userVisit[User visits website]
+    userVisit --> checkSub{Subscription\nExists?}
+    
+    checkSub -->|No| promptSub[Show subscription prompt]
+    checkSub -->|Yes| checkValid{Is subscription\nvalid?}
+    
+    promptSub --> userAgree{User agrees\nto subscribe?}
+    userAgree -->|No| denyRecord[Record opt-out preference]
+    userAgree -->|Yes| requestPerm[Request browser permission]
+    
+    requestPerm --> permGranted{Permission\ngranted?}
+    permGranted -->|No| denyRecord
+    permGranted -->|Yes| genToken[Generate push token]
+    
+    genToken --> storeUser[Store User & Push Token]
+    storeUser --> sendConfirm[Send confirmation notification]
+    sendConfirm --> tagUser[Add to "Subscribed" segment]
+    
+    checkValid -->|No| renewToken[Attempt to renew push token]
+    renewToken --> renewSuccess{Renewal\nsuccessful?}
+    renewSuccess -->|Yes| updateToken[Update push token]
+    renewSuccess -->|No| inactivateUser[Mark user as inactive]
+    
+    checkValid -->|Yes| end([End])
+    tagUser --> end
+    denyRecord --> end
+    updateToken --> end
+    inactivateUser --> end

@@ -1,0 +1,154 @@
+fathiapp/
+├── main.py
+├── core/
+│   ├── __init__.py
+│   ├── config.py
+│   ├── security.py
+│   ├── dependencies.py
+│   ├── celery_app.py
+│   ├── permissions/
+│   │   ├── __init__.py
+│   │   ├── role.py
+│   │   ├── permission.py
+│   │   └── dependencies.py
+│   ├── logging/
+│   │   ├── __init__.py
+│   │   ├── config.py
+│   │   ├── formatters.py
+│   │   └── handlers.py
+│   └── exceptions/
+│       ├── __init__.py
+│       ├── base.py
+│       ├── http.py
+│       ├── domain.py
+│       └── handlers.py
+├── models/
+│   ├── __init__.py
+│   ├── domain/
+│   │   ├── __init__.py
+│   │   ├── user.py
+│   │   ├── role.py           # New file for role models
+│   │   ├── permission.py     # New file for permission models
+│   │   ├── segment.py
+│   │   ├── webpush.py
+│   │   ├── template.py
+│   │   ├── campaign.py
+│   │   ├── trigger.py
+│   │   ├── analytics.py
+│   │   ├── webhook.py
+│   │   ├── cdp.py
+│   │   └── cep.py
+│   └── schemas/
+│       ├── __init__.py
+│       ├── user.py
+│       ├── role.py           # New file for role schemas
+│       ├── permission.py     # New file for permission schemas
+│       ├── segment.py
+│       ├── webpush.py
+│       ├── template.py
+│       ├── campaign.py
+│       ├── trigger.py
+│       ├── analytics.py
+│       ├── webhook.py
+│       ├── cdp.py
+│       └── cep.py
+├── repositories/
+│   ├── __init__.py
+│   ├── base.py
+│   ├── user.py
+│   ├── role.py              # New file for role repository
+│   ├── permission.py        # New file for permission repository
+│   ├── segment.py
+│   ├── webpush.py
+│   ├── template.py
+│   ├── campaign.py
+│   ├── trigger.py
+│   ├── analytics.py
+│   ├── webhook.py
+│   ├── cdp.py
+│   └── cep.py
+├── services/
+│   ├── __init__.py
+│   ├── user.py
+│   ├── role.py              # New file for role service
+│   ├── permission.py        # New file for permission service
+│   ├── segment.py
+│   ├── webpush.py
+│   ├── template.py
+│   ├── campaign.py
+│   ├── trigger.py
+│   ├── analytics.py
+│   ├── webhook.py
+│   ├── cdp.py
+│   └── cep.py
+├── tasks/
+│   ├── __init__.py
+│   ├── user_tasks.py
+│   ├── webpush_tasks.py
+│   ├── campaign_tasks.py
+│   └── ...
+├── api/
+│   ├── __init__.py
+│   ├── deps.py
+│   ├── error_handlers.py    # New file for API-level error handlers
+│   ├── v1/
+│   │   ├── __init__.py
+│   │   ├── endpoints/
+│   │   │   ├── __init__.py
+│   │   │   ├── users.py
+│   │   │   ├── roles.py     # New file for role endpoints
+│   │   │   ├── permissions.py # New file for permission endpoints
+│   │   │   ├── segments.py
+│   │   │   ├── webpush.py
+│   │   │   ├── templates.py
+│   │   │   ├── campaigns.py
+│   │   │   ├── triggers.py
+│   │   │   ├── analytics.py
+│   │   │   ├── webhooks.py
+│   │   │   ├── cdps.py
+│   │   │   └── ceps.py
+│   │   └── router.py
+│   └── router.py
+├── migrations/
+│   ├── __init__.py
+│   ├── env.py
+│   ├── script.py.mako
+│   └── versions/
+│       ├── __init__.py
+│       └── ... (migration scripts)
+├── utils/
+│   ├── __init__.py
+│   ├── helpers.py
+│   └── audit.py            # New file for audit logging utilities
+├── logs/                   # Directory to store log files
+│   └── .gitkeep
+└── tests/
+    ├── __init__.py
+    ├── conftest.py
+    ├── test_api/
+    ├── test_services/
+    └── test_repositories/
+
+
+
+    Role Permissions:
+
+core/permissions/role.py: Define role classes and hierarchies
+core/permissions/permission.py: Define permission classes and constants
+core/permissions/dependencies.py: FastAPI dependency injectors for permission checks
+Logging System:
+
+core/logging/config.py: Configure logging (file handlers, log levels, formats)
+core/logging/formatters.py: Custom log formatters (e.g., JSON)
+core/logging/handlers.py: Custom log handlers (e.g., rotating file, Sentry)
+logs/: Directory to store log files
+Exception Handling:
+
+core/exceptions/base.py: Base exception classes for the application
+core/exceptions/http.py: HTTP-specific exceptions
+core/exceptions/domain.py: Domain-specific exceptions
+core/exceptions/handlers.py: Global exception handlers
+api/error_handlers.py: API-level error handlers
+Audit Logging:
+
+utils/audit.py: Utilities for audit logging (user actions, CRUD operations)

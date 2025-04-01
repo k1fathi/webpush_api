@@ -1,0 +1,48 @@
+flowchart TD
+    start([Start]) --> createTest[Create new A/B test]
+    createTest --> setCampaign[Associate with campaign]
+    setCampaign --> defineVariants[Define test variants]
+    
+    defineVariants --> loopVariants[["For each variant"]]
+    loopVariants --> createTemplate[Create template variant]
+    createTemplate --> setDistribution[Set distribution percentage]
+    setDistribution --> nextVariant{More\nvariants?}
+    
+    nextVariant -->|Yes| loopVariants
+    nextVariant -->|No| setMetrics[Set success metrics]
+    
+    setMetrics --> defineAudience[Define test audience]
+    defineAudience --> setSampleSize[Set sample size]
+    setSampleSize --> setDuration[Set test duration]
+    
+    setDuration --> reviewTest[Review test setup]
+    reviewTest --> testOk{Setup\ncomplete?}
+    
+    testOk -->|No| adjustSettings[Adjust test settings]
+    adjustSettings --> reviewTest
+    testOk -->|Yes| activateTest[Activate test]
+    
+    activateTest --> distributeSends[Distribute sends across variants]
+    distributeSends --> collectData[Collect performance data]
+    collectData --> testComplete{Test\ncomplete?}
+    
+    testComplete -->|No| waitMoreData[Wait for more data]
+    waitMoreData --> collectData
+    testComplete -->|Yes| analyzeResults[Analyze test results]
+    
+    analyzeResults --> determineWinner[Determine winning variant]
+    determineWinner --> significantResult{Statistically\nsignificant?}
+    
+    significantResult -->|No| extendTest{Extend test?}
+    extendTest -->|Yes| adjustDuration[Adjust test duration]
+    adjustDuration --> collectData
+    extendTest -->|No| inconclusiveResults[Record inconclusive results]
+    inconclusiveResults --> end
+    
+    significantResult -->|Yes| declareWinner[Declare winning variant]
+    declareWinner --> applyWinner{Apply winner\nto campaign?}
+    
+    applyWinner -->|Yes| updateCampaign[Update campaign with winning variant]
+    updateCampaign --> end
+    applyWinner -->|No| documentResults[Document test results]
+    documentResults --> end([End])

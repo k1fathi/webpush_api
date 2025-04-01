@@ -1,0 +1,46 @@
+flowchart TD
+    start([Start]) --> createTrigger[Create new trigger]
+    createTrigger --> setName[Set trigger name]
+    setName --> selectEvent[Select trigger event type]
+    
+    selectEvent --> defineConditions[Define trigger conditions]
+    defineConditions --> setTemplate[Select notification template]
+    setTemplate --> selectSegment{Target specific\nsegment?}
+    
+    selectSegment -->|Yes| chooseSegment[Choose target segment]
+    selectSegment -->|No| allUsers[Target all eligible users]
+    
+    chooseSegment --> setDelay[Set delay time]
+    allUsers --> setDelay
+    
+    setDelay --> activateTrigger[Activate trigger]
+    activateTrigger --> monitorEvents[Monitor for trigger events]
+    monitorEvents --> eventDetected{Event\ndetected?}
+    
+    eventDetected -->|No| continueMonitoring[Continue monitoring]
+    continueMonitoring --> monitorEvents
+    eventDetected -->|Yes| validateConditions[Validate all conditions]
+    
+    validateConditions --> conditionsMet{All conditions\nmet?}
+    conditionsMet -->|No| logSkipped[Log skipped trigger]
+    conditionsMet -->|Yes| scheduleNotification[Schedule notification]
+    
+    scheduleNotification --> applyDelay[Apply configured delay]
+    applyDelay --> delayElapsed{Delay\nelapsed?}
+    
+    delayElapsed -->|No| waitForDelay[Wait for delay]
+    waitForDelay --> delayElapsed
+    delayElapsed -->|Yes| checkStillValid[Check if still valid]
+    
+    checkStillValid --> stillValid{Trigger still\nvalid?}
+    stillValid -->|No| cancelNotification[Cancel notification]
+    stillValid -->|Yes| sendNotification[Send notification]
+    
+    sendNotification --> logTriggerSuccess[Log successful trigger]
+    cancelNotification --> logCancellation[Log cancellation reason]
+    logSkipped --> continueTrigger{Trigger still\nactive?}
+    logTriggerSuccess --> continueTrigger
+    logCancellation --> continueTrigger
+    
+    continueTrigger -->|Yes| monitorEvents
+    continueTrigger -->|No| end([End])

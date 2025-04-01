@@ -1,0 +1,35 @@
+flowchart TD
+    start([Start]) --> userActivity[User activity occurs]
+    userActivity --> collectData[Collect interaction data]
+    
+    collectData --> determineSource{Data\nsource}
+    determineSource -->|Web| captureWebData[Capture web behavior]
+    determineSource -->|App| captureAppData[Capture app behavior]
+    determineSource -->|WebPush| captureNotifData[Capture notification interaction]
+    
+    captureWebData --> normalizeData[Normalize data]
+    captureAppData --> normalizeData
+    captureNotifData --> normalizeData
+    
+    normalizeData --> preparePayload[Prepare CDP payload]
+    preparePayload --> sendToCDP[Send data to CDP]
+    sendToCDP --> validateTransfer{Transfer\nsuccessful?}
+    
+    validateTransfer -->|No| logError[Log error]
+    logError --> retryTransfer{Retry\nallowed?}
+    retryTransfer -->|Yes| scheduleRetry[Schedule retry]
+    scheduleRetry --> end
+    retryTransfer -->|No| alertAdmin[Alert administrators]
+    alertAdmin --> end
+    
+    validateTransfer -->|Yes| cdpProcess[CDP processes data]
+    cdpProcess --> updateProfile[Update user profile]
+    
+    updateProfile --> syncBack{Sync back\nto WebPush?}
+    syncBack -->|Yes| pullCDPData[Pull updated profile from CDP]
+    pullCDPData --> updateLocalProfile[Update local user profile]
+    updateLocalProfile --> recalculateSegments[Recalculate user segments]
+    recalculateSegments --> end
+    
+    syncBack -->|No| scheduleSync[Schedule future sync]
+    scheduleSync --> end([End])

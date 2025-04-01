@@ -1,0 +1,46 @@
+flowchart TD
+    start([Start]) --> notificationSent[Notification sent]
+    notificationSent --> recordSent[Record sending event]
+    recordSent --> waitDelivery[Wait for delivery status]
+    
+    waitDelivery --> deliveryStatus{Delivery\nstatus}
+    deliveryStatus -->|Delivered| recordDelivery[Record delivery]
+    deliveryStatus -->|Failed| recordFailure[Record failure]
+    
+    recordDelivery --> waitOpen[Wait for opened status]
+    waitOpen --> openStatus{Notification\nopened?}
+    
+    openStatus -->|No| openTimeout{Timeout\nreached?}
+    openTimeout -->|No| waitOpen
+    openTimeout -->|Yes| calculateStats[Calculate campaign statistics]
+    
+    openStatus -->|Yes| recordOpen[Record opened event]
+    recordOpen --> waitClick[Wait for click]
+    waitClick --> clickStatus{Notification\nclicked?}
+    
+    clickStatus -->|No| clickTimeout{Timeout\nreached?}
+    clickTimeout -->|No| waitClick
+    clickTimeout -->|Yes| calculateStats
+    
+    clickStatus -->|Yes| recordClick[Record click event]
+    recordClick --> trackDestination[Track destination engagement]
+    trackDestination --> waitConversion[Monitor for conversion]
+    
+    waitConversion --> conversionStatus{Conversion\noccurred?}
+    conversionStatus -->|Yes| recordConversion[Record conversion event]
+    conversionStatus -->|No| convTimeout{Timeout\nreached?}
+    
+    convTimeout -->|No| waitConversion
+    convTimeout -->|Yes| calculateStats
+    
+    recordFailure --> calculateStats
+    recordConversion --> calculateStats
+    
+    calculateStats --> updateReports[Update analytics reports]
+    updateReports --> triggerWebhooks[Trigger analytics webhooks]
+    triggerWebhooks --> integrateCDP{CDP\nintegration?}
+    
+    integrateCDP -->|Yes| sendToCDP[Send data to CDP]
+    integrateCDP -->|No| end
+    
+    sendToCDP --> end([End])
