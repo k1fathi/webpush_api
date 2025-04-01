@@ -1,6 +1,6 @@
 from celery import shared_task
 from workers.celery_worker import celery_app
-from db.config import SessionLocal
+from db.databse_manager import SessionLocal
 from db.models import (
     Notification, WebhookEvent, DeliveryStatus
 )

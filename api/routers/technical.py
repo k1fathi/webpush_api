@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from db.config import get_db
+from db.databse_manager import get_db
 from typing import Dict, Any
 from api.schemas.technical import WebhookCreate, CDPSync, CEPConfig
 

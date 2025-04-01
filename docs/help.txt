@@ -1,75 +1,104 @@
-docker-compose exec web python test_integration.py
-
+# Project Structure and Setup
 /c:/K1/ZUZZUU/webpush/webpush_api/
 ├── api/
 │   ├── __init__.py
-│   └── main.py
+│   ├── main.py
+│   ├── dependencies.py
+│   └── endpoints/
+│       ├── __init__.py
+│       ├── notifications.py
+│       └── health.py
 ├── core/
 │   ├── __init__.py
+│   ├── config.py
 │   ├── database.py
+│   ├── logging.py
 │   └── models.py
+├── repositories/
+│   ├── __init__.py
+│   └── notification_repository.py
+├── services/
+│   ├── __init__.py
+│   └── notification_service.py
 ├── workers/
 │   ├── __init__.py
 │   ├── celery_worker.py
 │   └── tasks.py
 ├── tests/
 │   ├── __init__.py
-│   └── test_integration.py
+│   ├── conftest.py
+│   ├── test_integration.py
+│   └── test_unit/
+│       └── test_services.py
+├── schemas/
+│   ├── __init__.py
+│   └── notification.py
+├── logs/
+│   └── app.log
 ├── config/
 │   ├── __init__.py
 │   └── settings.py
+├── alembic/
+│   ├── versions/
+│   └── alembic.ini
 ├── .env
 ├── docker-compose.yml
 ├── Dockerfile
 └── requirements.txt
 
+# Development Commands
 
+## 1. Start Development Server
+docker-compose up -d --build
 
-## 1. Health check
-curl http://localhost:8000/health
-
-# 2. Create a notification (with properly formatted JSON)
-curl -X POST http://localhost:8000/notifications/ \
-  -H "Content-Type: application/json" \
-  -d '{
-    "title": "Test Notification",
-    "body": "This is a test message",
-    "icon": null,
-    "data": {
-      "key": "value"
-    }
-  }'
-
-# 3. List all notifications
-curl http://localhost:8000/notifications/
-
-# 4. Get specific notification (replace {id} with actual id)
-curl http://localhost:8000/notifications/1
-
-# 5. Check Celery worker logs
+## 2. Check Logs
+docker-compose logs -f web
 docker-compose logs -f celery_worker
 
+## 3. API Health Check
+curl http://localhost:8000/health
 
+## 4. API Documentation
+# Swagger UI: http://localhost:8000/docs
+# ReDoc: http://localhost:8000/redoc
 
-
-
-RabbitMQ: Acts as the message broker, handling task queue management
-Redis: Stores task results and states (success/failure, return values, etc.)
-
-
-docker-compose down -v web && docker-compose up -d --build web
-
-
-docker-compose -f docker-compose.dev.yml up -d --build
-
-cp .env.dev .env
-
-
-update databse FATAPI
-docker-compose exec web alembic revision --autogenerate -m "add_cdp_cep_models"
+## 5. Database Management
+# Create migration
+docker-compose exec web alembic revision --autogenerate -m "description"
+# Apply migration
 docker-compose exec web alembic upgrade head
+# Rollback
+docker-compose exec web alembic downgrade -1
+
+## 6. Testing
+docker-compose exec web pytest -v --cov
+
+## 7. Linting and Formatting
+docker-compose exec web black .
+docker-compose exec web flake8
+
+# Development Workflow
+1. Create/Update models in db/models.py
+2. Create/Update schemas in schemas/
+3. Implement repository layer in db/repositories/
+4. Implement service layer in services/
+5. Create API endpoints in api/endpoints/
+6. Add permissions and dependencies
+7. Write tests
+8. Generate and apply migrations
+
+# Logging Levels
+DEBUG: Detailed information for debugging
+INFO: General information about system operation
+WARNING: Warning messages for potential issues
+ERROR: Error messages for actual problems
+CRITICAL: Critical issues that require immediate attention
+
+# Environment Variables (.env)
+DATABASE_URL=postgresql://user:password@db:5432/dbname
+REDIS_URL=redis://redis:6379/0
+RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672//
+LOG_LEVEL=INFO
+ENVIRONMENT=development\
 
 
-
-Run the following command to auto-detect changes in your models and generate a migration script:
-alembic revision --autogenerate -m "Initial migration"

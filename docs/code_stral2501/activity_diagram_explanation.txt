@@ -81,3 +81,46 @@ Delivery Reports & Analytics Module:
 Generate reports.
 Analyze delivery status, open rates, click rates, conversion rates.
 Optimize reports.
+
+
+
+
+
+
+Explanation:
+WebPush Platform:
+
+The central node representing the WebPush platform.
+User Segmentation:
+
+Segments users into VIP Customers, Loyal Customers, and New Users.
+Role: MARKETER.
+Campaign Management:
+
+Manages WebPush campaigns, automated message scheduling, and campaign success analysis.
+Role: MARKETER.
+CDP & CEP Integration:
+
+Integrates CDP and CEP data for personalized notifications and campaign optimization.
+Role: TECH_ADMIN.
+Real-time Analytics:
+
+Performs real-time analytics and WebPush optimization.
+Role: ANALYST.
+Dashboard:
+
+Provides a dashboard for WebPush sending, personalization, campaign management, and delivery reports.
+Role: MARKETER and ANALYST.
+External Systems:
+
+Receives webhooks and sends notifications.
+Role: TECH_ADMIN.
+Connections:
+The WebPush Platform connects to various sub-systems.
+User Segmentation segments users into different categories.
+Campaign Management handles the creation and scheduling of campaigns.
+CDP & CEP Integration provides data for personalization and optimization.
+Real-time Analytics optimizes WebPush performance.
+The Dashboard provides various analytics and management tools.
+External Systems handle webhook integration and notifications.
+This diagram provides a clear view of the roles, permissions, and workflow within the WebPush platform.

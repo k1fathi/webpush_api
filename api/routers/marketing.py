@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from db.config import get_db
+from db.databse_manager import get_db
 from db.models import Campaign, Template, WebPush, User, Segment
 from typing import List
 from api.schemas.marketing import (

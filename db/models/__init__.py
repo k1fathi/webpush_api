@@ -7,7 +7,7 @@ from .subscription import Subscription
 from .campaign import Campaign, CampaignSegment
 from .trigger import Trigger
 from .analytics import Analytics
-from .user import User, UserSegment
+from .user_model import User, UserSegment
 from .template import Template
 from .webhook import WebhookEvent, Webhook
 from .delivery import DeliveryStatus, DeliveryReport

@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Table, Boolean, DateTime
 from sqlalchemy.orm import relationship
-from db.config import Base
+from db.databse_manager import Base
 from datetime import datetime
 
 # Role-Permission Association Table

@@ -1,0 +1,184 @@
+graph TD
+    %% Role definitions
+    classDef admin fill:#f9d,stroke:#333
+    classDef analyst fill:#afd,stroke:#333
+    classDef marketer fill:#daf,stroke:#333
+    classDef tech fill:#fda,stroke:#333
+    classDef enduser fill:#ddd,stroke:#333
+
+    subgraph WebPush Platform
+        direction TB
+        A[WebPush Platform]
+    end
+
+    subgraph User Segmentation
+        direction TB
+        B[User Segmentation]
+        G[VIP Customers]
+        H[Loyal Customers]
+        I[New Users]
+    end
+
+    subgraph Campaign Management
+        direction TB
+        C[Campaign Management]
+        J[WebPush Campaigns]
+        K[Automated Message Scheduling]
+        L[Campaign Success Analysis]
+    end
+
+    subgraph CDP & CEP Integration
+        direction TB
+        D[CDP & CEP Integration]
+        M[Personalized Notifications]
+        N[Campaign Optimization Based on Personal Data]
+    end
+
+    subgraph Real-time Analytics
+        direction TB
+        E[Real-time Analytics]
+        O[WebPush Optimization]
+    end
+
+    subgraph Dashboard
+        direction TB
+        F[Dashboard]
+        P[WebPush Sending Page]
+        Q[Personalization]
+        R[Campaign Management]
+        S[Delivery Reports & Analytics]
+    end
+
+    subgraph External Systems
+        direction TB
+        ES1[Receive Webhook]
+        ES2[Send Notification]
+    end
+
+    %% Connections showing role-based workflow
+    A --> B
+    A --> C
+    A --> D
+    A --> E
+    A --> F
+    B --> G
+    B --> H
+    B --> I
+    C --> J
+    C --> K
+    C --> L
+    D --> M
+    D --> N
+    E --> O
+    F --> P
+    F --> Q
+    F --> R
+    F --> S
+    G --> T[WebPush Deliveries]
+    H --> T
+    I --> T
+    J --> U[One-time & Automated Messages]
+    K --> V[Notification if Cart Abandoned in 24 Hours]
+    L --> W[A/B Test Results]
+    M --> X[Correct Time & Channel Selection]
+    N --> X
+    O --> Y[Highest Interaction Rates]
+    P --> Z[Recipient Selection]
+    Q --> Z
+    R --> Z
+    S --> AA[Delivery Status]
+    S --> BB[Open & Click Rates]
+    S --> CC[A/B Test Results]
+    S --> DD[Segment Analysis with CDP Data]
+    T --> EE[WebPush Deliveries]
+    U --> FF[One-time & Automated Messages]
+    V --> GG[Notification if Cart Abandoned in 24 Hours]
+    W --> HH[Activity-based Triggers]
+    X --> II[Personalized Notifications]
+    Y --> JJ[WebPush Optimization]
+    Z --> KK[WebPush Sending Page]
+    AA --> LL[Number of Delivered WebPushes]
+    BB --> MM[Number of Opened WebPushes]
+    CC --> NN[Click Rate]
+    DD --> OO[Conversion Rate]
+    EE --> PP[Number of Sent WebPushes]
+    FF --> QQ[Number of Delivered WebPushes]
+    GG --> RR[Number of Opened WebPushes]
+    HH --> SS[Click Rate]
+    II --> TT[Conversion Rate]
+    JJ --> UU[Time-based Success Rate Analysis]
+    KK --> VV[Segment Analysis for Best Conversion]
+    LL --> WW[Comparison of Different WebPush Message Success]
+    MM --> XX[Success Analysis with CDP & CEP Integration]
+    NN --> YY[Webhook Integration]
+    OO --> ZZ[Real-time Notification Triggers]
+    PP --> AA1[Webhook API]
+    QQ --> BB1[Delivery Data Transfer]
+    RR --> CC1[Feedback Data Transfer]
+    SS --> DD1[Feedback Data Transfer]
+    TT --> EE1[Feedback Data Transfer]
+    UU --> FF1[Feedback Data Transfer]
+    VV --> GG1[Feedback Data Transfer]
+    WW --> HH1[Feedback Data Transfer]
+    XX --> II1[Feedback Data Transfer]
+    YY --> JJ1[Feedback Data Transfer]
+    ZZ --> KK1[Feedback Data Transfer]
+
+    %% Role-based styling
+    G:::marketer
+    H:::marketer
+    I:::marketer
+    J:::marketer
+    K:::marketer
+    L:::marketer
+    M:::marketer
+    N:::marketer
+    O:::analyst
+    P:::marketer
+    Q:::marketer
+    R:::marketer
+    S:::analyst
+    T:::marketer
+    U:::marketer
+    V:::marketer
+    W:::analyst
+    X:::marketer
+    Y:::analyst
+    Z:::marketer
+    AA:::analyst
+    BB:::analyst
+    CC:::analyst
+    DD:::analyst
+    EE:::marketer
+    FF:::marketer
+    GG:::marketer
+    HH:::analyst
+    II:::marketer
+    JJ:::analyst
+    KK:::marketer
+    LL:::analyst
+    MM:::analyst
+    NN:::analyst
+    OO:::analyst
+    PP:::tech
+    QQ:::tech
+    RR:::tech
+    SS:::tech
+    TT:::tech
+    UU:::analyst
+    VV:::analyst
+    WW:::analyst
+    XX:::analyst
+    YY:::tech
+    ZZ:::tech
+    AA1:::tech
+    BB1:::tech
+    CC1:::tech
+    DD1:::tech
+    EE1:::tech
+    FF1:::tech
+    GG1:::tech
+    HH1:::tech
+    II1:::tech
+    JJ1:::tech
+    KK1:::tech
