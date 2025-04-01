@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
-from .base import Base
+from .base_model import Base
 
 class Trigger(Base):
     __tablename__ = 'triggers'

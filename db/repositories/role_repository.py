@@ -1,5 +1,5 @@
 from .base_repository import BaseRepository
-from db.models.roles import Role, Permission
+from db.models.roles_model import Role, Permission
 from typing import List, Optional
 
 class RoleRepository(BaseRepository[Role]):

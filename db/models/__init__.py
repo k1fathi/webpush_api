@@ -4,18 +4,18 @@ from .notification import (
     NotificationPriority, NotificationType
 )
 from .subscription import Subscription
-from .campaign import Campaign, CampaignSegment
-from .trigger import Trigger
-from .analytics import Analytics
+from .campaign_model import Campaign, CampaignSegment
+from .trigger_model import Trigger
+from .analytics_model import Analytics
 from .user_model import User, UserSegment
-from .template import Template
-from .webhook import WebhookEvent, Webhook
+from .template_model import Template
+from .webhook_model import WebhookEvent, Webhook
 from .delivery import DeliveryStatus, DeliveryReport
 from .integration import CEPStrategy, CDPData, CDPProfile
-from .segment import Segment
-from .roles import Role, Permission, UserActivity
-from .cdp import CDP
-from .cep import CEP
+from .segment_model import Segment
+from .roles_model import Role, Permission, UserActivity
+from .cdp_model import CDP
+from .cep_model import CEP
 
 __all__ = [
     # Notification related

@@ -1,6 +1,6 @@
 from db.models.user_model import User
 from .base_repository import BaseRepository
-from db.models.segment import Segment
+from db.models.segment_model import Segment
 from typing import List
 
 class SegmentRepository(BaseRepository[Segment]):

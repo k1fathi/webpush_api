@@ -1,6 +1,6 @@
 from fastapi import HTTPException, Depends
 from functools import wraps
-from db.models.roles import Role, Permission
+from db.models.roles_model import Role, Permission
 from typing import List, Callable
 
 class PermissionDenied(HTTPException):

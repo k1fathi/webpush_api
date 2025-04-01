@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
-from .base import Base
+from .base_model import Base
 
 class Analytics(Base):
     __tablename__ = 'analytics'

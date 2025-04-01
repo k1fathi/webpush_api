@@ -1,4 +1,4 @@
-from db.models.roles import Role, Permission
+from db.models.roles_model import Role, Permission
 from typing import Dict, List
 
 SWIMLANE_ACTIVITY_PERMISSIONS: Dict[str, Dict[str, List[str]]] = {

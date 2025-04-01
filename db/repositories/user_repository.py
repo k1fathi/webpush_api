@@ -2,8 +2,8 @@ from sqlalchemy.orm import Session
 from typing import List, Optional, Dict
 from datetime import datetime
 from db.models.user_model import User
-from db.models.roles import Role
-from db.models.segment import Segment
+from db.models.roles_model import Role
+from db.models.segment_model import Segment
 
 class UserRepository:
     def __init__(self, db: Session):

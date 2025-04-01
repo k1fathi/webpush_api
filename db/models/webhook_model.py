@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, JSON, ForeignKey
 from sqlalchemy.orm import relationship
-from .base import Base
+from .base_model import Base
 
 class Webhook(Base):
     __tablename__ = 'webhooks'

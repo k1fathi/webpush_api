@@ -1,6 +1,6 @@
 from .base_repository import BaseRepository
-from db.models.cdp import CDP
-from db.models.cep import CEP
+from db.models.cdp_model import CDP
+from db.models.cep_model import CEP
 from typing import Dict, Any, Optional
 
 class CDPRepository(BaseRepository[CDP]):

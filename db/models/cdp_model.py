@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, JSON, ForeignKey
-from .base import Base
+from .base_model import Base
 
 class CDP(Base):
     __tablename__ = 'cdp'
