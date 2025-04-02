@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import Enum
 from typing import Dict, List, Optional, Any
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, validator
 
 class UserStatus(str, Enum):
     """User status enumeration"""
@@ -18,37 +18,53 @@ class UserDeviceType(str, Enum):
     TABLET = "tablet"
     OTHER = "other"
 
+class UserSubscriptionStatus(str, Enum):
+    SUBSCRIBED = "subscribed"
+    UNSUBSCRIBED = "unsubscribed"
+    PENDING = "pending"
+
+class UserRole(str, Enum):
+    USER = "user"
+    ADMIN = "admin"
+    MARKETER = "marketer"
+    DEVELOPER = "developer"
+
+class DeviceInfo(BaseModel):
+    browser: Optional[str] = None
+    browser_version: Optional[str] = None
+    os: Optional[str] = None
+    os_version: Optional[str] = None
+    device_type: Optional[str] = None
+    screen_size: Optional[str] = None
+
 class User(BaseModel):
     """Base user model"""
-    id: Optional[str] = None
-    email: EmailStr
-    username: str
-    full_name: Optional[str] = None
-    status: UserStatus = UserStatus.PENDING
+    id: Optional[str] = Field(None, description="Unique identifier")
+    email: Optional[str] = Field(None, description="User email")
+    username: Optional[str] = Field(None, description="Username for login")
+    first_name: Optional[str] = Field(None, description="First name")
+    last_name: Optional[str] = Field(None, description="Last name")
+    subscription_status: UserSubscriptionStatus = UserSubscriptionStatus.PENDING
+    created_at: Optional[datetime] = Field(None, description="User creation timestamp")
+    updated_at: Optional[datetime] = Field(None, description="Last update timestamp")
+    last_login: Optional[datetime] = Field(None, description="Last login timestamp")
+    role: UserRole = UserRole.USER
+    preferences: Dict[str, Any] = Field(default_factory=dict)
+    device_info: Optional[DeviceInfo] = None
+    push_token: Optional[str] = Field(None, description="WebPush subscription token")
+    opted_in: bool = False
     is_active: bool = True
-    is_superuser: bool = False
-    
-    # Notification preferences
-    notification_enabled: bool = True
-    webpush_enabled: bool = True
-    email_notification_enabled: bool = True
-    quiet_hours_start: Optional[int] = None  # Hour in 24-hour format
-    quiet_hours_end: Optional[int] = None
-    
-    # Device and subscription info
-    subscription_info: Dict[str, Any] = Field(default_factory=dict)
-    devices: List[Dict[str, Any]] = Field(default_factory=list)
-    
-    # User attributes
-    timezone: Optional[str] = "UTC"
-    language: Optional[str] = "en"
-    custom_attributes: Dict[str, Any] = Field(default_factory=dict)
-    
-    # Tracking
-    last_login: Optional[datetime] = None
-    last_seen: Optional[datetime] = None
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
     
     class Config:
-        orm_mode = True
+        schema_extra = {
+            "example": {
+                "email": "user@example.com",
+                "username": "johndoe",
+                "first_name": "John",
+                "last_name": "Doe",
+                "subscription_status": "subscribed",
+                "role": "user",
+                "preferences": {"language": "en", "notifications": True},
+                "opted_in": True
+            }
+        }

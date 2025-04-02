@@ -11,6 +11,7 @@ alembic>=1.7.4
 python-jose>=3.3.0
 passlib>=1.7.4
 python-multipart>=0.0.5
+email-validator>=1.1.3  # Add email-validator for Pydantic EmailStr
 
 # Pydantic - solve the version conflict
 # Option 1: Use Pydantic v1.x without pydantic-settings

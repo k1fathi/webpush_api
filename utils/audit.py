@@ -1,50 +1,54 @@
 import logging
+import json
 from datetime import datetime
-from typing import Optional, Dict, Any, Union
+from typing import Dict, Any, Optional
 
-logger = logging.getLogger("audit")
+logger = logging.getLogger(__name__)
 
 def audit_log(
     message: str,
-    user_id: Optional[str] = None,
-    action_type: Optional[str] = None,
+    action_type: str,
     resource_type: Optional[str] = None,
     resource_id: Optional[str] = None,
+    user_id: Optional[str] = None,
     metadata: Optional[Dict[str, Any]] = None
-) -> None:
+) -> Dict[str, Any]:
     """
     Log an audit event
     
     Args:
-        message: Description of what happened
-        user_id: ID of user who performed the action
+        message: Description of the event
         action_type: Type of action (create, update, delete, etc.)
-        resource_type: Type of resource affected (segment, campaign, etc.)
-        resource_id: ID of resource affected
-        metadata: Additional information about the action
+        resource_type: Type of resource (user, campaign, etc.)
+        resource_id: ID of the resource
+        user_id: ID of the user who performed the action
+        metadata: Additional data about the event
+        
+    Returns:
+        Dictionary containing the audit log entry
     """
-    log_data = {
-        "timestamp": datetime.now().isoformat(),
+    log_entry = {
         "message": message,
-        "user_id": user_id,
-        "action_type": action_type,
-        "resource_type": resource_type,
-        "resource_id": resource_id
+        "action": action_type,
+        "timestamp": datetime.now().isoformat(),
+        "metadata": metadata or {}
     }
     
-    if metadata:
-        log_data["metadata"] = metadata
-        
-    # Format for human-readable logs
-    human_readable = f"{log_data['timestamp']} - {message}"
-    if user_id:
-        human_readable += f" (User: {user_id})"
-    if resource_type and resource_id:
-        human_readable += f" - {resource_type}/{resource_id}"
-        
-    logger.info(human_readable, extra={"audit_data": log_data})
+    if resource_type:
+        log_entry["resource_type"] = resource_type
     
-    # In a real implementation, we might also:
-    # - Store in database
-    # - Send to external audit system
-    # - Generate compliance reports
+    if resource_id:
+        log_entry["resource_id"] = resource_id
+    
+    if user_id:
+        log_entry["user_id"] = user_id
+    
+    # Log using standard logger
+    logger.info(f"AUDIT: {message}", extra=log_entry)
+    
+    # In a real implementation, you might also:
+    # 1. Store in database
+    # 2. Send to external logging system
+    # 3. Trigger alerts for certain events
+    
+    return log_entry

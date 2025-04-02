@@ -1,4 +1,7 @@
-from .user import User
+# Basic model initialization - reducing dependencies
+# Previously: from .user import User
+
+# Import these explicitly only when needed to avoid circular imports
 from .segment import Segment
 from .template import Template
 from .campaign import Campaign
@@ -12,7 +15,6 @@ from .cdp_integration import CdpIntegration
 from .cep_decision import CepDecision
 
 __all__ = [
-    'User',
     'Segment',
     'Template',
     'Campaign',

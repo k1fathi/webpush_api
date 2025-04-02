@@ -15,22 +15,9 @@ except ImportError:
         def decorator(func):
             return func
         return decorator
-else:
-    shared_task = celery_app.task
+    celery_app = type('MockCelery', (), {'task': shared_task})
 
-from models.domain.campaign import CampaignModel, CampaignStatus
-from models.domain.notification import DeliveryStatus, NotificationModel
-from repositories.campaign import CampaignRepository
-from repositories.notification import NotificationRepository
-from repositories.segment import SegmentRepository
-from repositories.template import TemplateRepository
-from repositories.user import UserRepository
-from repositories.webhook import WebhookRepository
-from services.cdp import CdpService
-from services.cep import CepService
-from services.webpush import WebPushService
-
-@shared_task
+@celery_app.task
 def process_scheduled_campaigns():
     """Process all scheduled campaigns that are ready to be sent"""
     logger.info("Processing scheduled campaigns")
@@ -43,8 +30,8 @@ def process_scheduled_campaigns():
         logger.info(f"Queuing campaign {campaign.id} - {campaign.name} for execution")
         execute_campaign.delay(str(campaign.id))
 
-@shared_task(bind=True, name="workers.tasks.campaign_tasks.execute_campaign")
-def execute_campaign(self, campaign_id: int, campaign_data: Dict[str, Any]) -> bool:
+@celery_app.task(bind=True)
+def execute_campaign(self, campaign_id: int, campaign_data: Dict[str, Any] = None) -> bool:
     """
     Executes a notification campaign
     """

@@ -1,5 +1,6 @@
-from typing import Dict, Any, Optional, List
 import logging
+from datetime import datetime, timedelta
+from typing import Dict, Any, Optional, List
 
 # Set up logger
 logger = logging.getLogger(__name__)
@@ -14,10 +15,7 @@ except ImportError:
         def decorator(func):
             return func
         return decorator
-else:
-    shared_task = celery_app.task
-
-from datetime import datetime, timedelta
+    celery_app = type('MockCelery', (), {'task': shared_task})
 
 from models.notification import DeliveryStatus
 from repositories.notification import NotificationRepository
@@ -26,7 +24,7 @@ from repositories.notification_delivery import NotificationDeliveryRepository
 from services.analytics import AnalyticsService
 from services.notification import NotificationService
 
-@shared_task(bind=True, name="workers.tasks.notification_tasks.send_notification")
+@celery_app.task(bind=True)
 def send_notification(self, user_id: int, notification_data: Dict[str, Any]) -> bool:
     """
     Sends a push notification to a user
@@ -41,7 +39,7 @@ def send_notification(self, user_id: int, notification_data: Dict[str, Any]) -> 
         self.retry(exc=e, countdown=30, max_retries=3)
         return False
 
-@shared_task(bind=True, name="workers.tasks.notification_tasks.process_pending_notifications")
+@celery_app.task(bind=True)
 def process_pending_notifications(self) -> int:
     """
     Processes pending notifications from the database

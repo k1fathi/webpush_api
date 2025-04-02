@@ -2,13 +2,41 @@ import logging
 from datetime import datetime
 from typing import Dict, List, Optional, Set, Any, Tuple
 
-from models.segment import Segment, SegmentType, SegmentOperator, CompositeOperator
+logger = logging.getLogger(__name__)
+
+# Define enum types here instead of importing them
+class SegmentType:
+    STATIC = "static"
+    DYNAMIC = "dynamic"
+    BEHAVIOR = "behavior"
+    COMPOSITE = "composite"
+
+class SegmentOperator:
+    EQUALS = "equals"
+    NOT_EQUALS = "not_equals"
+    CONTAINS = "contains"
+    NOT_CONTAINS = "not_contains"
+    GREATER_THAN = "greater_than"
+    LESS_THAN = "less_than"
+    IN = "in"
+    NOT_IN = "not_in"
+
+class CompositeOperator:
+    AND = "and"
+    OR = "or"
+
+# Basic Segment model
+class Segment:
+    def __init__(self, id, name, segment_type, filter_criteria=None):
+        self.id = id
+        self.name = name
+        self.segment_type = segment_type
+        self.filter_criteria = filter_criteria or {}
+
 from repositories.segment import SegmentRepository
 from repositories.user import UserRepository
 from utils.audit import audit_log
 from utils.query_builder import build_segment_query
-
-logger = logging.getLogger(__name__)
 
 class SegmentExecutionService:
     """
