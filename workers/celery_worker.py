@@ -1,26 +1,7 @@
 import os
 import sys
 
-# Simple dependency check and install function
-def install_package(package):
-    try:
-        import importlib
-        importlib.import_module(package)
-    except ImportError:
-        import subprocess
-        print(f"Installing missing package: {package}")
-        try:
-            subprocess.check_call([sys.executable, "-m", "pip", "install", package])
-            print(f"Successfully installed {package}")
-        except Exception as e:
-            print(f"Failed to install {package}: {e}")
-            return False
-    return True
-
-# Ensure dependencies are available
-install_package("pydantic")
-install_package("pydantic-settings")
-
+# No longer need to install dependencies at runtime since we're using a consistent approach
 try:
     # Import the celery app from the central module
     from core.celery_app import celery_app
@@ -45,7 +26,7 @@ except ImportError as e:
         "workers.tasks.campaign_tasks"
     ]
 
-# Expose the celery app for the worker command
+# Ensure the celery app is exposed for the worker command
 # This ensures the 'workers.celery_worker:celery_app' reference works
 if __name__ == "__main__":
     print("Celery worker module loaded successfully")

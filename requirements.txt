@@ -1,5 +1,5 @@
 # FastAPI and web server
-fastapi>=0.68.0
+fastapi>=0.68.0,<0.100.0
 uvicorn>=0.15.0
 
 # Database
@@ -12,9 +12,13 @@ python-jose>=3.3.0
 passlib>=1.7.4
 python-multipart>=0.0.5
 
-# Pydantic - pin to specific version to avoid compatibility issues
-pydantic==1.10.8  # Use v1.x which is more stable with FastAPI
-pydantic-settings==2.0.3  # Only needed for Pydantic v2
+# Pydantic - solve the version conflict
+# Option 1: Use Pydantic v1.x without pydantic-settings
+pydantic>=1.9.0,<2.0.0  # Stick with v1.x which is known to work with FastAPI
+
+# Option 2: Use Pydantic v2.x (commented out)
+# pydantic>=2.0.1
+# pydantic-settings>=2.0.3
 
 # WebPush
 pywebpush>=1.14.0
