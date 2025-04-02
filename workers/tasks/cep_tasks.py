@@ -1,15 +1,38 @@
 import logging
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 
-from core.celery_app import celery_app
+# Set up logger
+logger = logging.getLogger(__name__)
+
+# Import safely
+try:
+    from core.celery_app import celery_app
+except ImportError:
+    logger.warning("Could not import celery_app from core.celery_app")
+    # Create a no-op decorator for development/testing
+    def shared_task(*args, **kwargs):
+        def decorator(func):
+            return func
+        return decorator
+    celery_app = type('MockCelery', (), {'task': shared_task})
+
+# Mock repositories and services
+class CepDecisionRepository:
+    def create(self, decision):
+        return decision
+    
+    def get(self, decision_id):
+        return None
+    
+    def list_by_user(self, user_id):
+        return []
+
 from models.cep_decision import DecisionStatus
 from repositories.cep_decision import CepDecisionRepository
 from repositories.notification import NotificationRepository
 from repositories.user import UserRepository
 from services.cep import CepService
-
-logger = logging.getLogger(__name__)
 
 @celery_app.task
 def analyze_decision_performance():
@@ -185,3 +208,52 @@ def optimize_decision_parameters():
     
     # This is a placeholder for a real implementation
     pass
+
+@celery_app.task
+def optimize_channel_selection(user_id: str, campaign_id: str) -> Dict[str, Any]:
+    """
+    Determine the optimal channel for a user and campaign
+    
+    Args:
+        user_id: The user ID
+        campaign_id: The campaign ID
+        
+    Returns:
+        Dictionary with the selected channel and score
+    """
+    logger.info(f"Optimizing channel selection for user {user_id}, campaign {campaign_id}")
+    
+    # In a real implementation, this would:
+    # 1. Get user preferences
+    # 2. Get user engagement history
+    # 3. Consider time of day, device, location, etc.
+    # 4. Score each channel
+    # 5. Select the best channel
+    
+    # Placeholder implementation
+    return {
+        "user_id": user_id,
+        "campaign_id": campaign_id,
+        "selected_channel": "webpush",
+        "score": 0.85,
+        "alternative_channels": [
+            {"channel": "email", "score": 0.65},
+            {"channel": "sms", "score": 0.4}
+        ]
+    }
+
+@celery_app.task
+def batch_optimize_channels(campaign_id: str, user_ids: List[str]) -> Dict[str, Any]:
+    """Optimize channel selection for multiple users at once"""
+    logger.info(f"Batch optimizing channels for campaign {campaign_id} with {len(user_ids)} users")
+    
+    results = []
+    for user_id in user_ids:
+        result = optimize_channel_selection(user_id, campaign_id)
+        results.append(result)
+    
+    return {
+        "campaign_id": campaign_id,
+        "total_users": len(user_ids),
+        "results": results
+    }

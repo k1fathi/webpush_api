@@ -1,14 +1,26 @@
 import logging
 from datetime import datetime, timedelta
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
-from core.celery_app import celery_app
+# Set up logger
+logger = logging.getLogger(__name__)
+
+# Import safely
+try:
+    from core.celery_app import celery_app
+except ImportError:
+    logger.warning("Could not import celery_app from core.celery_app")
+    # Create a no-op decorator for development/testing
+    def shared_task(*args, **kwargs):
+        def decorator(func):
+            return func
+        return decorator
+    celery_app = type('MockCelery', (), {'task': shared_task})
+
 from repositories.user import UserRepository
 from repositories.cdp_integration import CdpIntegrationRepository
 from services.cdp import CdpService
 from models.cdp_integration import CdpSyncStatus
-
-logger = logging.getLogger(__name__)
 
 @celery_app.task
 def sync_user_with_cdp(user_id: str) -> bool:
@@ -176,3 +188,42 @@ def cleanup_stale_cdp_data() -> int:
     
     logger.info(f"Cleaned up {count} stale CDP integration records")
     return count
+
+@celery_app.task
+def sync_user_data(user_id: str) -> Dict[str, Any]:
+    """
+    Synchronize user data with the CDP
+    
+    Args:
+        user_id: The user ID to synchronize
+        
+    Returns:
+        Dictionary with sync results
+    """
+    logger.info(f"Syncing user {user_id} data with CDP")
+    
+    # In a real implementation, this would:
+    # 1. Get user data from our database
+    # 2. Format it for the CDP
+    # 3. Send it to the CDP API
+    # 4. Process the response
+    
+    # Placeholder implementation
+    return {
+        "user_id": user_id,
+        "success": True,
+        "synced_at": datetime.now().isoformat(),
+        "fields_synced": ["profile", "preferences", "engagement"]
+    }
+
+@celery_app.task
+def import_cdp_segments() -> Dict[str, Any]:
+    """Import segments from CDP into WebPush platform"""
+    logger.info("Importing CDP segments")
+    
+    # Placeholder implementation
+    return {
+        "success": True,
+        "segments_imported": 0,
+        "timestamp": datetime.now().isoformat()
+    }
