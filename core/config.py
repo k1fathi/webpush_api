@@ -2,8 +2,8 @@ import os
 import secrets
 from typing import Any, Dict, List, Optional, Union
 
-from pydantic import AnyHttpUrl, PostgresDsn, validator
-from pydantic_settings import BaseSettings
+# Replace pydantic_settings with standard pydantic for compatibility
+from pydantic import AnyHttpUrl, BaseSettings, PostgresDsn, validator
 
 class Settings(BaseSettings):
     # API settings
