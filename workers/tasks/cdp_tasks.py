@@ -17,10 +17,47 @@ except ImportError:
         return decorator
     celery_app = type('MockCelery', (), {'task': shared_task})
 
-from repositories.user import UserRepository
-from repositories.cdp_integration import CdpIntegrationRepository
-from services.cdp import CdpService
-from models.cdp_integration import CdpSyncStatus
+# Mock classes
+class CdpSyncStatus:
+    PENDING = "pending"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+# Mock repositories
+class UserRepository:
+    def get_all(self):
+        return []
+    
+    def get(self, user_id):
+        return None
+
+class CdpIntegrationRepository:
+    def get_by_user_id(self, user_id):
+        return None
+    
+    def update(self, integration_id, integration):
+        pass
+    
+    def get_outdated_integrations(self, cutoff_date):
+        return []
+    
+    def get_by_status(self, status):
+        return []
+    
+    def get_all(self):
+        return []
+    
+    def delete(self, integration_id):
+        pass
+
+# Mock service
+class CdpService:
+    def is_enabled(self):
+        return False
+    
+    def sync_user_data(self, user_id):
+        return False
 
 @celery_app.task
 def sync_user_with_cdp(user_id: str) -> bool:

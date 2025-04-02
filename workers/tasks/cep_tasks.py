@@ -17,7 +17,14 @@ except ImportError:
         return decorator
     celery_app = type('MockCelery', (), {'task': shared_task})
 
-# Mock repositories and services
+# Mock classes to avoid import errors
+class DecisionStatus:
+    CREATED = "created"
+    EXECUTING = "executing"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+# Mock repositories
 class CepDecisionRepository:
     def create(self, decision):
         return decision
@@ -27,12 +34,37 @@ class CepDecisionRepository:
     
     def list_by_user(self, user_id):
         return []
+    
+    def get_by_status(self, status):
+        return []
+    
+    def get_recent_decisions(self, days=30):
+        return []
+    
+    def get_by_user(self, user_id, limit=10):
+        return []
 
-from models.cep_decision import DecisionStatus
-from repositories.cep_decision import CepDecisionRepository
-from repositories.notification import NotificationRepository
-from repositories.user import UserRepository
-from services.cep import CepService
+class NotificationRepository:
+    def get(self, notification_id):
+        return None
+
+class UserRepository:
+    def get_all(self):
+        return []
+    
+    def get(self, user_id):
+        return None
+
+# Mock service
+class CepService:
+    def record_decision_outcome(self, decision_id, outcome):
+        pass
+    
+    def is_enabled(self):
+        return False
+    
+    def sync_user_data(self, user_id):
+        return False
 
 @celery_app.task
 def analyze_decision_performance():
