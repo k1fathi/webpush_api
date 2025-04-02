@@ -10,8 +10,8 @@ class Settings(BaseSettings):
     API_PREFIX: str = "/api"
     PROJECT_NAME: str = "WebPush API"
     
-    # CORS
-    CORS_ORIGINS: List[str] = ["*"]
+    # CORS - Fix parsing for CORS_ORIGINS
+    CORS_ORIGINS: Union[List[str], str] = "*"
     
     # Security
     SECRET_KEY: str = secrets.token_urlsafe(32)
@@ -50,6 +50,19 @@ class Settings(BaseSettings):
     # Logging
     LOG_LEVEL: str = os.environ.get("LOG_LEVEL", "INFO")
     LOG_FORMAT: str = os.environ.get("LOG_FORMAT", "json")
+
+    # Add validator for CORS_ORIGINS to handle string to list conversion
+    @validator("CORS_ORIGINS", pre=True)
+    def assemble_cors_origins(cls, v: Union[str, List[str]]) -> Union[List[str], str]:
+        if isinstance(v, str) and not v.startswith("["):
+            if v == "*":
+                # Return as-is for the wildcard case
+                return v
+            # Split by comma for multiple origins
+            return [origin.strip() for origin in v.split(",")]
+        elif isinstance(v, (list, str)):
+            return v
+        raise ValueError(v)
 
     # Standard Pydantic v1 validator
     @validator("SQLALCHEMY_DATABASE_URI", pre=True)
