@@ -2,7 +2,6 @@ import os
 import secrets
 from typing import Any, Dict, List, Optional, Union
 
-from pydantic import AnyHttpUrl, BaseSettings, PostgresDsn, validator
 from pydantic import AnyHttpUrl, PostgresDsn, validator
 from pydantic_settings import BaseSettings
 
@@ -23,6 +22,7 @@ class Settings(BaseSettings):
     POSTGRES_USER: str = os.environ.get("POSTGRES_USER", "postgres")
     POSTGRES_PASSWORD: str = os.environ.get("POSTGRES_PASSWORD", "postgres")
     POSTGRES_DB: str = os.environ.get("POSTGRES_DB", "webpush")
+    POSTGRES_PORT: str = os.environ.get("POSTGRES_PORT", "5432")
     SQLALCHEMY_DATABASE_URI: Optional[PostgresDsn] = None
 
     # Redis
@@ -66,8 +66,6 @@ class Settings(BaseSettings):
     class Config:
         case_sensitive = True
         env_file = ".env"
-
-settings = Settings()
 
 settings = Settings()
 
