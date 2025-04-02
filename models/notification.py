@@ -1,15 +1,24 @@
 import uuid
 from datetime import datetime
 from enum import Enum
-from typing import Dict, Optional
+from typing import Dict, Optional, Any
 from pydantic import BaseModel, Field, HttpUrl
 
 class DeliveryStatus(str, Enum):
     PENDING = "pending"
-    SENT = "sent"
+    QUEUED = "queued"
+    SENDING = "sending"
     DELIVERED = "delivered"
     FAILED = "failed"
+    OPENED = "opened"
     CLICKED = "clicked"
+
+class NotificationType(str, Enum):
+    CAMPAIGN = "campaign"
+    TRIGGERED = "triggered"
+    TRANSACTIONAL = "transactional"
+    AUTOMATED = "automated"
+    TEST = "test"
 
 class Notification(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -20,13 +29,15 @@ class Notification(BaseModel):
     body: str
     image_url: Optional[HttpUrl] = None
     action_url: Optional[HttpUrl] = None
-    personalized_data: Dict = Field(default_factory=dict)
+    personalized_data: Dict[str, Any] = Field(default_factory=dict)
     sent_at: Optional[datetime] = None
     delivery_status: DeliveryStatus = DeliveryStatus.PENDING
     delivered_at: Optional[datetime] = None
     opened_at: Optional[datetime] = None
     clicked_at: Optional[datetime] = None
-    device_info: Dict = Field(default_factory=dict)
+    device_info: Dict[str, Any] = Field(default_factory=dict)
+    variant_id: Optional[str] = None
+    notification_type: NotificationType = NotificationType.CAMPAIGN
     
     class Config:
         orm_mode = True

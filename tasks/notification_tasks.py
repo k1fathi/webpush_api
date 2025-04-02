@@ -1,0 +1,213 @@
+import logging
+from datetime import datetime, timedelta
+
+from core.celery_app import celery_app
+from models.notification import DeliveryStatus
+from repositories.notification import NotificationRepository
+from repositories.campaign import CampaignRepository
+from repositories.notification_delivery import NotificationDeliveryRepository
+from services.analytics import AnalyticsService
+from services.notification import NotificationService
+
+logger = logging.getLogger(__name__)
+
+@celery_app.task
+def process_pending_notifications(batch_size: int = 100):
+    """Process notifications that are pending delivery"""
+    logger.info(f"Processing up to {batch_size} pending notifications")
+    
+    notification_repo = NotificationRepository()
+    notification_service = NotificationService()
+    
+    # Get pending notifications
+    pending_notifications = notification_repo.get_pending_notifications(limit=batch_size)
+    
+    if not pending_notifications:
+        logger.info("No pending notifications found")
+        return
+        
+    logger.info(f"Found {len(pending_notifications)} pending notifications")
+    
+    success_count = 0
+    failure_count = 0
+    
+    # Process each notification
+    for notification in pending_notifications:
+        try:
+            result = notification_service.send_notification(notification.id)
+            if result:
+                success_count += 1
+            else:
+                failure_count += 1
+        except Exception as e:
+            logger.error(f"Error processing notification {notification.id}: {str(e)}")
+            failure_count += 1
+    
+    logger.info(f"Processed {success_count + failure_count} notifications: {success_count} succeeded, {failure_count} failed")
+    return {
+        "processed": success_count + failure_count,
+        "success": success_count,
+        "failure": failure_count
+    }
+
+@celery_app.task
+def track_notification_delivery(notification_id: str):
+    """Track delivery of a notification in analytics"""
+    logger.info(f"Tracking delivery of notification {notification_id}")
+    
+    analytics_service = AnalyticsService()
+    
+    try:
+        # Record delivery event in analytics
+        analytics_service.record_delivery(notification_id)
+        
+        # Update test variant metrics if this is part of an A/B test
+        notification_repo = NotificationRepository()
+        notification = notification_repo.get(notification_id)
+        
+        if notification and notification.variant_id:
+            from tasks.ab_test_tasks import track_variant_engagement
+            track_variant_engagement.delay(notification_id, "delivery")
+            
+        return True
+    except Exception as e:
+        logger.error(f"Error tracking notification delivery: {str(e)}")
+        return False
+
+@celery_app.task
+def track_notification_open(notification_id: str):
+    """Track open of a notification in analytics"""
+    logger.info(f"Tracking open of notification {notification_id}")
+    
+    analytics_service = AnalyticsService()
+    
+    try:
+        # Record open event in analytics
+        analytics_service.record_open(notification_id)
+        
+        # Update test variant metrics if this is part of an A/B test
+        notification_repo = NotificationRepository()
+        notification = notification_repo.get(notification_id)
+        
+        if notification and notification.variant_id:
+            from tasks.ab_test_tasks import track_variant_engagement
+            track_variant_engagement.delay(notification_id, "open")
+            
+        return True
+    except Exception as e:
+        logger.error(f"Error tracking notification open: {str(e)}")
+        return False
+
+@celery_app.task
+def track_notification_click(notification_id: str):
+    """Track click of a notification in analytics"""
+    logger.info(f"Tracking click of notification {notification_id}")
+    
+    analytics_service = AnalyticsService()
+    
+    try:
+        # Record click event in analytics
+        analytics_service.record_click(notification_id)
+        
+        # Update test variant metrics if this is part of an A/B test
+        notification_repo = NotificationRepository()
+        notification = notification_repo.get(notification_id)
+        
+        if notification and notification.variant_id:
+            from tasks.ab_test_tasks import track_variant_engagement
+            track_variant_engagement.delay(notification_id, "click")
+            
+        # Schedule monitoring for conversions
+        monitor_for_conversion.delay(notification_id)
+            
+        return True
+    except Exception as e:
+        logger.error(f"Error tracking notification click: {str(e)}")
+        return False
+
+@celery_app.task
+def monitor_for_conversion(notification_id: str, timeout_hours: int = 24):
+    """Monitor for conversions after a notification click"""
+    logger.info(f"Monitoring for conversions from notification {notification_id}")
+    
+    # This would check if a conversion has happened within a specified timeframe
+    # For now, we'll just log that we're monitoring
+    
+    # In a real implementation, you would:
+    # 1. Check your analytics/events system for conversion events attributed to this notification
+    # 2. If found, record the conversion in analytics
+    # 3. If not found and still within timeout period, reschedule this task for later
+    
+    # Placeholder implementation
+    notification_repo = NotificationRepository()
+    notification = notification_repo.get(notification_id)
+    
+    if not notification:
+        logger.error(f"Notification {notification_id} not found")
+        return
+        
+    # Check if clicked and within monitoring window
+    if notification.clicked_at:
+        hours_since_click = (datetime.now() - notification.clicked_at).total_seconds() / 3600
+        
+        if hours_since_click < timeout_hours:
+            # Still within monitoring window, reschedule check
+            logger.info(f"Still monitoring for conversions from notification {notification_id}")
+            # Check again in 1 hour
+            monitor_for_conversion.apply_async(
+                args=[notification_id, timeout_hours],
+                countdown=3600  # 1 hour
+            )
+        else:
+            logger.info(f"Conversion monitoring timeout for notification {notification_id}")
+
+@celery_app.task
+def process_campaign_notifications(campaign_id: str, user_batch: List[str]):
+    """Process notifications for a campaign batch"""
+    logger.info(f"Processing notifications for campaign {campaign_id}, {len(user_batch)} users")
+    
+    notification_service = NotificationService()
+    
+    try:
+        # Create notifications
+        notifications = notification_service.create_notifications_for_campaign(
+            campaign_id, user_batch
+        )
+        
+        # Queue each notification for sending
+        for notification in notifications:
+            send_notification.delay(notification.id)
+            
+        return {
+            "campaign_id": campaign_id,
+            "notifications_created": len(notifications),
+            "user_count": len(user_batch)
+        }
+    except Exception as e:
+        logger.error(f"Error processing campaign notifications: {str(e)}")
+        return {
+            "campaign_id": campaign_id,
+            "error": str(e),
+            "user_count": len(user_batch)
+        }
+
+@celery_app.task
+def send_notification(notification_id: str):
+    """Send a single notification"""
+    logger.info(f"Sending notification {notification_id}")
+    
+    notification_service = NotificationService()
+    
+    try:
+        result = notification_service.send_notification(notification_id)
+        return {
+            "notification_id": notification_id,
+            "success": result
+        }
+    except Exception as e:
+        logger.error(f"Error sending notification {notification_id}: {str(e)}")
+        return {
+            "notification_id": notification_id,
+            "success": False,
+            "error": str(e)
+        }
