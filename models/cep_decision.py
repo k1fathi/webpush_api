@@ -1,5 +1,6 @@
 import enum
 from datetime import datetime
+from enum import Enum
 from typing import Dict, Optional, Any, List
 
 from pydantic import BaseModel, Field, validator
@@ -12,36 +13,55 @@ class DecisionStatus(str, enum.Enum):
     FAILED = "failed"
 
 class ChannelType(str, Enum):
-    WEBPUSH = "webpush"
+    """Channel types for CEP decisions"""
     EMAIL = "email"
     SMS = "sms"
-    WHATSAPP = "whatsapp"
+    WEBPUSH = "webpush"
+    MOBILE_PUSH = "mobile_push"
     IN_APP = "in_app"
+    WHATSAPP = "whatsapp"
+    SOCIAL = "social"
+    OTHER = "other"
+
+class DecisionFactor(BaseModel):
+    """Factor used in channel decision-making"""
+    name: str
+    weight: float
+    score: float
+    description: Optional[str] = None
 
 class CepDecision(BaseModel):
     """
-    Model for storing CEP (Complex Event Processing) decisions
-    These decisions determine the optimal communication channel and timing
+    Model for Customer Engagement Platform channel decisions
+    Tracks which channel was selected for a user and campaign
     """
     id: Optional[str] = None
     user_id: str
-    campaign_id: Optional[str] = None
-    decision_time: datetime = Field(default_factory=datetime.now)
-    selected_channel: str
-    score: float
-    decision_factors: Dict[str, Any] = Field(default_factory=dict)
-    status: DecisionStatus = DecisionStatus.CREATED
-    outcome: Optional[Dict[str, Any]] = None
+    campaign_id: str
+    selected_channel: ChannelType
+    score: float = 0.0
+    factors: Dict[str, Any] = Field(default_factory=dict)
+    alternative_channels: List[Dict[str, Any]] = Field(default_factory=list)
+    created_at: datetime = Field(default_factory=datetime.now)
     
     class Config:
-        orm_mode = True
-        
-    @validator('selected_channel')
-    def channel_must_be_valid(cls, v):
-        valid_channels = ["webpush", "email", "sms", "in_app", "mobile_push"]
-        if v not in valid_channels:
-            raise ValueError(f"Channel must be one of: {', '.join(valid_channels)}")
-        return v
+        schema_extra = {
+            "example": {
+                "user_id": "12345",
+                "campaign_id": "campaign123",
+                "selected_channel": "webpush",
+                "score": 0.85,
+                "factors": {
+                    "channel_preference": 0.9,
+                    "previous_engagement": 0.8,
+                    "time_of_day": 0.7
+                },
+                "alternative_channels": [
+                    {"channel": "email", "score": 0.75},
+                    {"channel": "sms", "score": 0.6}
+                ]
+            }
+        }
 
 class ChannelScore(BaseModel):
     """Score for a communication channel"""
