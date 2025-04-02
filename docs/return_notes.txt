@@ -16,3 +16,1572 @@ Support for A/B testing
 All components work together to create a robust notification delivery system that can scale to handle large volumes of notifications while maintaining reliable tracking of delivery status and user interactions.
 
 Similar code found with 2 license types - View matches
+
+
+
+
+
+I'll create a template management system according to the template_creation_flow.mmd workflow. Let me implement the necessary files:
+
+## Step 1: First, let's implement the template schema file
+
+### [template.py](file:///c%3A/K1/ZUZZUU/webpush/webpush_api/models/schemas/template.py)
+
+```python
+from datetime import datetime
+from enum import Enum
+from typing import Dict, List, Optional, Any
+from pydantic import BaseModel, Field, HttpUrl, validator
+
+class TemplateType(str, Enum):
+    """Template types"""
+    WEBPUSH = "webpush"
+    EMAIL = "email"
+    SMS = "sms"
+    IN_APP = "in_app"
+
+class TemplateStatus(str, Enum):
+    """Template status"""
+    DRAFT = "draft"
+    PENDING_APPROVAL = "pending_approval"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+    ARCHIVED = "archived"
+    ACTIVE = "active"
+
+class TemplateBase(BaseModel):
+    """Base schema for templates"""
+    name: str
+    description: Optional[str] = None
+    template_type: TemplateType = TemplateType.WEBPUSH
+    content: Dict[str, Any] = Field(default_factory=dict)
+    variables: List[str] = Field(default_factory=list)
+    tags: List[str] = Field(default_factory=list)
+
+class TemplateCreate(TemplateBase):
+    """Schema for creating templates"""
+    title: str
+    body: str
+    image_url: Optional[HttpUrl] = None
+    action_url: Optional[HttpUrl] = None
+    icon_url: Optional[HttpUrl] = None
+    category: Optional[str] = None
+
+    @validator('variables')
+    def extract_variables(cls, v, values):
+        """Extract variables from content if not provided"""
+        if not v and 'content' in values:
+            # Extract variables from content (placeholders like {variable})
+            import re
+            content_str = str(values['content'])
+            v = list(set(re.findall(r'\{([a-zA-Z0-9_]+)\}', content_str)))
+        return v
+
+class TemplateUpdate(BaseModel):
+    """Schema for updating templates"""
+    name: Optional[str] = None
+    description: Optional[str] = None
+    title: Optional[str] = None
+    body: Optional[str] = None
+    image_url: Optional[HttpUrl] = None
+    action_url: Optional[HttpUrl] = None
+    icon_url: Optional[HttpUrl] = None
+    content: Optional[Dict[str, Any]] = None
+    variables: Optional[List[str]] = None
+    tags: Optional[List[str]] = None
+    category: Optional[str] = None
+    status: Optional[TemplateStatus] = None
+
+class TemplateRead(TemplateBase):
+    """Schema for reading templates"""
+    id: str
+    title: str
+    body: str
+    image_url: Optional[HttpUrl] = None
+    action_url: Optional[HttpUrl] = None
+    icon_url: Optional[HttpUrl] = None
+    created_at: datetime
+    updated_at: datetime
+    created_by: Optional[str] = None
+    status: TemplateStatus
+    version: int = 1
+    category: Optional[str] = None
+    
+    class Config:
+        orm_mode = True
+
+class TemplateList(BaseModel):
+    """Schema for listing templates with pagination"""
+    items: List[TemplateRead]
+    total: int
+    skip: int
+    limit: int
+
+class TemplatePreview(BaseModel):
+    """Schema for template preview"""
+    title: str
+    body: str
+    image_url: Optional[HttpUrl] = None
+    action_url: Optional[HttpUrl] = None
+    icon_url: Optional[HttpUrl] = None
+    rendered_content: Dict[str, Any] = Field(default_factory=dict)
+    
+class TemplateValidation(BaseModel):
+    """Schema for template validation"""
+    is_valid: bool
+    errors: List[str] = Field(default_factory=list)
+    warnings: List[str] = Field(default_factory=list)
+
+class TemplateVersion(BaseModel):
+    """Schema for template version"""
+    id: str
+    template_id: str
+    version: int
+    content: Dict[str, Any]
+    created_at: datetime
+    created_by: Optional[str] = None
+    
+    class Config:
+        orm_mode = True
+```
+
+## Step 2: Next, let's define the base Template model
+
+### [template.py](file:///c%3A/K1/ZUZZUU/webpush/webpush_api/models/template.py)
+
+```python
+
+
+Made changes.
+
+from datetime import datetime
+from typing import Dict, List, Optional, Any
+from pydantic import BaseModel, Field, HttpUrl
+
+from models.schemas.template import TemplateType, TemplateStatus
+
+class Template(BaseModel):
+    """Template model"""
+    id: Optional[str] = None
+    name: str
+    description: Optional[str] = None
+    title: str
+    body: str
+    image_url: Optional[HttpUrl] = None
+    action_url: Optional[HttpUrl] = None
+    icon_url: Optional[HttpUrl] = None
+    template_type: TemplateType = TemplateType.WEBPUSH
+    content: Dict[str, Any] = Field(default_factory=dict)
+    variables: List[str] = Field(default_factory=list)
+    tags: List[str] = Field(default_factory=list)
+    status: TemplateStatus = TemplateStatus.DRAFT
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+    created_by: Optional[str] = None
+    version: int = 1
+    category: Optional[str] = None
+    
+    class Config:
+        orm_mode = True
+```
+
+## Step 3: Create the database model for templates
+
+### [template.py](file:///c%3A/K1/ZUZZUU/webpush/webpush_api/models/domain/template.py)
+
+```python
+
+
+Made changes.
+
+import uuid
+from datetime import datetime
+from sqlalchemy import Column, String, Integer, DateTime, Text, ForeignKey, JSON, Boolean
+from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.postgresql import UUID, ENUM, ARRAY
+
+from db.base_class import Base
+from models.schemas.template import TemplateType, TemplateStatus
+
+class TemplateModel(Base):
+    """Template model for storing notification templates"""
+    __tablename__ = "templates"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    name = Column(String, nullable=False)
+    description = Column(Text, nullable=True)
+    
+    # Template content
+    title = Column(String, nullable=False)
+    body = Column(Text, nullable=False)
+    image_url = Column(String, nullable=True)
+    action_url = Column(String, nullable=True)
+    icon_url = Column(String, nullable=True)
+    
+    # Template metadata
+    template_type = Column(
+        ENUM(TemplateType, name="template_type_enum", create_type=False),
+        default=TemplateType.WEBPUSH
+    )
+    content = Column(JSON, default=dict)
+    variables = Column(ARRAY(String), default=list)
+    tags = Column(ARRAY(String), default=list)
+    category = Column(String, nullable=True)
+    
+    # Status tracking
+    status = Column(
+        ENUM(TemplateStatus, name="template_status_enum", create_type=False),
+        default=TemplateStatus.DRAFT
+    )
+    version = Column(Integer, default=1)
+    
+    # Timestamps and user tracking
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    
+    # Relationships
+    user = relationship("UserModel")
+    versions = relationship("TemplateVersionModel", back_populates="template")
+    campaigns = relationship("CampaignModel", back_populates="template")
+
+class TemplateVersionModel(Base):
+    """Template version model for storing version history"""
+    __tablename__ = "template_versions"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    template_id = Column(UUID(as_uuid=True), ForeignKey("templates.id"), nullable=False)
+    version = Column(Integer, nullable=False)
+    
+    # Version content
+    title = Column(String, nullable=False)
+    body = Column(Text, nullable=False)
+    image_url = Column(String, nullable=True)
+    action_url = Column(String, nullable=True)
+    icon_url = Column(String, nullable=True)
+    content = Column(JSON, default=dict)
+    
+    # Timestamps and user tracking
+    created_at = Column(DateTime, default=datetime.utcnow)
+    created_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    
+    # Relationships
+    template = relationship("TemplateModel", back_populates="versions")
+    user = relationship("UserModel")
+```
+
+## Step 4: Implement the template repository
+
+### [template.py](file:///c%3A/K1/ZUZZUU/webpush/webpush_api/repositories/template.py)
+
+```python
+
+
+Made changes.
+
+import uuid
+from datetime import datetime
+from typing import Dict, List, Optional, Any
+
+from sqlalchemy import select, func, and_, or_, desc
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from db.session import get_session
+from models.domain.template import TemplateModel, TemplateVersionModel
+from models.template import Template
+from models.schemas.template import TemplateStatus, TemplateType
+from repositories.base import BaseRepository
+
+class TemplateRepository(BaseRepository):
+    """Repository for template operations"""
+    
+    async def create(self, template: Template) -> Template:
+        """Create a new template"""
+        async with get_session() as session:
+            # Create the template model
+            db_template = TemplateModel(
+                id=str(uuid.uuid4()) if not template.id else template.id,
+                name=template.name,
+                description=template.description,
+                title=template.title,
+                body=template.body,
+                image_url=template.image_url,
+                action_url=template.action_url,
+                icon_url=template.icon_url,
+                template_type=template.template_type,
+                content=template.content,
+                variables=template.variables,
+                tags=template.tags,
+                status=template.status,
+                created_at=datetime.now(),
+                updated_at=datetime.now(),
+                created_by=template.created_by,
+                version=1,
+                category=template.category
+            )
+            session.add(db_template)
+            
+            # Also create the first version
+            db_version = TemplateVersionModel(
+                id=str(uuid.uuid4()),
+                template_id=db_template.id,
+                version=1,
+                title=template.title,
+                body=template.body,
+                image_url=template.image_url,
+                action_url=template.action_url,
+                icon_url=template.icon_url,
+                content=template.content,
+                created_at=datetime.now(),
+                created_by=template.created_by
+            )
+            session.add(db_version)
+            
+            await session.commit()
+            await session.refresh(db_template)
+            return Template.from_orm(db_template)
+    
+    async def get(self, template_id: str) -> Optional[Template]:
+        """Get a template by ID"""
+        async with get_session() as session:
+            result = await session.execute(
+                select(TemplateModel).where(TemplateModel.id == template_id)
+            )
+            db_template = result.scalars().first()
+            return Template.from_orm(db_template) if db_template else None
+    
+    async def get_all(
+        self, 
+        skip: int = 0, 
+        limit: int = 100,
+        status: Optional[TemplateStatus] = None,
+        type_filter: Optional[TemplateType] = None,
+        tag: Optional[str] = None,
+        category: Optional[str] = None
+    ) -> List[Template]:
+        """Get all templates with pagination and filtering"""
+        async with get_session() as session:
+            query = select(TemplateModel)
+            
+            # Apply filters
+            if status:
+                query = query.where(TemplateModel.status == status)
+                
+            if type_filter:
+                query = query.where(TemplateModel.template_type == type_filter)
+                
+            if tag:
+                query = query.where(TemplateModel.tags.contains([tag]))
+                
+            if category:
+                query = query.where(TemplateModel.category == category)
+            
+            # Apply pagination and ordering
+            query = query.order_by(desc(TemplateModel.updated_at)).offset(skip).limit(limit)
+            
+            result = await session.execute(query)
+            db_templates = result.scalars().all()
+            return [Template.from_orm(db_template) for db_template in db_templates]
+    
+    async def update(self, template_id: str, template: Template, create_version: bool = True) -> Template:
+        """Update a template"""
+        async with get_session() as session:
+            result = await session.execute(
+                select(TemplateModel).where(TemplateModel.id == template_id)
+            )
+            db_template = result.scalars().first()
+            if not db_template:
+                raise ValueError(f"Template with ID {template_id} not found")
+                
+            # Get current version before updating
+            current_version = db_template.version
+            
+            # Update fields
+            db_template.name = template.name
+            db_template.description = template.description
+            db_template.title = template.title
+            db_template.body = template.body
+            db_template.image_url = template.image_url
+            db_template.action_url = template.action_url
+            db_template.icon_url = template.icon_url
+            db_template.template_type = template.template_type
+            db_template.content = template.content
+            db_template.variables = template.variables
+            db_template.tags = template.tags
+            db_template.status = template.status
+            db_template.updated_at = datetime.now()
+            db_template.category = template.category
+            
+            # Create a new version if needed
+            if create_version:
+                # Increment version number
+                db_template.version = current_version + 1
+                
+                # Create a new version entry
+                db_version = TemplateVersionModel(
+                    id=str(uuid.uuid4()),
+                    template_id=template_id,
+                    version=current_version + 1,
+                    title=template.title,
+                    body=template.body,
+                    image_url=template.image_url,
+                    action_url=template.action_url,
+                    icon_url=template.icon_url,
+                    content=template.content,
+                    created_at=datetime.now(),
+                    created_by=template.created_by
+                )
+                session.add(db_version)
+                
+            await session.commit()
+            await session.refresh(db_template)
+            return Template.from_orm(db_template)
+    
+    async def delete(self, template_id: str) -> bool:
+        """Delete a template"""
+        async with get_session() as session:
+            # Check if template exists
+            result = await session.execute(
+                select(TemplateModel).where(TemplateModel.id == template_id)
+            )
+            db_template = result.scalars().first()
+            if not db_template:
+                return False
+                
+            # Delete versions first
+            await session.execute(
+                select(TemplateVersionModel).where(TemplateVersionModel.template_id == template_id)
+            )
+            versions = await session.execute(
+                select(TemplateVersionModel).where(TemplateVersionModel.template_id == template_id)
+            )
+            for version in versions.scalars().all():
+                await session.delete(version)
+                
+            # Then delete the template
+            await session.delete(db_template)
+            await session.commit()
+            return True
+    
+    async def get_versions(self, template_id: str) -> List[Dict]:
+        """Get all versions of a template"""
+        async with get_session() as session:
+            result = await session.execute(
+                select(TemplateVersionModel)
+                .where(TemplateVersionModel.template_id == template_id)
+                .order_by(desc(TemplateVersionModel.version))
+            )
+            versions = result.scalars().all()
+            return [{
+                "id": str(v.id),
+                "template_id": str(v.template_id),
+                "version": v.version,
+                "title": v.title,
+                "body": v.body,
+                "image_url": v.image_url,
+                "action_url": v.action_url,
+                "icon_url": v.icon_url,
+                "content": v.content,
+                "created_at": v.created_at,
+                "created_by": str(v.created_by) if v.created_by else None
+            } for v in versions]
+    
+    async def get_version(self, template_id: str, version: int) -> Optional[Dict]:
+        """Get a specific version of a template"""
+        async with get_session() as session:
+            result = await session.execute(
+                select(TemplateVersionModel)
+                .where(
+                    and_(
+                        TemplateVersionModel.template_id == template_id,
+                        TemplateVersionModel.version == version
+                    )
+                )
+            )
+            v = result.scalars().first()
+            if not v:
+                return None
+                
+            return {
+                "id": str(v.id),
+                "template_id": str(v.template_id),
+                "version": v.version,
+                "title": v.title,
+                "body": v.body,
+                "image_url": v.image_url,
+                "action_url": v.action_url,
+                "icon_url": v.icon_url,
+                "content": v.content,
+                "created_at": v.created_at,
+                "created_by": str(v.created_by) if v.created_by else None
+            }
+    
+    async def restore_version(self, template_id: str, version: int) -> Optional[Template]:
+        """Restore a template to a specific version"""
+        # Get the specified version
+        version_data = await self.get_version(template_id, version)
+        if not version_data:
+            return None
+            
+        # Get the current template
+        template = await self.get(template_id)
+        if not template:
+            return None
+            
+        # Update template with version data
+        template.title = version_data["title"]
+        template.body = version_data["body"]
+        template.image_url = version_data["image_url"]
+        template.action_url = version_data["action_url"]
+        template.icon_url = version_data["icon_url"]
+        template.content = version_data["content"]
+        
+        # Save the updated template and create a new version
+        updated = await self.update(template_id, template, create_version=True)
+        return updated
+    
+    async def update_status(self, template_id: str, status: TemplateStatus) -> Optional[Template]:
+        """Update template status"""
+        async with get_session() as session:
+            result = await session.execute(
+                select(TemplateModel).where(TemplateModel.id == template_id)
+            )
+            db_template = result.scalars().first()
+            if not db_template:
+                return None
+                
+            db_template.status = status
+            db_template.updated_at = datetime.now()
+            
+            await session.commit()
+            await session.refresh(db_template)
+            return Template.from_orm(db_template)
+    
+    async def count_templates(
+        self, 
+        status: Optional[TemplateStatus] = None,
+        type_filter: Optional[TemplateType] = None
+    ) -> int:
+        """Count templates with optional filters"""
+        async with get_session() as session:
+            query = select(func.count(TemplateModel.id))
+            
+            if status:
+                query = query.where(TemplateModel.status == status)
+                
+            if type_filter:
+                query = query.where(TemplateModel.template_type == type_filter)
+                
+            result = await session.execute(query)
+            return result.scalar() or 0
+    
+    async def search(self, query: str, limit: int = 10) -> List[Template]:
+        """Search templates by name or content"""
+        search_term = f"%{query}%"
+        
+        async with get_session() as session:
+            result = await session.execute(
+                select(TemplateModel)
+                .where(
+                    or_(
+                        TemplateModel.name.ilike(search_term),
+                        TemplateModel.description.ilike(search_term),
+                        TemplateModel.title.ilike(search_term),
+                        TemplateModel.body.ilike(search_term)
+                    )
+                )
+                .limit(limit)
+            )
+            db_templates = result.scalars().all()
+            return [Template.from_orm(t) for t in db_templates]
+```
+
+## Step 5: Create the template service to implement the template creation flow
+
+### [template.py](file:///c%3A/K1/ZUZZUU/webpush/webpush_api/services/template.py)
+
+```python
+
+
+Made changes.
+
+import logging
+import uuid
+import re
+from datetime import datetime
+from typing import Dict, List, Optional, Any, Union
+
+from core.config import settings
+from models.template import Template
+from models.schemas.template import TemplateStatus, TemplateType, TemplateValidation
+from repositories.template import TemplateRepository
+from repositories.campaign import CampaignRepository
+from utils.audit import audit_log
+
+logger = logging.getLogger(__name__)
+
+class TemplateService:
+    """Service for template management according to template_creation_flow.mmd"""
+    
+    def __init__(self):
+        self.template_repo = TemplateRepository()
+        self.campaign_repo = CampaignRepository()
+    
+    async def create_template(self, template_data: Dict, user_id: str = None) -> Template:
+        """
+        Create a new template
+        
+        Args:
+            template_data: Template data
+            user_id: ID of the user creating the template
+            
+        Returns:
+            Template: The created template
+        """
+        # Extract variables from content if not provided
+        if "variables" not in template_data or not template_data["variables"]:
+            variables = self._extract_variables_from_content(template_data)
+            template_data["variables"] = variables
+        
+        # Create the template
+        template = Template(
+            id=str(uuid.uuid4()),
+            created_by=user_id,
+            status=TemplateStatus.DRAFT,
+            created_at=datetime.now(),
+            updated_at=datetime.now(),
+            **template_data
+        )
+        
+        # Save to repository
+        created_template = await self.template_repo.create(template)
+        
+        # Log the creation
+        audit_log(
+            message=f"Created template {created_template.name}",
+            user_id=user_id,
+            action_type="create_template",
+            resource_type="template",
+            resource_id=created_template.id
+        )
+        
+        return created_template
+    
+    def _extract_variables_from_content(self, template_data: Dict) -> List[str]:
+        """Extract variables from template content"""
+        variables = set()
+        
+        # Check title
+        if "title" in template_data:
+            title_vars = re.findall(r'\{([a-zA-Z0-9_]+)\}', template_data["title"])
+            variables.update(title_vars)
+            
+        # Check body
+        if "body" in template_data:
+            body_vars = re.findall(r'\{([a-zA-Z0-9_]+)\}', template_data["body"])
+            variables.update(body_vars)
+            
+        # Check content dictionary if present
+        if "content" in template_data and isinstance(template_data["content"], dict):
+            content_str = str(template_data["content"])
+            content_vars = re.findall(r'\{([a-zA-Z0-9_]+)\}', content_str)
+            variables.update(content_vars)
+            
+        return list(variables)
+    
+    async def get_template(self, template_id: str) -> Optional[Template]:
+        """
+        Get a template by ID
+        
+        Args:
+            template_id: The template ID
+            
+        Returns:
+            Optional[Template]: The template if found
+        """
+        return await self.template_repo.get(template_id)
+    
+    async def update_template(
+        self, 
+        template_id: str, 
+        template_data: Dict, 
+        user_id: str = None,
+        create_version: bool = True
+    ) -> Template:
+        """
+        Update a template
+        
+        Args:
+            template_id: The template ID
+            template_data: Updated template data
+            user_id: ID of the user updating the template
+            create_version: Whether to create a new version
+            
+        Returns:
+            Template: The updated template
+        """
+        # Get the existing template
+        template = await self.template_repo.get(template_id)
+        if not template:
+            raise ValueError(f"Template with ID {template_id} not found")
+            
+        # Check if template can be updated
+        if template.status not in [TemplateStatus.DRAFT, TemplateStatus.REJECTED, TemplateStatus.ACTIVE]:
+            raise ValueError(f"Template in {template.status} status cannot be updated")
+            
+        # Update template fields
+        for key, value in template_data.items():
+            if hasattr(template, key):
+                setattr(template, key, value)
+                
+        # Re-extract variables if content has changed
+        if "title" in template_data or "body" in template_data or "content" in template_data:
+            extracted_vars = self._extract_variables_from_content({
+                "title": template.title,
+                "body": template.body,
+                "content": template.content
+            })
+            if "variables" not in template_data:
+                template.variables = extracted_vars
+                
+        # Reset status to DRAFT if content was changed
+        content_fields = ["title", "body", "image_url", "action_url", "icon_url", "content"]
+        if any(field in template_data for field in content_fields):
+            if template.status == TemplateStatus.ACTIVE:
+                # Active templates remain active until explicitly changed
+                pass
+            else:
+                template.status = TemplateStatus.DRAFT
+        
+        # Update timestamp and user
+        template.updated_at = datetime.now()
+        if user_id:
+            template.created_by = user_id  # This is used for the version
+            
+        # Save to repository
+        updated_template = await self.template_repo.update(
+            template_id, 
+            template,
+            create_version=create_version
+        )
+        
+        # Log the update
+        audit_log(
+            message=f"Updated template {updated_template.name}",
+            user_id=user_id,
+            action_type="update_template",
+            resource_type="template",
+            resource_id=template_id
+        )
+        
+        return updated_template
+    
+    async def delete_template(self, template_id: str, user_id: str = None) -> bool:
+        """
+        Delete a template
+        
+        Args:
+            template_id: The template ID
+            user_id: ID of the user deleting the template
+            
+        Returns:
+            bool: True if deleted, False otherwise
+        """
+        # Check if template is used by any campaigns
+        campaigns = await self.campaign_repo.get_by_template(template_id)
+        if campaigns:
+            raise ValueError(f"Cannot delete template: it is used by {len(campaigns)} campaigns")
+            
+        # Delete the template
+        result = await self.template_repo.delete(template_id)
+        
+        # Log the deletion
+        if result:
+            audit_log(
+                message=f"Deleted template {template_id}",
+                user_id=user_id,
+                action_type="delete_template",
+                resource_type="template",
+                resource_id=template_id
+            )
+            
+        return result
+    
+    async def get_all_templates(
+        self, 
+        skip: int = 0, 
+        limit: int = 100, 
+        status: Optional[TemplateStatus] = None,
+        template_type: Optional[TemplateType] = None,
+        tag: Optional[str] = None,
+        category: Optional[str] = None
+    ) -> tuple[List[Template], int]:
+        """
+        Get all templates with pagination and filtering
+        
+        Args:
+            skip: Number of items to skip
+            limit: Maximum number of items to return
+            status: Filter by status
+            template_type: Filter by template type
+            tag: Filter by tag
+            category: Filter by category
+            
+        Returns:
+            Tuple[List[Template], int]: List of templates and total count
+        """
+        templates = await self.template_repo.get_all(
+            skip=skip, 
+            limit=limit, 
+            status=status, 
+            type_filter=template_type,
+            tag=tag,
+            category=category
+        )
+        total = await self.template_repo.count_templates(status, template_type)
+        return templates, total
+    
+    async def validate_template(self, template_data: Dict) -> TemplateValidation:
+        """
+        Validate a template
+        
+        Args:
+            template_data: Template data to validate
+            
+        Returns:
+            TemplateValidation: Validation result
+        """
+        errors = []
+        warnings = []
+        
+        # Required fields
+        if not template_data.get("name"):
+            errors.append("Template name is required")
+            
+        if not template_data.get("title"):
+            errors.append("Template title is required")
+            
+        if not template_data.get("body"):
+            errors.append("Template body is required")
+            
+        # Length constraints
+        if "title" in template_data and len(template_data["title"]) > 50:
+            warnings.append("Title exceeds recommended length of 50 characters")
+            
+        if "body" in template_data and len(template_data["body"]) > 500:
+            warnings.append("Body exceeds recommended length of 500 characters")
+            
+        # Check for invalid variables
+        variables = self._extract_variables_from_content(template_data)
+        for var in variables:
+            if not re.match(r'^[a-zA-Z0-9_]+$', var):
+                errors.append(f"Invalid variable name: {var}")
+                
+        # Check URL validity (already handled by Pydantic for image_url and action_url)
+        
+        return TemplateValidation(
+            is_valid=len(errors) == 0,
+            errors=errors,
+            warnings=warnings
+        )
+    
+    async def render_template(self, template_id: str, data: Dict[str, Any] = None) -> Dict:
+        """
+        Render a template with provided data
+        
+        Args:
+            template_id: The template ID
+            data: Dictionary with variables for rendering
+            
+        Returns:
+            Dict: Rendered template
+        """
+        template = await self.template_repo.get(template_id)
+        if not template:
+            raise ValueError(f"Template with ID {template_id} not found")
+            
+        data = data or {}
+        
+        # Render title and body
+        title = template.title
+        body = template.body
+        
+        for var_name, var_value in data.items():
+            placeholder = "{" + var_name + "}"
+            title = title.replace(placeholder, str(var_value))
+            body = body.replace(placeholder, str(var_value))
+            
+        # Result dictionary
+        result = {
+            "title": title,
+            "body": body,
+            "image_url": template.image_url,
+            "action_url": template.action_url,
+            "icon_url": template.icon_url,
+            "rendered_content": template.content.copy() if template.content else {}
+        }
+        
+        return result
+    
+    async def submit_for_approval(self, template_id: str, user_id: str = None) -> Template:
+        """
+        Submit a template for approval
+        
+        Args:
+            template_id: The template ID
+            user_id: ID of the user submitting the template
+            
+        Returns:
+            Template: The updated template
+        """
+        template = await self.template_repo.get(template_id)
+        if not template:
+            raise ValueError(f"Template with ID {template_id} not found")
+            
+        if template.status != TemplateStatus.DRAFT:
+            raise ValueError(f"Only draft templates can be submitted for approval")
+            
+        # Validate the template before submission
+        validation = await self.validate_template({
+            "name": template.name,
+            "title": template.title,
+            "body": template.body,
+            "content": template.content
+        })
+        
+        if not validation.is_valid:
+            raise ValueError(f"Template validation failed: {validation.errors}")
+            
+        # Update status
+        template = await self.template_repo.update_status(template_id, TemplateStatus.PENDING_APPROVAL)
+        
+        # Log the submission
+        audit_log(
+            message=f"Submitted template {template.name} for approval",
+            user_id=user_id,
+            action_type="submit_template",
+            resource_type="template",
+            resource_id=template_id
+        )
+        
+        return template
+    
+    async def approve_template(self, template_id: str, user_id: str = None) -> Template:
+        """
+        Approve a template
+        
+        Args:
+            template_id: The template ID
+            user_id: ID of the user approving the template
+            
+        Returns:
+            Template: The updated template
+        """
+        template = await self.template_repo.get(template_id)
+        if not template:
+            raise ValueError(f"Template with ID {template_id} not found")
+            
+        if template.status != TemplateStatus.PENDING_APPROVAL:
+            raise ValueError(f"Only pending templates can be approved")
+            
+        # Update status
+        template = await self.template_repo.update_status(template_id, TemplateStatus.ACTIVE)
+        
+        # Log the approval
+        audit_log(
+            message=f"Approved template {template.name}",
+            user_id=user_id,
+            action_type="approve_template",
+            resource_type="template",
+            resource_id=template_id
+        )
+        
+        return template
+    
+    async def reject_template(
+        self, 
+        template_id: str, 
+        reason: str = None,
+        user_id: str = None
+    ) -> Template:
+        """
+        Reject a template
+        
+        Args:
+            template_id: The template ID
+            reason: Reason for rejection
+            user_id: ID of the user rejecting the template
+            
+        Returns:
+            Template: The updated template
+        """
+        template = await self.template_repo.get(template_id)
+        if not template:
+            raise ValueError(f"Template with ID {template_id} not found")
+            
+        if template.status != TemplateStatus.PENDING_APPROVAL:
+            raise ValueError(f"Only pending templates can be rejected")
+            
+        # Update status
+        template = await self.template_repo.update_status(template_id, TemplateStatus.REJECTED)
+        
+        # Add rejection reason to content metadata
+        if reason:
+            content = template.content or {}
+            content["rejection_reason"] = reason
+            content["rejected_at"] = datetime.now().isoformat()
+            content["rejected_by"] = user_id
+            
+            # Update the template content
+            template.content = content
+            template = await self.template_repo.update(template_id, template, create_version=False)
+        
+        # Log the rejection
+        audit_log(
+            message=f"Rejected template {template.name}" + (f": {reason}" if reason else ""),
+            user_id=user_id,
+            action_type="reject_template",
+            resource_type="template",
+            resource_id=template_id,
+            metadata={"reason": reason} if reason else None
+        )
+        
+        return template
+    
+    async def archive_template(self, template_id: str, user_id: str = None) -> Template:
+        """
+        Archive a template
+        
+        Args:
+            template_id: The template ID
+            user_id: ID of the user archiving the template
+            
+        Returns:
+            Template: The updated template
+        """
+        template = await self.template_repo.get(template_id)
+        if not template:
+            raise ValueError(f"Template with ID {template_id} not found")
+            
+        # Update status
+        template = await self.template_repo.update_status(template_id, TemplateStatus.ARCHIVED)
+        
+        # Log the archive
+        audit_log(
+            message=f"Archived template {template.name}",
+            user_id=user_id,
+            action_type="archive_template",
+            resource_type="template",
+            resource_id=template_id
+        )
+        
+        return template
+    
+    async def get_template_versions(self, template_id: str) -> List[Dict]:
+        """
+        Get all versions of a template
+        
+        Args:
+            template_id: The template ID
+            
+        Returns:
+            List[Dict]: List of template versions
+        """
+        return await self.template_repo.get_versions(template_id)
+    
+    async def restore_template_version(
+        self, 
+        template_id: str, 
+        version: int,
+        user_id: str = None
+    ) -> Template:
+        """
+        Restore a template to a specific version
+        
+        Args:
+            template_id: The template ID
+            version: The version to restore
+            user_id: ID of the user restoring the version
+            
+        Returns:
+            Template: The updated template
+        """
+        result = await self.template_repo.restore_version(template_id, version)
+        if not result:
+            raise ValueError(f"Version {version} of template {template_id} not found")
+            
+        # Log the version restore
+        audit_log(
+            message=f"Restored template {result.name} to version {version}",
+            user_id=user_id,
+            action_type="restore_template_version",
+            resource_type="template",
+            resource_id=template_id,
+            metadata={"version": version}
+        )
+        
+        return result
+    
+    async def search_templates(self, query: str, limit: int = 10) -> List[Template]:
+        """
+        Search for templates
+        
+        Args:
+            query: Search query
+            limit: Maximum number of results
+            
+        Returns:
+            List[Template]: Matching templates
+        """
+        return await self.template_repo.search(query, limit)
+```
+
+## Step 6: Create the template API endpoints
+
+### [templates.py](file:///c%3A/K1/ZUZZUU/webpush/webpush_api/api/v1/endpoints/templates.py)
+
+```python
+
+
+Made changes.
+
+import logging
+from typing import Dict, List, Optional, Any
+
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
+from fastapi.responses import JSONResponse
+
+from api.deps import get_current_active_user
+from core.exceptions.http import NotFoundException
+from core.permissions.dependencies import has_permission
+from models.domain.user import UserModel
+from models.schemas.template import (
+    TemplateCreate,
+    TemplateRead,
+    TemplateUpdate,
+    TemplateList,
+    TemplatePreview,
+    TemplateValidation,
+    TemplateVersion,
+    TemplateStatus,
+    TemplateType
+)
+from services.template import TemplateService
+from utils.audit import audit_log
+
+router = APIRouter()
+logger = logging.getLogger(__name__)
+
+@router.post(
+    "/",
+    response_model=TemplateRead,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(has_permission("create_template"))]
+)
+async def create_template(
+    template: TemplateCreate,
+    current_user: UserModel = Depends(get_current_active_user),
+    template_service: TemplateService = Depends(),
+):
+    """Create a new template"""
+    try:
+        created = await template_service.create_template(
+            template.dict(),
+            user_id=str(current_user.id)
+        )
+        return created
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except Exception as e:
+        logger.error(f"Error creating template: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error creating template: {str(e)}"
+        )
+
+@router.get(
+    "/",
+    response_model=TemplateList,
+    dependencies=[Depends(has_permission("list_templates"))]
+)
+async def list_templates(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=500),
+    status: Optional[TemplateStatus] = None,
+    type: Optional[TemplateType] = None,
+    tag: Optional[str] = None,
+    category: Optional[str] = None,
+    template_service: TemplateService = Depends(),
+):
+    """List all templates with pagination and filtering"""
+    try:
+        templates, total = await template_service.get_all_templates(
+            skip=skip,
+            limit=limit,
+            status=status,
+            template_type=type,
+            tag=tag,
+            category=category
+        )
+        return {
+            "items": templates,
+            "total": total,
+            "skip": skip,
+            "limit": limit
+        }
+    except Exception as e:
+        logger.error(f"Error listing templates: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error listing templates: {str(e)}"
+        )
+
+@router.get(
+    "/{template_id}",
+    response_model=TemplateRead,
+    dependencies=[Depends(has_permission("read_template"))]
+)
+async def get_template(
+    template_id: str = Path(...),
+    template_service: TemplateService = Depends(),
+):
+    """Get a template by ID"""
+    template = await template_service.get_template(template_id)
+    if not template:
+        raise NotFoundException("Template not found")
+    return template
+
+@router.put(
+    "/{template_id}",
+    response_model=TemplateRead,
+    dependencies=[Depends(has_permission("update_template"))]
+)
+async def update_template(
+    template_id: str,
+    template: TemplateUpdate,
+    current_user: UserModel = Depends(get_current_active_user),
+    template_service: TemplateService = Depends(),
+):
+    """Update a template"""
+    try:
+        updated = await template_service.update_template(
+            template_id=template_id,
+            template_data=template.dict(exclude_unset=True),
+            user_id=str(current_user.id)
+        )
+        return updated
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except NotFoundException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating template: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error updating template: {str(e)}"
+        )
+
+@router.delete(
+    "/{template_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(has_permission("delete_template"))]
+)
+async def delete_template(
+    template_id: str = Path(...),
+    current_user: UserModel = Depends(get_current_active_user),
+    template_service: TemplateService = Depends(),
+):
+    """Delete a template"""
+    try:
+        result = await template_service.delete_template(
+            template_id=template_id,
+            user_id=str(current_user.id)
+        )
+        if not result:
+            raise NotFoundException("Template not found")
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except NotFoundException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting template: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error deleting template: {str(e)}"
+        )
+
+@router.post(
+    "/validate",
+    response_model=TemplateValidation,
+    dependencies=[Depends(has_permission("create_template"))]
+)
+async def validate_template(
+    template_data: Dict[str, Any],
+    template_service: TemplateService = Depends(),
+):
+    """Validate a template"""
+    try:
+        validation = await template_service.validate_template(template_data)
+        return validation
+    except Exception as e:
+        logger.error(f"Error validating template: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error validating template: {str(e)}"
+        )
+
+@router.post(
+    "/{template_id}/render",
+    response_model=TemplatePreview,
+    dependencies=[Depends(has_permission("read_template"))]
+)
+async def render_template(
+    template_id: str = Path(...),
+    data: Dict[str, Any] = None,
+    template_service: TemplateService = Depends(),
+):
+    """Render a template with provided data"""
+    try:
+        rendered = await template_service.render_template(
+            template_id=template_id,
+            data=data or {}
+        )
+        return rendered
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except Exception as e:
+        logger.error(f"Error rendering template: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error rendering template: {str(e)}"
+        )
+
+@router.post(
+    "/{template_id}/submit",
+    response_model=TemplateRead,
+    dependencies=[Depends(has_permission("submit_template"))]
+)
+async def submit_template_for_approval(
+    template_id: str = Path(...),
+    current_user: UserModel = Depends(get_current_active_user),
+    template_service: TemplateService = Depends(),
+):
+    """Submit a template for approval"""
+    try:
+        updated = await template_service.submit_for_approval(
+            template_id=template_id,
+            user_id=str(current_user.id)
+        )
+        return updated
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except NotFoundException:
+        raise
+    except Exception as e:
+        logger.error(f"Error submitting template: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error submitting template: {str(e)}"
+        )
+
+@router.post(
+    "/{template_id}/approve",
+    response_model=TemplateRead,
+    dependencies=[Depends(has_permission("approve_template"))]
+)
+async def approve_template(
+    template_id: str = Path(...),
+    current_user: UserModel = Depends(get_current_active_user),
+    template_service: TemplateService = Depends(),
+):
+    """Approve a template"""
+    try:
+        updated = await template_service.approve_template(
+            template_id=template_id,
+            user_id=str(current_user.id)
+        )
+        return updated
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except NotFoundException:
+        raise
+    except Exception as e:
+        logger.error(f"Error approving template: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error approving template: {str(e)}"
+        )
+
+@router.post(
+    "/{template_id}/reject",
+    response_model=TemplateRead,
+    dependencies=[Depends(has_permission("approve_template"))]
+)
+async def reject_template(
+    template_id: str = Path(...),
+    reason: Optional[str] = None,
+    current_user: UserModel = Depends(get_current_active_user),
+    template_service: TemplateService = Depends(),
+):
+    """Reject a template"""
+    try:
+        updated = await template_service.reject_template(
+            template_id=template_id,
+            reason=reason,
+            user_id=str(current_user.id)
+        )
+        return updated
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except NotFoundException:
+        raise
+    except Exception as e:
+        logger.error(f"Error rejecting template: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error rejecting template: {str(e)}"
+        )
+
+@router.post(
+    "/{template_id}/archive",
+    response_model=TemplateRead,
+    dependencies=[Depends(has_permission("archive_template"))]
+)
+async def archive_template(
+    template_id: str = Path(...),
+    current_user: UserModel = Depends(get_current_active_user),
+    template_service: TemplateService = Depends(),
+):
+    """Archive a template"""
+    try:
+        updated = await template_service.archive_template(
+            template_id=template_id,
+            user_id=str(current_user.id)
+        )
+        return updated
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except NotFoundException:
+        raise
+    except Exception as e:
+        logger.error(f"Error archiving template: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error archiving template: {str(e)}"
+        )
+
+@router.get(
+    "/{template_id}/versions",
+    response_model=List[TemplateVersion],
+    dependencies=[Depends(has_permission("read_template"))]
+)
+async def get_template_versions(
+    template_id: str = Path(...),
+    template_service: TemplateService = Depends(),
+):
+    """Get all versions of a template"""
+    try:
+        versions = await template_service.get_template_versions(template_id)
+        return versions
+    except Exception as e:
+        logger.error(f"Error getting template versions: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error getting template versions: {str(e)}"
+        )
+
+@router.post(
+    "/{template_id}/restore/{version}",
+    response_model=TemplateRead,
+    dependencies=[Depends(has_permission("update_template"))]
+)
+async def restore_template_version(
+    template_id: str = Path(...),
+    version: int = Path(..., gt=0),
+    current_user: UserModel = Depends(get_current_active_user),
+    template_service: TemplateService = Depends(),
+):
+    """Restore a template to a specific version"""
+    try:
+        updated = await template_service.restore_template_version(
+            template_id=template_id,
+            version=version,
+            user_id=str(current_user.id)
+        )
+        return updated
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except Exception as e:
+        logger.error(f"Error restoring template version: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error restoring template version: {str(e)}"
+        )
+
+@router.get(
+    "/search",
+    response_model=List[TemplateRead],
+    dependencies=[Depends(has_permission("list_templates"))]
+)
+async def search_templates(
+    query: str = Query(..., min_length=1),
+    limit: int = Query(10, ge=1, le=50),
+    template_service: TemplateService = Depends(),
+):
+    """Search templates by name or content"""
+    try:
+        templates = await template_service.search_templates(query, limit)
+        return templates
+    except Exception as e:
+        logger.error(f"Error searching templates: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error searching templates: {str(e)}"
+        )
+```
+
+## Step 7: Update api_router to include template endpoints (if not already included)
+
+The API router seems to already include templates, so no changes are needed.
+
+The implementation above follows the template creation flow as described in template_creation_flow.mmd. It includes:
+
+1. A comprehensive template model with versioning capability
+2. Complete repository layer with version management
+3. Service layer implementing the template management flow:
+   - Creation and validation
+   - Approval workflow (draft, submit, approve/reject)
+   - Version management and restore capability
+   - Template rendering with variables
+4. REST API endpoints for all operations
+
+This implementation creates a full template management system with approval workflow, versioning, and template rendering capabilities.
+
+Made changes.
