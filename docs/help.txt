@@ -142,3 +142,12 @@ ENVIRONMENT=development\
 
 
 
+
+
+# Run migrations
+./scripts/run_migrations.sh development upgrade
+
+# Or using Make
+make migrate ENV=development
+
+
