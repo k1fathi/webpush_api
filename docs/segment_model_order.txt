@@ -1,0 +1,8 @@
+1. models/segment.py (Database Models - ORM)
+2. models/domain/segment.py (Domain Models - Business Logic)
+3. models/schema/segment.py (API Schemas - Pydantic)
+4. repositories/segment.py (Repository Layer - Database Operations)
+5. services/segment.py (Service Layer - Business Logic)
+6. api/endpoints/segment.py (API Endpoints - FastAPI)
+7. tests/test_segment.py (Unit Tests - Pytest)
+8. migrations/versions/ (Database Migrations - Alembic)

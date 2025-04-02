@@ -1,0 +1,8 @@
+1. models/cep.py (Database Models - ORM)
+2. models/domain/cep.py (Domain Models - Business Logic)
+3. models/schema/cep.py (API Schemas - Pydantic)
+4. repositories/cep.py (Repository Layer - Database Operations)
+5. services/cep.py (Service Layer - Business Logic)
+6. api/endpoints/cep.py (API Endpoints - FastAPI)
+7. tests/test_cep.py (Unit Tests - Pytest)
+8. migrations/versions/ (Database Migrations - Alembic)

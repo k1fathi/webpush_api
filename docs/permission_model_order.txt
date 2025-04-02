@@ -1,0 +1,8 @@
+1. models/permission.py (Database Models - ORM)
+2. models/domain/permission.py (Domain Models - Business Logic)
+3. models/schema/permission.py (API Schemas - Pydantic)
+4. repositories/permission.py (Repository Layer - Database Operations)
+5. services/permission.py (Service Layer - Business Logic)
+6. api/endpoints/permission.py (API Endpoints - FastAPI)
+7. tests/test_permission.py (Unit Tests - Pytest)
+8. migrations/versions/ (Database Migrations - Alembic)

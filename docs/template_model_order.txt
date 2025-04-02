@@ -1,0 +1,8 @@
+1. models/template.py (Database Models - ORM)
+2. models/domain/template.py (Domain Models - Business Logic)
+3. models/schema/template.py (API Schemas - Pydantic)
+4. repositories/template.py (Repository Layer - Database Operations)
+5. services/template.py (Service Layer - Business Logic)
+6. api/endpoints/template.py (API Endpoints - FastAPI)
+7. tests/test_template.py (Unit Tests - Pytest)
+8. migrations/versions/ (Database Migrations - Alembic)

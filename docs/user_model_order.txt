@@ -1,0 +1,8 @@
+1. models/user.py (Database Models - ORM)
+2. models/domain/user.py (Domain Models - Business Logic)
+3. models/schema/user.py (API Schemas - Pydantic)
+4. repositories/user.py (Repository Layer - Database Operations)
+5. services/user.py (Service Layer - Business Logic)
+6. api/endpoints/user.py (API Endpoints - FastAPI)
+7. tests/test_user.py (Unit Tests - Pytest)
+8. migrations/versions/ (Database Migrations - Alembic)

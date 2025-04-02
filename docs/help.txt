@@ -102,3 +102,43 @@ LOG_LEVEL=INFO
 ENVIRONMENT=development\
 
 
+
+
+
+1. models/user.py (Database Models - ORM)
+2. models/domain/user.py (Domain Models - Business Logic)
+3. models/schema/user.py (API Schemas - Pydantic)
+4. repositories/user.py (Repository Layer - Database Operations)
+5. services/user.py (Service Layer - Business Logic)
+6. api/endpoints/user.py (API Endpoints - FastAPI)
+7. tests/test_user.py (Unit Tests - Pytest)
+8. migrations/versions/ (Database Migrations - Alembic)
+9. docs/help.txt (Documentation - Help Text)
+10. .env (Environment Variables - Configuration)
+11. docker-compose.yml (Docker Compose - Container Orchestration)
+12. Dockerfile (Docker - Containerization)
+13. requirements.txt (Python Dependencies - Pip)
+14. pyproject.toml (Project Configuration - Poetry)
+15. .gitignore (Git - Version Control)  
+16. README.md (Project Documentation - Markdown)
+17. .github/workflows/ci.yml (CI/CD - GitHub Actions)
+18. .pre-commit-config.yaml (Pre-commit Hooks - Linting)
+19. .flake8 (Linting Configuration - Flake8)
+20. .isort.cfg (Import Sorting Configuration - Isort)
+21. .black (Code Formatting Configuration - Black)
+22. .mypy.ini (Type Checking Configuration - Mypy)
+23. .coveragerc (Code Coverage Configuration - Coverage)
+24. .bandit (Security Linting Configuration - Bandit)
+25. .pylintrc (Linting Configuration - Pylint)
+26. .editorconfig (Editor Configuration - EditorConfig)
+27. .env.example (Environment Variables - Example)
+28. .dockerignore (Docker - Ignore File)
+29. .vscode/ (VSCode Configuration - Settings)
+30. .idea/ (PyCharm Configuration - Settings)
+31. .vscode/launch.json (VSCode Configuration - Debugging)
+32. .vscode/tasks.json (VSCode Configuration - Tasks)
+
+
+
+
+

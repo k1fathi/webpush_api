@@ -1,0 +1,52 @@
+flowchart TD
+    start([Start]) --> user[User]
+    user --> role[Role]
+    user --> permission[Permission]
+    user --> segment[Segment]
+    user --> webpush[WebPush]
+    user --> template[Template]
+    user --> campaign[Campaign]
+    user --> trigger[Trigger]
+    user --> analytics[Analytics]
+    user --> webhook[Webhook]
+    user --> cdp[CDP]
+    user --> cep[CEP]
+
+    role --> permission
+    role --> user
+
+    permission --> role
+    permission --> user
+
+    segment --> user
+    segment --> campaign
+
+    webpush --> user
+    webpush --> campaign
+
+    template --> user
+    template --> campaign
+
+    campaign --> user
+    campaign --> segment
+    campaign --> webpush
+    campaign --> template
+    campaign --> trigger
+    campaign --> analytics
+
+    trigger --> user
+    trigger --> campaign
+
+    analytics --> user
+    analytics --> campaign
+
+    webhook --> user
+    webhook --> campaign
+
+    cdp --> user
+    cdp --> campaign
+
+    cep --> user
+    cep --> campaign
+
+    end([End])

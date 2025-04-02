@@ -1,0 +1,8 @@
+1. models/cdp.py (Database Models - ORM)
+2. models/domain/cdp.py (Domain Models - Business Logic)
+3. models/schema/cdp.py (API Schemas - Pydantic)
+4. repositories/cdp.py (Repository Layer - Database Operations)
+5. services/cdp.py (Service Layer - Business Logic)
+6. api/endpoints/cdp.py (API Endpoints - FastAPI)
+7. tests/test_cdp.py (Unit Tests - Pytest)
+8. migrations/versions/ (Database Migrations - Alembic)

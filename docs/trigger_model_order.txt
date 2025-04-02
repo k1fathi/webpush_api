@@ -1,0 +1,8 @@
+1. models/trigger.py (Database Models - ORM)
+2. models/domain/trigger.py (Domain Models - Business Logic)
+3. models/schema/trigger.py (API Schemas - Pydantic)
+4. repositories/trigger.py (Repository Layer - Database Operations)
+5. services/trigger.py (Service Layer - Business Logic)
+6. api/endpoints/trigger.py (API Endpoints - FastAPI)
+7. tests/test_trigger.py (Unit Tests - Pytest)
+8. migrations/versions/ (Database Migrations - Alembic)
