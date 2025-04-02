@@ -1,18 +1,35 @@
 import uuid
 import json
 from datetime import datetime
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Union
+import logging
 
 from sqlalchemy import select, func, and_, or_, desc
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
 
-from db.session import get_session
+# Import with error handling
+try:
+    from db.session import get_session
+except ImportError:
+    logging.warning("DB session import failed, using mock session")
+    # Mock session generator
+    def get_session():
+        yield None
+
 from models.domain.segment import SegmentModel
 from models.segment import Segment, SegmentType
 from repositories.base import BaseRepository
 
 class SegmentRepository(BaseRepository):
     """Repository for segment operations"""
+    
+    def __init__(self, db: Optional[Session] = None):
+        """
+        Initialize the repository with an optional database session.
+        If not provided, get_session() will be used.
+        """
+        self.db = db
     
     async def create(self, segment: Segment) -> Segment:
         """Create a new segment"""
@@ -159,3 +176,36 @@ class SegmentRepository(BaseRepository):
         async with get_session() as session:
             result = await session.execute(select(func.count(SegmentModel.id)))
             return result.scalar() or 0
+
+    def get_segment_by_id(self, segment_id: int) -> Dict[str, Any]:
+        """
+        Get segment details by ID
+        
+        Args:
+            segment_id: ID of the segment
+            
+        Returns:
+            Dict containing segment information
+        """
+        # Mock implementation for now
+        return {
+            "id": segment_id,
+            "name": f"Segment {segment_id}",
+            "description": f"Description for segment {segment_id}",
+            "criteria": {"attribute": "value"}
+        }
+    
+    def evaluate_segment_criteria(self, segment_id: int, user_data: Dict[str, Any]) -> bool:
+        """
+        Evaluate if a user matches segment criteria
+        
+        Args:
+            segment_id: ID of the segment
+            user_data: Dictionary with user attributes
+            
+        Returns:
+            Boolean indicating if user matches criteria
+        """
+        # Mock implementation - would normally evaluate criteria from the database
+        # against user_data
+        return True

@@ -1,7 +1,24 @@
+from typing import Dict, Any, Optional, List
 import logging
+
+# Set up logger
+logger = logging.getLogger(__name__)
+
+# Import safely
+try:
+    from core.celery_app import celery_app
+except ImportError:
+    logger.warning("Could not import celery_app from core.celery_app")
+    # Create a no-op decorator for development/testing
+    def shared_task(*args, **kwargs):
+        def decorator(func):
+            return func
+        return decorator
+else:
+    shared_task = celery_app.task
+
 from datetime import datetime, timedelta
 
-from core.celery_app import celery_app
 from models.notification import DeliveryStatus
 from repositories.notification import NotificationRepository
 from repositories.campaign import CampaignRepository
@@ -9,7 +26,34 @@ from repositories.notification_delivery import NotificationDeliveryRepository
 from services.analytics import AnalyticsService
 from services.notification import NotificationService
 
-logger = logging.getLogger(__name__)
+@shared_task(bind=True, name="workers.tasks.notification_tasks.send_notification")
+def send_notification(self, user_id: int, notification_data: Dict[str, Any]) -> bool:
+    """
+    Sends a push notification to a user
+    """
+    try:
+        logger.info(f"Sending notification to user {user_id}: {notification_data.get('title', 'Untitled')}")
+        # Placeholder for actual notification sending logic
+        # This would integrate with the actual web push sending mechanism
+        return True
+    except Exception as e:
+        logger.error(f"Error sending notification to user {user_id}: {str(e)}")
+        self.retry(exc=e, countdown=30, max_retries=3)
+        return False
+
+@shared_task(bind=True, name="workers.tasks.notification_tasks.process_pending_notifications")
+def process_pending_notifications(self) -> int:
+    """
+    Processes pending notifications from the database
+    """
+    try:
+        logger.info("Processing pending notifications")
+        # Placeholder for fetching and processing pending notifications
+        return 0  # Number of processed notifications
+    except Exception as e:
+        logger.error(f"Error processing pending notifications: {str(e)}")
+        self.retry(exc=e, countdown=60, max_retries=3)
+        return 0
 
 @celery_app.task
 def process_pending_notifications(batch_size: int = 100):
