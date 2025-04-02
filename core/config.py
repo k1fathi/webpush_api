@@ -3,6 +3,8 @@ import secrets
 from typing import Any, Dict, List, Optional, Union
 
 from pydantic import AnyHttpUrl, BaseSettings, PostgresDsn, validator
+from pydantic import AnyHttpUrl, PostgresDsn, validator
+from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     # API settings
@@ -66,3 +68,6 @@ class Settings(BaseSettings):
         env_file = ".env"
 
 settings = Settings()
+
+settings = Settings()
+

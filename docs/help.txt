@@ -151,3 +151,4 @@ ENVIRONMENT=development\
 make migrate ENV=development
 
 
+git fetch --all && git reset --hard origin/dev
