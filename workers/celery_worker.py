@@ -12,6 +12,16 @@ except ImportError as e:
     # Create a minimal setup for Celery
     print("Warning: Failed to import settings from core.config, using environment variables as fallback")
     
+    try:
+        # Try installing pydantic-settings if missing
+        import subprocess
+        print("Attempting to install missing dependencies...")
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "pydantic-settings"])
+        print("Dependencies installed successfully. Please restart the service.")
+    except Exception as install_error:
+        print(f"Failed to install dependencies: {install_error}")
+    
+    # Create minimal celery app using environment variables
     celery_app = Celery(
         "webpush_workers",
         broker=f"amqp://{os.environ.get('RABBITMQ_USER', 'guest')}:{os.environ.get('RABBITMQ_PASSWORD', 'guest')}@{os.environ.get('RABBITMQ_HOST', 'localhost')}:5672/",

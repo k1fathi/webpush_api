@@ -1,11 +1,29 @@
-fastapi>=0.104.1
-uvicorn>=0.24.0
-sqlalchemy>=2.0.23
-psycopg2-binary>=2.9.9
-celery>=5.3.6
-pydantic>=2.5.2
-python-dotenv>=1.0.0
-pytest==7.3.1
-httpx>=0.26.0  # For async HTTP requests
-requests==2.31.0
-redis>=5.0.1
+# FastAPI and web server
+fastapi>=0.68.0
+uvicorn>=0.15.0
+
+# Database
+sqlalchemy>=1.4.0
+psycopg2-binary>=2.9.1
+alembic>=1.7.4
+
+# Authentication and security
+python-jose>=3.3.0
+passlib>=1.7.4
+python-multipart>=0.0.5
+
+# Pydantic and settings management
+pydantic>=1.9.0
+pydantic-settings>=2.0.0  # Add this for Pydantic v2 compatibility
+
+# WebPush
+pywebpush>=1.14.0
+
+# Celery and message broker
+celery>=5.1.2
+redis>=4.0.2
+
+# Utility and helper packages
+python-dotenv>=0.19.1
+requests>=2.26.0
+tenacity>=8.0.1
