@@ -12,9 +12,9 @@ python-jose>=3.3.0
 passlib>=1.7.4
 python-multipart>=0.0.5
 
-# Pydantic and settings management
-pydantic>=1.9.0
-pydantic-settings>=2.0.0  # Add this for Pydantic v2 compatibility
+# Pydantic - pin to specific version to avoid compatibility issues
+pydantic==1.10.8  # Use v1.x which is more stable with FastAPI
+pydantic-settings==2.0.3  # Only needed for Pydantic v2
 
 # WebPush
 pywebpush>=1.14.0

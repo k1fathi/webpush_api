@@ -2,24 +2,27 @@ import os
 import secrets
 from typing import Any, Dict, List, Optional, Union
 
-# Handle different Pydantic versions
+# Determine Pydantic version and import appropriate modules
 try:
-    # For Pydantic v1.x
-    from pydantic import AnyHttpUrl, BaseSettings, PostgresDsn, validator
-except ImportError:
-    try:
+    import pydantic
+    pydantic_version = int(pydantic.__version__.split('.')[0])
+    
+    if pydantic_version >= 2:
         # For Pydantic v2.x
         from pydantic import AnyHttpUrl, PostgresDsn, field_validator
         from pydantic_settings import BaseSettings
         
-        # Create alias for validator to maintain compatibility
-        validator = field_validator
-    except ImportError:
-        # Fall back to basic settings if pydantic is not available
-        import sys
-        print("Error: Unable to import required Pydantic modules. Check your installation.")
-        sys.exit(1)
-
+        USING_V2 = True
+    else:
+        # For Pydantic v1.x
+        from pydantic import AnyHttpUrl, BaseSettings, PostgresDsn, validator
+        
+        USING_V2 = False
+except ImportError:
+    # Fall back to basic settings if pydantic is not available
+    import sys
+    print("Error: Unable to import required Pydantic modules. Check your installation.")
+    sys.exit(1)
 
 class Settings(BaseSettings):
     # API settings
@@ -67,39 +70,51 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = os.environ.get("LOG_LEVEL", "INFO")
     LOG_FORMAT: str = os.environ.get("LOG_FORMAT", "json")
 
-    # Use a compatibility layer for the validator
-    if 'field_validator' in locals():
-        # Pydantic v2 style
-        @field_validator("SQLALCHEMY_DATABASE_URI", mode="before")
-        @classmethod
-        def assemble_db_connection(cls, v: Optional[str], info) -> Any:
-            if isinstance(v, str):
-                return v
-            values = info.data
-            return PostgresDsn.build(
-                scheme="postgresql",
-                username=values.get("POSTGRES_USER"),
-                password=values.get("POSTGRES_PASSWORD"),
-                host=values.get("POSTGRES_SERVER"),
-                path=f"/{values.get('POSTGRES_DB') or ''}",
-            )
+    # Configure with the appropriate Config class based on Pydantic version
+    if USING_V2:
+        model_config = {
+            "case_sensitive": True,
+            "env_file": ".env"
+        }
     else:
-        # Pydantic v1 style
-        @validator("SQLALCHEMY_DATABASE_URI", pre=True)
-        def assemble_db_connection(cls, v: Optional[str], values: Dict[str, Any]) -> Any:
-            if isinstance(v, str):
-                return v
-            return PostgresDsn.build(
-                scheme="postgresql",
-                user=values.get("POSTGRES_USER"),
-                password=values.get("POSTGRES_PASSWORD"),
-                host=values.get("POSTGRES_SERVER"),
-                path=f"/{values.get('POSTGRES_DB') or ''}",
-            )
+        class Config:
+            case_sensitive = True
+            env_file = ".env"
 
-    class Config:
-        case_sensitive = True
-        env_file = ".env"
 
+# Define the validator outside the class definition to avoid syntax errors
+if USING_V2:
+    @field_validator("SQLALCHEMY_DATABASE_URI", mode="before")
+    def assemble_db_connection_v2(cls, v: Optional[str], info) -> Any:
+        if isinstance(v, str):
+            return v
+        values = info.data
+        return PostgresDsn.build(
+            scheme="postgresql",
+            username=values.get("POSTGRES_USER"),
+            password=values.get("POSTGRES_PASSWORD"),
+            host=values.get("POSTGRES_SERVER"),
+            path=f"/{values.get('POSTGRES_DB') or ''}",
+        )
+    
+    # Add the validator to the class
+    setattr(Settings, "assemble_db_connection", assemble_db_connection_v2)
+else:
+    @validator("SQLALCHEMY_DATABASE_URI", pre=True)
+    def assemble_db_connection_v1(cls, v: Optional[str], values: Dict[str, Any]) -> Any:
+        if isinstance(v, str):
+            return v
+        return PostgresDsn.build(
+            scheme="postgresql",
+            user=values.get("POSTGRES_USER"),
+            password=values.get("POSTGRES_PASSWORD"),
+            host=values.get("POSTGRES_SERVER"),
+            path=f"/{values.get('POSTGRES_DB') or ''}",
+        )
+    
+    # Add the validator to the class
+    setattr(Settings, "assemble_db_connection", assemble_db_connection_v1)
+
+# Initialize settings
 settings = Settings()
 

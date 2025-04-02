@@ -1,6 +1,26 @@
 import os
 import sys
 
+# Simple dependency check and install function
+def install_package(package):
+    try:
+        import importlib
+        importlib.import_module(package)
+    except ImportError:
+        import subprocess
+        print(f"Installing missing package: {package}")
+        try:
+            subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+            print(f"Successfully installed {package}")
+        except Exception as e:
+            print(f"Failed to install {package}: {e}")
+            return False
+    return True
+
+# Ensure dependencies are available
+install_package("pydantic")
+install_package("pydantic-settings")
+
 try:
     # Import the celery app from the central module
     from core.celery_app import celery_app
@@ -10,16 +30,7 @@ except ImportError as e:
     from celery import Celery
     
     # Create a minimal setup for Celery
-    print("Warning: Failed to import settings from core.config, using environment variables as fallback")
-    
-    try:
-        # Try installing pydantic-settings if missing
-        import subprocess
-        print("Attempting to install missing dependencies...")
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "pydantic-settings"])
-        print("Dependencies installed successfully. Please restart the service.")
-    except Exception as install_error:
-        print(f"Failed to install dependencies: {install_error}")
+    print("Warning: Failed to import settings, using environment variables as fallback")
     
     # Create minimal celery app using environment variables
     celery_app = Celery(
@@ -28,16 +39,13 @@ except ImportError as e:
         backend=f"redis://{os.environ.get('REDIS_HOST', 'localhost')}:{os.environ.get('REDIS_PORT', '6379')}/0"
     )
     
-    # Minimum configuration to get the worker running
+    # Basic configuration
     celery_app.conf.imports = [
-        "workers.tasks.segment_tasks",
         "workers.tasks.notification_tasks",
-        "workers.tasks.cep_tasks", 
-        "workers.tasks.cdp_tasks",
-        "workers.tasks.campaign_tasks",
-        "workers.tasks.analytics_tasks",
-        "workers.tasks.ab_test_tasks"
+        "workers.tasks.campaign_tasks"
     ]
 
-# This file is only needed to provide the entrypoint for the Celery worker
-# All configuration is centralized in core.celery_app
+# Expose the celery app for the worker command
+# This ensures the 'workers.celery_worker:celery_app' reference works
+if __name__ == "__main__":
+    print("Celery worker module loaded successfully")
