@@ -17,9 +17,9 @@ class Settings(BaseSettings):
     SECRET_KEY: str = secrets.token_urlsafe(32)
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8  # 8 days
     
-    # Database
+    # Database - Use the postgres user directly since webpush_user may not exist yet
     POSTGRES_SERVER: str = os.environ.get("POSTGRES_SERVER", "db")
-    POSTGRES_USER: str = os.environ.get("POSTGRES_USER", "postgres")
+    POSTGRES_USER: str = os.environ.get("POSTGRES_USER", "postgres")  # Use postgres user
     POSTGRES_PASSWORD: str = os.environ.get("POSTGRES_PASSWORD", "postgres")
     POSTGRES_DB: str = os.environ.get("POSTGRES_DB", "webpush")
     POSTGRES_PORT: str = os.environ.get("POSTGRES_PORT", "5432")
@@ -69,12 +69,15 @@ class Settings(BaseSettings):
     def assemble_db_connection(cls, v: Optional[str], values: Dict[str, Any]) -> Any:
         if isinstance(v, str):
             return v
+        
+        # Use standard postgres connection
         return PostgresDsn.build(
             scheme="postgresql",
             user=values.get("POSTGRES_USER"),
             password=values.get("POSTGRES_PASSWORD"),
             host=values.get("POSTGRES_SERVER"),
             path=f"/{values.get('POSTGRES_DB') or ''}",
+            port=values.get("POSTGRES_PORT", "5432"),
         )
 
     class Config:
