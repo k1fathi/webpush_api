@@ -196,8 +196,32 @@ create_migration() {
   migration_name=$1
   log_message "Creating migration: ${migration_name}"
   
-  # Create a fresh migration
-  alembic revision --autogenerate -m "${migration_name}" || log_message "Error creating migration"
+  # First check if the database is up to date
+  log_message "Checking database status..."
+  current_revision=$(alembic current 2>/dev/null || echo "None")
+  
+  # If there's a "not up to date" message or no current revision, upgrade first
+  if [[ "$current_revision" == *"not up to date"* || "$current_revision" == "None" ]]; then
+    log_message "Database is not up to date, upgrading first..."
+    apply_migrations
+  fi
+  
+  # Now create the migration
+  log_message "Creating new migration..."
+  alembic revision --autogenerate -m "${migration_name}" || {
+    log_status=$?
+    log_message "Error creating migration (status code: $log_status)"
+    
+    # If there's still an issue, try to provide more info
+    log_message "Checking migration heads..."
+    alembic heads || log_message "Could not determine migration heads"
+    
+    # Return the error status
+    return $log_status
+  }
+  
+  # Migration created successfully
+  log_message "Migration created successfully"
 }
 
 # Function to apply migrations
@@ -205,7 +229,17 @@ apply_migrations() {
   log_message "Applying migrations"
   
   # Apply the migrations
-  alembic upgrade head || log_message "Error applying migrations"
+  alembic upgrade head || {
+    log_status=$?
+    log_message "Error applying migrations (status code: $log_status)"
+    
+    # Try to provide more info
+    log_message "Checking migration status..."
+    alembic current || log_message "Could not determine migration status"
+    
+    # Return the error status
+    return $log_status
+  }
   
   log_message "Displaying current migration state"
   alembic current
@@ -291,8 +325,13 @@ case "$1" in
       fi
     fi
     ;;
+  sync-and-migrate)
+    migration_name=${2:-"migration_${DATE_TIME}"}
+    log_message "Syncing database and creating migration: ${migration_name}"
+    apply_migrations && create_migration "$migration_name"
+    ;;
   *)
-    echo "Usage: $0 {init|backup|reset-alembic|drop-tables|new-migration|upgrade|fix-heads|full-reset} [options]"
+    echo "Usage: $0 {init|backup|reset-alembic|drop-tables|new-migration|upgrade|fix-heads|full-reset|sync-and-migrate} [options]"
     echo ""
     echo "Commands:"
     echo "  init              Initialize database with extensions and permissions"
@@ -302,10 +341,12 @@ case "$1" in
     echo "  new-migration     Create a new migration (optionally provide name as second argument)"
     echo "  upgrade           Apply all pending migrations"
     echo "  fix-heads         Fix multiple migration heads"
-    echo "  full-reset        Perform a complete database reset (use --force to skip confirmation)"
+    echo "  full-reset        Perform a full database reset (use --force to skip confirmation)"
+    echo "  sync-and-migrate  Apply migrations and then create a new one (for out-of-sync databases)"
     echo ""
     echo "Example: $0 init"
     echo "Example: $0 new-migration add_user_preferences"
+    echo "Example: $0 sync-and-migrate user_profile_fields"
     echo "Example: $0 full-reset --force"
     exit 1
     ;;
