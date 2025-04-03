@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from .endpoints import ab_tests, analytics, campaigns, cdps, ceps, permissions, roles, segments
 from .endpoints import templates, triggers, users, webhooks, webpush, notification_delivery
 from .endpoints import notifications, segment_execution  # Add segment execution
+from .endpoints import campaign_templates
 
 api_router = APIRouter()
 
@@ -22,3 +23,4 @@ api_router.include_router(ceps.router, prefix="/cep", tags=["cep"])
 api_router.include_router(webpush.router, prefix="/webpush", tags=["webpush"])
 api_router.include_router(notification_delivery.router, prefix="/delivery", tags=["delivery"])
 api_router.include_router(notifications.router, prefix="/notifications", tags=["notifications"])
+api_router.include_router(campaign_templates.router, prefix="/campaign-templates", tags=["campaign templates"])

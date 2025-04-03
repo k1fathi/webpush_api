@@ -148,3 +148,35 @@ fathiapp/
     ├── test_api/                       # API tests
     ├── test_services/                  # Service tests
     └── test_repositories/              # Repository tests
+
+--------------------------------------------------------------
+        webpush_api/
+    ├── api/                  # API layer (FastAPI routes)
+    │   └── v1/
+    │       └── endpoints/    # API endpoints
+    ├── db/                   # Database configuration
+    ├── models/               # Domain models
+    │   ├── domain/           # ORM models (SQLAlchemy)
+    │   ├── schemas/          # Request/response models (Pydantic)
+    │   └── *.py              # Business models (enums, constants)
+    ├── repositories/         # Data access layer
+    ├── services/             # Business logic
+    ├── workers/              # Celery tasks
+    └── alembic/              # Database migrations
+
+
+
+    Table of Contents
+Understanding the Project Structure
+Define Your Entity
+Create Domain Model
+Create Business Model
+Create Schema Models
+Update Alembic Configuration
+Create Repository Layer
+Create Service Layer
+Create API Endpoints
+Register Routes
+Generate and Run Migrations
+Writing Tests
+Understanding the Project Str

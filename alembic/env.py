@@ -52,6 +52,7 @@ try:
     from models.domain.test_variant import TestVariantModel
     from models.domain.analytics import AnalyticsModel
     from models.domain.cep_decision import CepDecisionModel
+    from models.domain.campaign_template import CampaignTemplateModel
     
     # Set the target metadata for Alembic
     target_metadata = Base.metadata

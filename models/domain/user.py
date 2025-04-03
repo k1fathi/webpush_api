@@ -73,3 +73,4 @@ class UserModel(Base):
     segments = relationship("SegmentModel", secondary=user_segment)
     cep_decisions = relationship("CepDecisionModel", back_populates="user")
     analytics = relationship("AnalyticsModel", back_populates="user")
+    campaign_templates = relationship("CampaignTemplateModel", back_populates="creator")

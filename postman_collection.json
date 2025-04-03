@@ -1,0 +1,139 @@
+{
+    "info": {
+        "name": "WebPush API",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:8000"
+        }
+    ],
+    "item": [
+        {
+            "name": "Users",
+            "item": [
+                {
+                    "name": "Create User",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"user@example.com\",\n  \"name\": \"John Doe\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/users",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "users"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "List Users",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/users",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "users"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get User",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/users/:user_id",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "users",
+                                ":user_id"
+                            ]
+                        }
+                    }
+                }
+                // ... Add other user-related endpoints here ...
+            ]
+        },
+        {
+            "name": "WebPush",
+            "item": [
+                {
+                    "name": "Get VAPID Public Key",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/webpush/vapid-public-key",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "webpush",
+                                "vapid-public-key"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Subscribe",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"user@example.com\",\n  \"subscription_json\": {},\n  \"browser\": \"Chrome\",\n  \"device_info\": \"Windows 10\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/webpush/subscribe",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "webpush",
+                                "subscribe"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Unsubscribe",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"user@example.com\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/webpush/unsubscribe",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "webpush",
+                                "unsubscribe"
+                            ]
+                        }
+                    }
+                }
+                // ... Add other WebPush-related endpoints here ...
+            ]
+        }
+        // ... Add other endpoint groups (e.g., Notifications, Campaigns, etc.) here ...
+    ]
+}
