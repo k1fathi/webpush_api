@@ -43,7 +43,7 @@ class CampaignModel(Base):
     
     # Relationships
     segment = relationship("SegmentModel")
-    template = relationship("TemplateModel")
+    template = relationship("TemplateModel", back_populates="campaigns")
     notifications = relationship("NotificationModel", back_populates="campaign")
     ab_tests = relationship("AbTestModel", back_populates="campaign")
     analytics = relationship("AnalyticsModel", back_populates="campaign")

@@ -19,4 +19,5 @@ class TestVariantModel(Base):
     
     # Relationships
     ab_test = relationship("AbTestModel", back_populates="variants")
-    template = relationship("TemplateModel")
+    template = relationship("TemplateModel", back_populates="test_variants")
+    notifications = relationship("NotificationModel", back_populates="variant")

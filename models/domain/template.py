@@ -48,6 +48,7 @@ class TemplateModel(Base):
     user = relationship("UserModel")
     versions = relationship("TemplateVersionModel", back_populates="template")
     campaigns = relationship("CampaignModel", back_populates="template")
+    test_variants = relationship("TestVariantModel", back_populates="template")
 
 class TemplateVersionModel(Base):
     """Template version model for storing version history"""
