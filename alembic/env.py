@@ -102,8 +102,15 @@ def run_migrations_online() -> None:
             )
 
             # Run the migrations
-            with context.begin_transaction():
-                context.run_migrations()
+            try:
+                with context.begin_transaction():
+                    context.run_migrations()
+            except KeyError as e:
+                if 'clear_migrations' in str(e):
+                    logger.error("Missing migration 'clear_migrations'. Ensure all migration files are present.")
+                else:
+                    logger.error(f"KeyError during migration: {e}")
+                raise
     except Exception as e:
         logger.error(f"Database connection error: {e}")
         # Print more details about configuration

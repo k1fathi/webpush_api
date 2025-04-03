@@ -221,3 +221,22 @@ alembic revision -m "initiate tables"
 
 alembic upgrade head
 
+
+
+
+docker compose down -v db web && docker compose up -d --build db web
+
+## Troubleshooting Alembic Issues
+
+### Missing Migration Error
+If you encounter an error like `KeyError: 'clear_migrations'`:
+1. Verify that all migration files are present in `alembic/versions/`.
+2. If a migration file is missing, restore it from version control or recreate it.
+3. Run `alembic history` to check the migration history.
+4. If necessary, reset the database and reapply migrations:
+   ```
+   docker-compose down -v
+   docker-compose up -d --build
+   docker-compose exec web alembic upgrade head
+   ```
+5. Ensure the database state matches the migration files.
