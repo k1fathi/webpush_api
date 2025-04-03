@@ -11,8 +11,8 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = 'reset_migrations'
-down_revision = None
-branch_labels = None
+down_revision = None  # This should remain None as it's a base migration
+branch_labels = ('reset',)  # Add a branch label to distinguish this branch
 depends_on = None
 
 def upgrade():

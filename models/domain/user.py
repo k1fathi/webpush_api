@@ -70,3 +70,4 @@ class UserModel(Base):
     role = relationship("RoleModel", back_populates="users")
     notifications = relationship("NotificationModel", back_populates="user")
     segments = relationship("SegmentModel", secondary="user_segments")
+    cep_decisions = relationship("CepDecisionModel", back_populates="user")
