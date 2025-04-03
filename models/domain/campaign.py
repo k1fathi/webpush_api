@@ -11,6 +11,7 @@ class CampaignModel(Base):
     """Campaign model for storing campaign data"""
     __tablename__ = "campaigns"
 
+    # Ensure id is UUID type to match foreign keys in other tables
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String, nullable=False)
     description = Column(Text, nullable=True)
@@ -32,7 +33,7 @@ class CampaignModel(Base):
         default=CampaignType.ONE_TIME
     )
     
-    # Foreign keys
+    # Foreign keys - ensure these are UUID type too
     segment_id = Column(UUID(as_uuid=True), ForeignKey("segments.id"), nullable=True)
     template_id = Column(UUID(as_uuid=True), ForeignKey("templates.id"), nullable=True)
     
