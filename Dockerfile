@@ -29,7 +29,7 @@ COPY . .
 RUN mkdir -p /app/db_backups
 
 # Set environment variables
-ENV PYTHONPATH=/app
+ENV PYTHONPATH=/app/webpush_api
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
