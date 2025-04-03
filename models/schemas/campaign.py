@@ -11,6 +11,10 @@ class CampaignBase(BaseModel):
     campaign_type: CampaignType = CampaignType.ONE_TIME
     is_recurring: bool = False
     recurrence_pattern: Optional[str] = None
+    
+    model_config = {
+        "from_attributes": True  # Updated from orm_mode = True
+    }
 
 class CampaignCreate(CampaignBase):
     """Schema for creating campaigns"""
@@ -39,8 +43,9 @@ class CampaignRead(CampaignBase):
     segment_id: Optional[str] = None
     template_id: Optional[str] = None
     
-    class Config:
-        orm_mode = True
+    model_config = {
+        "from_attributes": True
+    }
 
 class CampaignList(BaseModel):
     """Schema for listing campaigns with pagination"""

@@ -116,3 +116,76 @@ PERMISSIONS = {
     "read_system_settings": Permission(ResourceType.SYSTEM_SETTINGS, Action.READ),
     "update_system_settings": Permission(ResourceType.SYSTEM_SETTINGS, Action.UPDATE),
 }
+
+# Define permissions used in the application
+# This helps avoid typos and inconsistencies when using permission strings
+
+# User permissions
+USER_CREATE = "create_user"
+USER_READ = "read_user" 
+USER_UPDATE = "update_user"
+USER_DELETE = "delete_user"
+USER_LIST = "list_users"
+USER_ACTIVATE = "activate_user"
+USER_DEACTIVATE = "deactivate_user"
+
+# Campaign permissions
+CAMPAIGN_CREATE = "create_campaign"
+CAMPAIGN_READ = "read_campaign"
+CAMPAIGN_UPDATE = "update_campaign"
+CAMPAIGN_DELETE = "delete_campaign"
+CAMPAIGN_LIST = "list_campaigns"
+CAMPAIGN_PUBLISH = "publish_campaign"
+CAMPAIGN_APPROVE = "approve_campaign"
+
+# Template permissions
+TEMPLATE_CREATE = "create_template"
+TEMPLATE_READ = "read_template"
+TEMPLATE_UPDATE = "update_template"
+TEMPLATE_DELETE = "delete_template"
+TEMPLATE_LIST = "list_templates"
+TEMPLATE_APPROVE = "approve_template"
+TEMPLATE_SUBMIT = "submit_template"
+TEMPLATE_ARCHIVE = "archive_template"
+
+# Segment permissions
+SEGMENT_CREATE = "create_segment"
+SEGMENT_READ = "read_segment"
+SEGMENT_UPDATE = "update_segment"
+SEGMENT_DELETE = "delete_segment"
+SEGMENT_LIST = "list_segments"
+SEGMENT_EVALUATE = "evaluate_segment"
+SEGMENT_EXECUTE = "execute_segment"
+
+# Notification permissions
+NOTIFICATION_CREATE = "create_notification"
+NOTIFICATION_READ = "read_notification"
+NOTIFICATION_SEND = "send_notification"
+
+# Analytics permissions
+READ_ANALYTICS = "read_analytics"
+CREATE_ANALYTICS = "create_analytics"
+EXPORT_ANALYTICS = "export_analytics"
+
+# AB Test permissions
+AB_TEST_CREATE = "create_ab_test"
+AB_TEST_READ = "read_ab_test"
+AB_TEST_UPDATE = "update_ab_test"
+AB_TEST_LIST = "list_ab_tests"
+
+# CEP permissions
+CEP_READ = "read_cep_decision"
+CEP_UPDATE = "update_cep_decision"
+CEP_CREATE = "create_cep_decision"
+
+# Group all permissions for reference
+PERMISSIONS = {
+    "user": [USER_CREATE, USER_READ, USER_UPDATE, USER_DELETE, USER_LIST, USER_ACTIVATE, USER_DEACTIVATE],
+    "campaign": [CAMPAIGN_CREATE, CAMPAIGN_READ, CAMPAIGN_UPDATE, CAMPAIGN_DELETE, CAMPAIGN_LIST, CAMPAIGN_PUBLISH, CAMPAIGN_APPROVE],
+    "template": [TEMPLATE_CREATE, TEMPLATE_READ, TEMPLATE_UPDATE, TEMPLATE_DELETE, TEMPLATE_LIST, TEMPLATE_APPROVE, TEMPLATE_SUBMIT, TEMPLATE_ARCHIVE],
+    "segment": [SEGMENT_CREATE, SEGMENT_READ, SEGMENT_UPDATE, SEGMENT_DELETE, SEGMENT_LIST, SEGMENT_EVALUATE, SEGMENT_EXECUTE],
+    "notification": [NOTIFICATION_CREATE, NOTIFICATION_READ, NOTIFICATION_SEND],
+    "analytics": [READ_ANALYTICS, CREATE_ANALYTICS, EXPORT_ANALYTICS],
+    "ab_test": [AB_TEST_CREATE, AB_TEST_READ, AB_TEST_UPDATE, AB_TEST_LIST],
+    "cep": [CEP_READ, CEP_UPDATE, CEP_CREATE]
+}

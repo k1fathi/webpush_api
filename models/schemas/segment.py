@@ -11,6 +11,10 @@ class SegmentBase(BaseModel):
     description: Optional[str] = None
     segment_type: SegmentType = SegmentType.DYNAMIC
     is_active: bool = True
+    
+    model_config = {
+        "from_attributes": True  # Updated from orm_mode = True
+    }
 
 class SegmentCreate(SegmentBase):
     """Schema for creating segments"""
@@ -38,8 +42,9 @@ class SegmentRead(SegmentBase):
     updated_at: datetime
     last_evaluated_at: Optional[datetime] = None
     
-    class Config:
-        orm_mode = True
+    model_config = {
+        "from_attributes": True
+    }
 
 class SegmentList(BaseModel):
     """Schema for listing segments with pagination"""

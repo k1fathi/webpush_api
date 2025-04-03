@@ -1,3 +1,4 @@
+import datetime
 import uuid
 from typing import Dict, List, Optional, Any
 
@@ -6,6 +7,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.session import get_session
 from models.domain.user import UserModel
+from models.domain.user_role import UserRoleModel
+from models.domain.role import RoleModel
+from models.user import User
 from repositories.base import BaseRepository
 
 class UserRepository(BaseRepository):
@@ -131,3 +135,24 @@ class UserRepository(BaseRepository):
             users_query = select(UserModel).where(UserModel.id.in_(user_ids))
             users_result = await session.execute(users_query)
             return list(users_result.scalars().all())
+
+    async def get_user_roles(self, user_id: str) -> List[str]:
+        """Get all role IDs for a user"""
+        async with get_session() as session:
+            query = select(UserRoleModel.role_id).where(
+                UserRoleModel.user_id == user_id
+            )
+            result = await session.execute(query)
+            return [str(row[0]) for row in result.all()]
+
+    async def get_user_role_names(self, user_id: str) -> List[str]:
+        """Get all role names for a user"""
+        async with get_session() as session:
+            query = select(RoleModel.name).join(
+                UserRoleModel,
+                UserRoleModel.role_id == RoleModel.id
+            ).where(
+                UserRoleModel.user_id == user_id
+            )
+            result = await session.execute(query)
+            return [row[0] for row in result.all()]

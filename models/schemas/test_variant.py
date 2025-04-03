@@ -6,6 +6,10 @@ class TestVariantBase(BaseModel):
     """Base schema for test variants"""
     name: str
     template_id: str
+    
+    model_config = {
+        "from_attributes": True  # Updated from orm_mode = True
+    }
 
 class TestVariantCreate(TestVariantBase):
     """Schema for creating test variants"""
@@ -27,5 +31,6 @@ class TestVariantRead(TestVariantBase):
     opened_count: int = 0
     clicked_count: int = 0
     
-    class Config:
-        orm_mode = True
+    model_config = {
+        "from_attributes": True
+    }

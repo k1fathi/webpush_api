@@ -14,6 +14,10 @@ class AnalyticsBase(BaseModel):
     opened: bool = False
     clicked: bool = False
     user_action: Optional[str] = None
+    
+    model_config = {
+        "from_attributes": True  # Updated from orm_mode = True
+    }
 
 class AnalyticsCreate(AnalyticsBase):
     """Schema for creating analytics"""
@@ -38,8 +42,9 @@ class AnalyticsRead(AnalyticsBase):
     conversion_type: Optional[ConversionType] = None
     conversion_value: float = 0.0
     
-    class Config:
-        orm_mode = True
+    model_config = {
+        "from_attributes": True
+    }
 
 class ConversionCreate(BaseModel):
     """Schema for creating conversion events"""

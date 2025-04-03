@@ -68,5 +68,6 @@ class User(BaseModel):
                 "preferences": {"language": "en", "notifications": True},
                 "opted_in": True
             }
-        }
+        },
+        "from_attributes": True  # Updated from orm_mode = True
     }

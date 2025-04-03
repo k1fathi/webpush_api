@@ -14,6 +14,10 @@ class UserBase(BaseModel):
     email_notification_enabled: bool = True
     timezone: Optional[str] = "UTC"
     language: Optional[str] = "en"
+    
+    model_config = {
+        "from_attributes": True
+    }
 
 class UserCreate(UserBase):
     """Schema for creating a user"""
@@ -54,8 +58,9 @@ class UserRead(UserBase):
     created_at: datetime
     updated_at: datetime
     
-    class Config:
-        orm_mode = True
+    model_config = {
+        "from_attributes": True
+    }
 
 class UserList(BaseModel):
     """Schema for listing users"""

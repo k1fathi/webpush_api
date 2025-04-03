@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: str = os.environ.get("POSTGRES_PASSWORD", "")
     POSTGRES_DB: str = os.environ.get("POSTGRES_DB", "")
     POSTGRES_PORT: str = os.environ.get("POSTGRES_PORT", "")
-    SQLALCHEMY_DATABASE_URI: Optional[PostgresDsn] = None
+    SQLALCHEMY_DATABASE_URI: str | PostgresDsn = None
 
     # Redis
     REDIS_HOST: str = os.environ.get("REDIS_HOST", "redis")
@@ -104,4 +104,7 @@ class Settings(BaseSettings):
     )
 
 settings = Settings()
+
+# Ensure SQLALCHEMY_DATABASE_URI is a string
+settings.SQLALCHEMY_DATABASE_URI = str(settings.SQLALCHEMY_DATABASE_URI)
 

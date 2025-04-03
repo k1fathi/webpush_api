@@ -11,6 +11,10 @@ class AbTestBase(BaseModel):
     description: Optional[str] = None
     variant_count: int = 2
     winning_criteria: WinningCriteria = WinningCriteria.CLICK_RATE
+    
+    model_config = {
+        "from_attributes": True
+    }
 
 class AbTestCreate(AbTestBase):
     """Schema for creating A/B tests"""
@@ -33,5 +37,6 @@ class AbTestRead(AbTestBase):
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
     
-    class Config:
-        orm_mode = True
+    model_config = {
+        "from_attributes": True
+    }

@@ -53,6 +53,10 @@ try:
     from models.domain.analytics import AnalyticsModel
     from models.domain.cep_decision import CepDecisionModel
     from models.domain.campaign_template import CampaignTemplateModel
+    # Add new models here
+    from models.domain.role_permission import RolePermissionModel
+    from models.domain.user_role import UserRoleModel
+    from models.domain.cdp_integration import CdpIntegrationModel
     
     # Set the target metadata for Alembic
     target_metadata = Base.metadata

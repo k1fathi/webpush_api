@@ -27,6 +27,10 @@ class TemplateBase(BaseModel):
     variables: List[str] = Field(default_factory=list)
     tags: List[str] = Field(default_factory=list)
 
+    model_config = {
+        "from_attributes": True  # Updated from orm_mode = True
+    }
+
 class TemplateCreate(TemplateBase):
     """Schema for creating templates"""
     title: str
@@ -77,7 +81,9 @@ class TemplateRead(TemplateBase):
     version: int = 1
     category: Optional[str] = None
     
-    model_config = {"from_attributes": True}  # Updated for Pydantic v2
+    model_config = {
+        "from_attributes": True
+    }
 
 class TemplateList(BaseModel):
     """Schema for listing templates with pagination"""

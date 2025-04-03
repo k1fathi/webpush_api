@@ -7,7 +7,7 @@ from core.config import settings
 
 # Create SQLAlchemy engine
 engine = create_engine(
-    settings.SQLALCHEMY_DATABASE_URI,
+    settings.SQLALCHEMY_DATABASE_URI,  # This should now be a string
     pool_pre_ping=True
 )
 

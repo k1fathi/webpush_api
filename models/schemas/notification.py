@@ -12,6 +12,10 @@ class NotificationBase(BaseModel):
     image_url: Optional[HttpUrl] = None
     action_url: Optional[HttpUrl] = None
     notification_type: NotificationType = NotificationType.CAMPAIGN
+    
+    model_config = {
+        "from_attributes": True
+    }
 
 class NotificationCreate(NotificationBase):
     """Schema for creating notifications"""
@@ -48,8 +52,9 @@ class NotificationRead(NotificationBase):
     device_info: Dict[str, Any]
     variant_id: Optional[str] = None
     
-    class Config:
-        orm_mode = True
+    model_config = {
+        "from_attributes": True
+    }
 
 class NotificationList(BaseModel):
     """Schema for listing notifications"""
