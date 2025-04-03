@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, timedelta
-from sqlalchemy import Column, String, Integer, DateTime, Text, JSON, Boolean, Interval
+from sqlalchemy import Column, String, Integer, DateTime, Text, JSON, Boolean, Interval, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID, ENUM
 from sqlalchemy.orm import relationship
 
@@ -34,7 +34,7 @@ class TriggerModel(Base):
     last_triggered_at = Column(DateTime)
     trigger_count = Column(Integer, default=0)
     error_count = Column(Integer, default=0)
-    metadata = Column(JSON, default=dict)
+    trigger_metadata = Column(JSON, default=dict)  # Renamed from 'metadata' to avoid conflict
     
     # Limits and thresholds
     cooldown_period = Column(Interval)

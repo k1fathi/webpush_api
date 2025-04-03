@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     # API settings
     API_PREFIX: str = "/api"
     PROJECT_NAME: str = "WebPush API"
+    API_HOST: str = "localhost"  # Add the API_HOST field that's in the .env file
     
     # CORS - Fix parsing for CORS_ORIGINS
     CORS_ORIGINS: Union[List[str], str] = "*"
@@ -18,12 +19,12 @@ class Settings(BaseSettings):
     SECRET_KEY: str = secrets.token_urlsafe(32)
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8  # 8 days
     
-    # Database
-    POSTGRES_SERVER: str = os.environ.get("POSTGRES_SERVER", "db")
-    POSTGRES_USER: str = os.environ.get("POSTGRES_USER", "postgres")
-    POSTGRES_PASSWORD: str = os.environ.get("POSTGRES_PASSWORD", "postgres")
-    POSTGRES_DB: str = os.environ.get("POSTGRES_DB", "webpush")
-    POSTGRES_PORT: str = os.environ.get("POSTGRES_PORT", "5432")
+    # Database - Update to use PostgreSQL user for both username and DB name
+    POSTGRES_SERVER: str = os.environ.get("POSTGRES_SERVER", "")
+    POSTGRES_USER: str = os.environ.get("POSTGRES_USER", "")
+    POSTGRES_PASSWORD: str = os.environ.get("POSTGRES_PASSWORD", "")
+    POSTGRES_DB: str = os.environ.get("POSTGRES_DB", "")
+    POSTGRES_PORT: str = os.environ.get("POSTGRES_PORT", "")
     SQLALCHEMY_DATABASE_URI: Optional[PostgresDsn] = None
 
     # Redis
@@ -73,14 +74,23 @@ class Settings(BaseSettings):
         if values.get("SQLALCHEMY_DATABASE_URI"):
             return values
         
-        # Build connection string
+        # Convert port to int for PostgresDsn.build
+        port = values.get("POSTGRES_PORT")
+        if port and isinstance(port, str):
+            try:
+                port = int(port)
+            except ValueError:
+                port = 5432  # Default to 5432 if conversion fails
+        
+        # Build connection string with port as integer
+        # IMPORTANT CHANGE: Remove the leading slash in the path
         db_url = PostgresDsn.build(
             scheme="postgresql",
             username=values.get("POSTGRES_USER"),
             password=values.get("POSTGRES_PASSWORD"),
             host=values.get("POSTGRES_SERVER"),
-            port=values.get("POSTGRES_PORT", "5432"),
-            path=f"/{values.get('POSTGRES_DB') or ''}",
+            path=f"{values.get('POSTGRES_DB') or ''}",  # Remove the leading slash here
+            port=port,
         )
         values["SQLALCHEMY_DATABASE_URI"] = db_url
         return values
@@ -90,6 +100,7 @@ class Settings(BaseSettings):
         env_file=".env", 
         env_file_encoding="utf-8",
         case_sensitive=True,
+        extra="ignore",  # Add this to ignore extra fields from .env
     )
 
 settings = Settings()

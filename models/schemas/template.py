@@ -1,23 +1,22 @@
 from datetime import datetime
 from enum import Enum
 from typing import Dict, List, Optional, Any
-from pydantic import BaseModel, Field, HttpUrl, validator
+from pydantic import BaseModel, Field, HttpUrl, field_validator
 
 class TemplateType(str, Enum):
-    """Template types"""
+    """Template type enumeration"""
     WEBPUSH = "webpush"
     EMAIL = "email"
     SMS = "sms"
     IN_APP = "in_app"
+    MOBILE_PUSH = "mobile_push"
 
 class TemplateStatus(str, Enum):
-    """Template status"""
+    """Template status enumeration"""
     DRAFT = "draft"
-    PENDING_APPROVAL = "pending_approval"
-    APPROVED = "approved"
-    REJECTED = "rejected"
-    ARCHIVED = "archived"
     ACTIVE = "active"
+    ARCHIVED = "archived"
+    DELETED = "deleted"
 
 class TemplateBase(BaseModel):
     """Base schema for templates"""
@@ -37,13 +36,14 @@ class TemplateCreate(TemplateBase):
     icon_url: Optional[HttpUrl] = None
     category: Optional[str] = None
 
-    @validator('variables')
-    def extract_variables(cls, v, values):
+    @field_validator('variables')
+    @classmethod
+    def extract_variables(cls, v, info):
         """Extract variables from content if not provided"""
-        if not v and 'content' in values:
+        if not v and 'content' in info.data:
             # Extract variables from content (placeholders like {variable})
             import re
-            content_str = str(values['content'])
+            content_str = str(info.data['content'])
             v = list(set(re.findall(r'\{([a-zA-Z0-9_]+)\}', content_str)))
         return v
 
@@ -77,8 +77,7 @@ class TemplateRead(TemplateBase):
     version: int = 1
     category: Optional[str] = None
     
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}  # Updated for Pydantic v2
 
 class TemplateList(BaseModel):
     """Schema for listing templates with pagination"""
@@ -111,5 +110,4 @@ class TemplateVersion(BaseModel):
     created_at: datetime
     created_by: Optional[str] = None
     
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}  # Updated for Pydantic v2

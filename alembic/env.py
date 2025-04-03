@@ -1,53 +1,62 @@
 import os
 import sys
-from dotenv import load_dotenv
-
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
+import logging
 
-# Add parent directory to path so we can import app modules
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+# Add the parent directory to the path so we can import from the project
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Load environment variables from .env file
-load_dotenv()
+# Set up logging
+logger = logging.getLogger("alembic")
 
-# Import Base from your models
-from db.base_class import Base
-# Import all models that should be included in migrations
-from models.domain.user import UserModel
-# Import other models as needed, for example:
-# from models.domain.role import RoleModel
-# from models.domain.notification import NotificationModel
-# from models.domain.segment import SegmentModel
-
-# this is the Alembic Config object, which provides
+# This is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
-
-# Get database URL from environment or settings
-from core.config import settings
-config.set_main_option("sqlalchemy.url", str(settings.SQLALCHEMY_DATABASE_URI))
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# add your model's MetaData object here
-# for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
-target_metadata = Base.metadata
-
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
-# ... etc.
-
+try:
+    # Import models and settings more safely
+    from db.base_class import Base
+    from core.config import settings
+    
+    # Log database connection info (with password masked)
+    connection_str = str(settings.SQLALCHEMY_DATABASE_URI)
+    masked_connection = connection_str.replace(settings.POSTGRES_PASSWORD, "********")
+    logger.info(f"Using database connection: {masked_connection}")
+    
+    # Set the database URL in the Alembic config directly from settings
+    # Ensure we are using the correct database URL
+    config.set_main_option("sqlalchemy.url", str(settings.SQLALCHEMY_DATABASE_URI))
+    
+    # Import all models for Alembic to detect
+    from models.domain.user import UserModel
+    from models.domain.role import RoleModel
+    from models.domain.permission import PermissionModel
+    from models.domain.campaign import CampaignModel
+    from models.domain.notification import NotificationModel
+    from models.domain.segment import SegmentModel
+    from models.domain.template import TemplateModel
+    from models.domain.trigger import TriggerModel
+    from models.domain.ab_test import AbTestModel
+    from models.domain.test_variant import TestVariantModel
+    from models.domain.analytics import AnalyticsModel
+    from models.domain.cep_decision import CepDecisionModel
+    
+    # This is the target metadata for Alembic
+    target_metadata = Base.metadata
+    
+except ImportError as e:
+    logger.error(f"Error importing configuration or models: {e}")
+    raise
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
@@ -59,7 +68,6 @@ def run_migrations_offline() -> None:
 
     Calls to context.execute() here emit the given string to the
     script output.
-
     """
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
@@ -67,35 +75,48 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        compare_type=True,  # Compare column types
+        compare_server_default=True  # Compare server defaults
     )
 
     with context.begin_transaction():
         context.run_migrations()
 
-
 def run_migrations_online() -> None:
-    """Run migrations in 'online' mode.
-
-    In this scenario we need to create an Engine
-    and associate a connection with the context.
-
-    """
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
-
-    with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
+    """Run migrations in 'online' mode."""
+    # Get connection settings directly from settings object for more control
+    # Add error handling for database connection
+    try:
+        connectable = engine_from_config(
+            config.get_section(config.config_ini_section),
+            prefix="sqlalchemy.",
+            poolclass=pool.NullPool,
         )
+        
+        with connectable.connect() as connection:
+            # Configure Alembic context with our connection and metadata
+            context.configure(
+                connection=connection, 
+                target_metadata=target_metadata,
+                compare_type=True,
+                compare_server_default=True,
+                include_schemas=True,
+            )
 
-        with context.begin_transaction():
-            context.run_migrations()
-
+            # Run the migrations
+            with context.begin_transaction():
+                context.run_migrations()
+    except Exception as e:
+        logger.error(f"Database connection error: {e}")
+        # Print more details about configuration
+        logger.error(f"Database URL: {masked_connection}")
+        logger.error(f"Database server: {settings.POSTGRES_SERVER}")
+        logger.error(f"Database name: {settings.POSTGRES_DB}")
+        raise
 
 if context.is_offline_mode():
+    logger.info("Running migrations in offline mode")
     run_migrations_offline()
 else:
+    logger.info("Running migrations in online mode")
     run_migrations_online()
