@@ -28,3 +28,11 @@ docker exec -it webpush_api-web-1 ./scripts/db_manager.sh new-migration add_user
 docker exec -it webpush_api-web-1 ./scripts/db_manager.sh sync-and-migrate add_user_preferences
 
 
+
+
+
+# To fix migration heads using the db_manager.sh script:
+docker exec -it webpush_api-web-1 ./scripts/db_manager.sh merge-heads
+
+# Or use the dedicated script:
+docker exec -it webpush_api-web-1 ./scripts/fix_migration_heads.sh
