@@ -56,6 +56,11 @@ try:
     # Set the target metadata for Alembic
     target_metadata = Base.metadata
     
+    # Print detected tables for debugging
+    logger.info("Detected tables:")
+    for table in Base.metadata.sorted_tables:
+        logger.info(f"  - {table.name}")
+    
 except ImportError as e:
     logger.error(f"Error importing configuration or models: {e}")
     raise
