@@ -106,10 +106,11 @@ def run_migrations_online() -> None:
                 with context.begin_transaction():
                     context.run_migrations()
             except KeyError as e:
-                if 'clear_migrations' in str(e):
-                    logger.error("Missing migration 'clear_migrations'. Ensure all migration files are present.")
-                else:
-                    logger.error(f"KeyError during migration: {e}")
+                missing_revision = str(e).strip("'")
+                logger.error(f"Missing migration '{missing_revision}'. Ensure all migration files are present in 'alembic/versions/'.")
+                logger.error("Run `alembic history` to inspect the migration history and verify the missing revision.")
+                logger.error("If the migration file is missing, restore it from version control or recreate it manually.")
+                logger.error("If the issue persists, consider resetting the database and reapplying migrations.")
                 raise
     except Exception as e:
         logger.error(f"Database connection error: {e}")

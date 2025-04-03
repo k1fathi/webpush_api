@@ -240,3 +240,18 @@ If you encounter an error like `KeyError: 'clear_migrations'`:
    docker-compose exec web alembic upgrade head
    ```
 5. Ensure the database state matches the migration files.
+
+### Missing Revision Error
+If you encounter an error like `KeyError: '<previous_revision_id>'`:
+1. Verify that the migration file corresponding to `<previous_revision_id>` exists in `alembic/versions/`.
+2. If the file is missing:
+   - Restore it from version control.
+   - If unavailable, recreate the migration manually.
+3. Run `alembic history` to inspect the migration history.
+4. If necessary, reset the database and reapply migrations:
+   ```
+   docker-compose down -v
+   docker-compose up -d --build
+   docker-compose exec web alembic upgrade head
+   ```
+5. Ensure the database state matches the migration files.

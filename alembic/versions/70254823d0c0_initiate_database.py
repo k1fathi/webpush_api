@@ -1,8 +1,8 @@
-"""Initial migration
+"""initiate database
 
-Revision ID: 9fff8c047fe0
-Revises: d23c48673f53
-Create Date: 2025-04-03 16:12:24.695397
+Revision ID: 70254823d0c0
+Revises: 
+Create Date: 2025-04-03 22:24:38.792237
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = '9fff8c047fe0'
-down_revision: Union[str, None] = 'd23c48673f53'
+revision: str = '70254823d0c0'
+down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -114,6 +114,19 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)
     op.create_index(op.f('ix_users_username'), 'users', ['username'], unique=True)
+    op.create_table('campaign_templates',
+    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('name', sa.String(length=255), nullable=False),
+    sa.Column('description', sa.Text(), nullable=True),
+    sa.Column('category', postgresql.ENUM('PROMOTIONAL', 'TRANSACTIONAL', 'INFORMATIONAL', 'REMINDER', 'SURVEY', name='templatecategory'), nullable=True),
+    sa.Column('status', postgresql.ENUM('DRAFT', 'ACTIVE', 'ARCHIVED', 'DEPRECATED', name='templatestatus'), nullable=True),
+    sa.Column('content', sa.JSON(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), nullable=True),
+    sa.Column('created_by', sa.UUID(), nullable=True),
+    sa.ForeignKeyConstraint(['created_by'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('templates',
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('name', sa.String(), nullable=False),
@@ -278,6 +291,7 @@ def downgrade() -> None:
     op.drop_table('user_segment')
     op.drop_table('user_role')
     op.drop_table('templates')
+    op.drop_table('campaign_templates')
     op.drop_index(op.f('ix_users_username'), table_name='users')
     op.drop_index(op.f('ix_users_email'), table_name='users')
     op.drop_table('users')
