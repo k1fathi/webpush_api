@@ -7,6 +7,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 try:
+    # Update import for use with Pydantic v2
     from core.config import settings
     # Configure using imported settings
     celery_app = Celery(

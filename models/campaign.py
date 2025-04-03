@@ -30,5 +30,4 @@ class Campaign(BaseModel):
     recurrence_pattern: Optional[str] = None
     campaign_type: CampaignType = CampaignType.ONE_TIME
     
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}  # Updated from orm_mode for Pydantic v2

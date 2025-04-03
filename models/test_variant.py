@@ -10,5 +10,4 @@ class TestVariant(BaseModel):
     opened_count: int = 0
     clicked_count: int = 0
     
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}  # Updated from orm_mode for Pydantic v2

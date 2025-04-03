@@ -152,3 +152,19 @@ make migrate ENV=development
 
 
 git fetch --all && git reset --hard origin/dev
+
+----------------------------------------------------------------------
+docker exec -it webpush_api-db-1 psql -U postgres -d webpush -W
+postgres
+
+----------------------------------------------------------------------
+docker inspect webpush_api-db-1 | grep -E "POSTGRES_USER|POSTGRES_PASSWORD|POSTGRES_DB"
+docker inspect --format='{{json .State.Health}}' webpush_api-db-1
+
+
+----------------------------------------------------------------------
+.venv\Scripts\activate
+pip install alembic
+
+----------------------------------------------------------------------
+----------------------------------------------------------------------

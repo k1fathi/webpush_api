@@ -24,5 +24,4 @@ class Analytics(BaseModel):
     conversion_type: Optional[ConversionType] = None
     conversion_value: float = 0.0
     
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}  # Updated from orm_mode for Pydantic v2

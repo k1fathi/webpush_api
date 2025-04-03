@@ -1,7 +1,8 @@
 from datetime import datetime
 from enum import Enum
 from typing import Dict, List, Optional, Any
-from pydantic import BaseModel, EmailStr, Field, validator
+# Update imports for Pydantic v2
+from pydantic import BaseModel, EmailStr, Field, field_validator
 
 class UserStatus(str, Enum):
     """User status enumeration"""
@@ -55,8 +56,8 @@ class User(BaseModel):
     opted_in: bool = False
     is_active: bool = True
     
-    class Config:
-        schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
                 "email": "user@example.com",
                 "username": "johndoe",
@@ -68,3 +69,4 @@ class User(BaseModel):
                 "opted_in": True
             }
         }
+    }

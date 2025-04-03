@@ -97,5 +97,4 @@ class Trigger(BaseModel):
     max_triggers_per_day: Optional[int] = None
     enabled: bool = True
     
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}  # Updated from orm_mode for Pydantic v2

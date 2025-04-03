@@ -20,5 +20,4 @@ class AbTest(BaseModel):
     start_date: datetime = Field(default_factory=datetime.now)
     end_date: Optional[datetime] = None
     
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}  # Updated from orm_mode for Pydantic v2

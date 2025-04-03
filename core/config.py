@@ -2,8 +2,9 @@ import os
 import secrets
 from typing import Any, Dict, List, Optional, Union
 
-# Just use Pydantic v1.x which is more stable with FastAPI
-from pydantic import AnyHttpUrl, BaseSettings, PostgresDsn, validator
+# Update imports for Pydantic v2
+from pydantic import AnyHttpUrl, field_validator, PostgresDsn, model_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     # API settings
@@ -17,9 +18,9 @@ class Settings(BaseSettings):
     SECRET_KEY: str = secrets.token_urlsafe(32)
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8  # 8 days
     
-    # Database - Use the postgres user directly since webpush_user may not exist yet
+    # Database
     POSTGRES_SERVER: str = os.environ.get("POSTGRES_SERVER", "db")
-    POSTGRES_USER: str = os.environ.get("POSTGRES_USER", "postgres")  # Use postgres user
+    POSTGRES_USER: str = os.environ.get("POSTGRES_USER", "postgres")
     POSTGRES_PASSWORD: str = os.environ.get("POSTGRES_PASSWORD", "postgres")
     POSTGRES_DB: str = os.environ.get("POSTGRES_DB", "webpush")
     POSTGRES_PORT: str = os.environ.get("POSTGRES_PORT", "5432")
@@ -52,7 +53,8 @@ class Settings(BaseSettings):
     LOG_FORMAT: str = os.environ.get("LOG_FORMAT", "json")
 
     # Add validator for CORS_ORIGINS to handle string to list conversion
-    @validator("CORS_ORIGINS", pre=True)
+    @field_validator("CORS_ORIGINS", mode="before")
+    @classmethod
     def assemble_cors_origins(cls, v: Union[str, List[str]]) -> Union[List[str], str]:
         if isinstance(v, str) and not v.startswith("["):
             if v == "*":
@@ -62,27 +64,33 @@ class Settings(BaseSettings):
             return [origin.strip() for origin in v.split(",")]
         elif isinstance(v, (list, str)):
             return v
-        raise ValueError(v)
+        raise ValueError("CORS_ORIGINS should be a string or list")
 
-    # Standard Pydantic v1 validator
-    @validator("SQLALCHEMY_DATABASE_URI", pre=True)
-    def assemble_db_connection(cls, v: Optional[str], values: Dict[str, Any]) -> Any:
-        if isinstance(v, str):
-            return v
+    # Updated for Pydantic v2
+    @model_validator(mode="before")
+    @classmethod
+    def assemble_db_connection(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        if values.get("SQLALCHEMY_DATABASE_URI"):
+            return values
         
-        # Use standard postgres connection
-        return PostgresDsn.build(
+        # Build connection string
+        db_url = PostgresDsn.build(
             scheme="postgresql",
-            user=values.get("POSTGRES_USER"),
+            username=values.get("POSTGRES_USER"),
             password=values.get("POSTGRES_PASSWORD"),
             host=values.get("POSTGRES_SERVER"),
-            path=f"/{values.get('POSTGRES_DB') or ''}",
             port=values.get("POSTGRES_PORT", "5432"),
+            path=f"/{values.get('POSTGRES_DB') or ''}",
         )
+        values["SQLALCHEMY_DATABASE_URI"] = db_url
+        return values
 
-    class Config:
-        case_sensitive = True
-        env_file = ".env"
+    # Replace Config class with model_config
+    model_config = SettingsConfigDict(
+        env_file=".env", 
+        env_file_encoding="utf-8",
+        case_sensitive=True,
+    )
 
 settings = Settings()
 

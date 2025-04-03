@@ -64,5 +64,4 @@ class Segment(BaseModel):
     last_evaluated_at: Optional[datetime] = None
     is_active: bool = True
     
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}  # Updated from orm_mode for Pydantic v2

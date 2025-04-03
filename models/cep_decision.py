@@ -3,7 +3,8 @@ from datetime import datetime
 from enum import Enum
 from typing import Dict, Optional, Any, List
 
-from pydantic import BaseModel, Field, validator
+# Update imports for Pydantic v2
+from pydantic import BaseModel, Field, field_validator
 
 class DecisionStatus(str, enum.Enum):
     """Status of a CEP decision"""
@@ -44,8 +45,8 @@ class CepDecision(BaseModel):
     alternative_channels: List[Dict[str, Any]] = Field(default_factory=list)
     created_at: datetime = Field(default_factory=datetime.now)
     
-    class Config:
-        schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
                 "user_id": "12345",
                 "campaign_id": "campaign123",
@@ -62,6 +63,7 @@ class CepDecision(BaseModel):
                 ]
             }
         }
+    }
 
 class ChannelScore(BaseModel):
     """Score for a communication channel"""

@@ -10,5 +10,4 @@ class CdpIntegration(BaseModel):
     behavioral_data: Dict = Field(default_factory=dict)
     last_synced: datetime = Field(default_factory=datetime.now)
     
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}  # Updated from orm_mode for Pydantic v2

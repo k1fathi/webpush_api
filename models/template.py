@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Dict, List, Optional, Any
+# Update imports for Pydantic v2
 from pydantic import BaseModel, Field, HttpUrl
 
 from models.schemas.template import TemplateType, TemplateStatus
@@ -25,5 +26,4 @@ class Template(BaseModel):
     version: int = 1
     category: Optional[str] = None
     
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}  # orm_mode is renamed in Pydantic v2
