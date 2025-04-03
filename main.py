@@ -2,7 +2,7 @@ import uvicorn
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.router import api_router
+from api.v1.router import api_router
 from core.config import settings
 from core.exceptions.handlers import register_exception_handlers
 from core.logging.config import configure_logging
