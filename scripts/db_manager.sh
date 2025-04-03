@@ -7,6 +7,14 @@ log_message() {
   echo "$(date +"%Y-%m-%d %H:%M:%S") - $1"
 }
 
+# Check if psql is available and install if needed
+check_dependencies() {
+  if ! command -v psql &> /dev/null; then
+    log_message "Installing PostgreSQL client..."
+    apt-get update && apt-get install -y postgresql-client
+  fi
+}
+
 # Get current date-time for folder names
 DATE_TIME=$(date +"%Y%m%d_%H%M%S")
 MIGRATIONS_DIR="/app/alembic/versions"
@@ -15,10 +23,12 @@ BACKUPS_DIR="/app/db_backups/${DATE_TIME}"
 # Function to initialize database extensions and users
 initialize_database() {
   log_message "Running database initialization"
-
+  
+  check_dependencies
+  
   # Create extensions
   log_message "Creating extensions..."
-  psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
+  PGPASSWORD=${POSTGRES_PASSWORD} psql -h ${POSTGRES_SERVER} -U ${POSTGRES_USER} -d ${POSTGRES_DB} <<-EOSQL
     CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
     CREATE EXTENSION IF NOT EXISTS "hstore";
     CREATE EXTENSION IF NOT EXISTS "pg_trgm";
@@ -84,11 +94,13 @@ EOSQL
 backup_data() {
   log_message "Backing up existing data"
   
+  check_dependencies
+  
   # Create backup directory
   mkdir -p $BACKUPS_DIR
   
   # Check if tables exist
-  has_tables=$(psql -h ${POSTGRES_SERVER} -U ${POSTGRES_USER} -d ${POSTGRES_DB} -t -c "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'users');")
+  has_tables=$(PGPASSWORD=${POSTGRES_PASSWORD} psql -h ${POSTGRES_SERVER} -U ${POSTGRES_USER} -d ${POSTGRES_DB} -t -c "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'users');")
   
   if [[ $has_tables == *t* ]]; then
     log_message "Found existing tables, creating backups"
@@ -120,8 +132,10 @@ backup_data() {
 reset_alembic() {
   log_message "Resetting Alembic state"
   
+  check_dependencies
+  
   # Drop the alembic_version table
-  psql -h ${POSTGRES_SERVER} -U ${POSTGRES_USER} -d ${POSTGRES_DB} -c "DROP TABLE IF EXISTS alembic_version;"
+  PGPASSWORD=${POSTGRES_PASSWORD} psql -h ${POSTGRES_SERVER} -U ${POSTGRES_USER} -d ${POSTGRES_DB} -c "DROP TABLE IF EXISTS alembic_version;"
   
   # Create migrations directory for this run
   VERSION_DIR="${MIGRATIONS_DIR}/${DATE_TIME}"
@@ -140,7 +154,9 @@ reset_alembic() {
 drop_tables() {
   log_message "Dropping existing tables"
   
-  psql -h ${POSTGRES_SERVER} -U ${POSTGRES_USER} -d ${POSTGRES_DB} << EOF
+  check_dependencies
+  
+  PGPASSWORD=${POSTGRES_PASSWORD} psql -h ${POSTGRES_SERVER} -U ${POSTGRES_USER} -d ${POSTGRES_DB} << EOF
     DROP TABLE IF EXISTS analytics CASCADE;
     DROP TABLE IF EXISTS cep_decisions CASCADE;
     DROP TABLE IF EXISTS notifications CASCADE;
@@ -228,7 +244,9 @@ fix_migration_heads() {
   log_message "Migration heads fixed"
 }
 
-# Main execution
+# Main execution - add dependency check
+check_dependencies
+
 case "$1" in
   init)
     initialize_database

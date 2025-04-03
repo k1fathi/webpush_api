@@ -2,11 +2,18 @@ FROM python:3.9-slim
 
 WORKDIR /app
 
-# Install system dependencies if needed
+# Install system dependencies including PostgreSQL client
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends gcc && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get install -y --no-install-recommends \
+    gcc \
+    postgresql-client \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Make scripts executable
+RUN mkdir -p /app/scripts
+COPY scripts/ /app/scripts/
+RUN chmod +x /app/scripts/*.sh
 
 # Copy requirements first to leverage Docker cache
 COPY requirements.txt .
@@ -17,6 +24,9 @@ RUN pip install --no-cache-dir --upgrade pip && \
 
 # Copy the project
 COPY . .
+
+# Create backup directory
+RUN mkdir -p /app/db_backups
 
 # Set environment variables
 ENV PYTHONPATH=/app
