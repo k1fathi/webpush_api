@@ -224,22 +224,76 @@ create_migration() {
   log_message "Migration created successfully"
 }
 
-# Function to apply migrations
+# Function to handle multiple migration heads
+handle_multiple_heads() {
+  log_message "Detecting and handling multiple migration heads"
+  
+  # Check if we have multiple heads
+  heads_output=$(alembic heads 2>&1)
+  head_count=$(echo "$heads_output" | grep -c "^[0-9a-f]")
+  
+  if [ "$head_count" -gt 1 ]; then
+    log_message "Found multiple migration heads: $head_count"
+    log_message "$heads_output"
+    
+    # Create a merge migration that combines all heads
+    log_message "Creating merge migration"
+    merge_name="merge_heads_${DATE_TIME}"
+    alembic revision --autogenerate -m "$merge_name" || {
+      log_message "Failed to create merge migration automatically"
+      
+      # If automatic merge failed, create an empty merge migration
+      log_message "Creating empty merge migration"
+      alembic merge heads -m "$merge_name" || {
+        log_message "Error: Failed to merge migration heads"
+        return 1
+      }
+    }
+    
+    # Apply the merge migration
+    log_message "Applying merge migration"
+    alembic upgrade heads || {
+      log_message "Error: Failed to apply merged migration"
+      return 1
+    }
+    
+    log_message "Successfully merged migration heads"
+    return 0
+  else
+    log_message "No multiple heads detected"
+    return 0
+  fi
+}
+
+# Function to apply migrations with better handling for multiple heads
 apply_migrations() {
   log_message "Applying migrations"
   
-  # Apply the migrations
-  alembic upgrade head || {
-    log_status=$?
-    log_message "Error applying migrations (status code: $log_status)"
+  # Try regular upgrade first
+  alembic upgrade head 2>&1 | tee /tmp/alembic_output.log
+  
+  # Check if the error was about multiple heads
+  if grep -q "Multiple head revisions" /tmp/alembic_output.log; then
+    log_message "Detected multiple migration heads, attempting to fix"
     
-    # Try to provide more info
-    log_message "Checking migration status..."
-    alembic current || log_message "Could not determine migration status"
-    
-    # Return the error status
-    return $log_status
-  }
+    # Handle the multiple heads
+    if handle_multiple_heads; then
+      log_message "Migration heads fixed, applying migrations again"
+      alembic upgrade head || {
+        log_status=$?
+        log_message "Error applying migrations after fixing heads (status code: $log_status)"
+        return $log_status
+      }
+    else
+      log_message "Failed to fix multiple migration heads"
+      return 1
+    fi
+  elif [ ${PIPESTATUS[0]} -ne 0 ]; then
+    # Some other error occurred
+    log_message "Error applying migrations"
+    alembic current || log_message "Could not determine current migration state"
+    return 1
+  fi
   
   log_message "Displaying current migration state"
   alembic current
@@ -330,8 +384,11 @@ case "$1" in
     log_message "Syncing database and creating migration: ${migration_name}"
     apply_migrations && create_migration "$migration_name"
     ;;
+  merge-heads)
+    handle_multiple_heads
+    ;;
   *)
-    echo "Usage: $0 {init|backup|reset-alembic|drop-tables|new-migration|upgrade|fix-heads|full-reset|sync-and-migrate} [options]"
+    echo "Usage: $0 {init|backup|reset-alembic|drop-tables|new-migration|upgrade|fix-heads|full-reset|sync-and-migrate|merge-heads} [options]"
     echo ""
     echo "Commands:"
     echo "  init              Initialize database with extensions and permissions"
@@ -343,6 +400,7 @@ case "$1" in
     echo "  fix-heads         Fix multiple migration heads"
     echo "  full-reset        Perform a full database reset (use --force to skip confirmation)"
     echo "  sync-and-migrate  Apply migrations and then create a new one (for out-of-sync databases)"
+    echo "  merge-heads       Detect and merge multiple migration heads"
     echo ""
     echo "Example: $0 init"
     echo "Example: $0 new-migration add_user_preferences"
