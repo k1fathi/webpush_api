@@ -20,3 +20,9 @@ class RoleRepository(BaseRepository):
         )
         result = await self.session.execute(query)
         return {row[0] for row in result}
+        
+    async def get_by_name(self, name: str) -> Optional[RoleModel]:
+        """Get a role by name"""
+        query = select(RoleModel).where(RoleModel.name == name)
+        result = await self.session.execute(query)
+        return result.scalars().first()

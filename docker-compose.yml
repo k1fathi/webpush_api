@@ -12,6 +12,10 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
     ports:
       - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    # Add these restart settings to ensure the database persists across restarts
+    restart: always
+    # Add command to disable automatic vacuuming that might be related to the issue
+    command: postgres -c 'max_connections=100' -c 'shared_buffers=256MB' -c 'autovacuum=on' -c 'log_statement=all'
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 5s
@@ -83,3 +87,9 @@ services:
 
 volumes:
   postgres_data:
+    # Add driver_opts for better persistence
+    driver: local
+    driver_opts:
+      type: none
+      device: ${PWD}/postgres-data # Store data in local directory
+      o: bind

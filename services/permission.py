@@ -56,3 +56,31 @@ class PermissionService:
                 all_permissions.update(role_permissions)
         
         return all_permissions
+    
+    async def get_all_permissions(self, skip: int = 0, limit: int = 100, category: Optional[str] = None) -> List[Dict]:
+        """Get all permissions with pagination and optional filtering"""
+        permissions = await self.permission_repo.get_all()
+        
+        # Filter by category if provided
+        if category:
+            permissions = [p for p in permissions if p.category == category]
+            
+        # Apply pagination
+        paginated = permissions[skip:skip+limit]
+        
+        return paginated
+    
+    async def get_permission(self, name: str) -> Optional[Dict]:
+        """Get a permission by name"""
+        return await self.permission_repo.get_by_name(name)
+    
+    async def get_permissions_by_role_name(self, role_name: str) -> List[str]:
+        """Get all permissions for a role by name"""
+        # Get role ID first
+        role = await self.role_repo.get_by_name(role_name)
+        if not role:
+            return []
+            
+        # Then get permissions for that role
+        permissions = await self.role_repo.get_role_permissions(str(role.id))
+        return list(permissions)
