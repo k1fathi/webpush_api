@@ -9,13 +9,13 @@ from api.deps import get_current_active_user
 from core.exceptions.http import NotFoundException
 from core.permissions.dependencies import has_permission
 from models.domain.user import UserModel
-from models.analytics import ConversionType
 from models.schemas.analytics import (
     AnalyticsCreate,
     AnalyticsRead,
     AnalyticsUpdate,
     CampaignStats,
-    ConversionCreate
+    ConversionCreate,
+    ConversionType
 )
 from services.analytics import AnalyticsService
 from services.campaign import CampaignService

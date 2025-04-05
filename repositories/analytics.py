@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.session import get_session
 from models.domain.analytics import AnalyticsModel
-from models.analytics import Analytics, ConversionType
+from models.schemas.analytics import Analytics, ConversionType
 from repositories.base import BaseRepository
 
 class AnalyticsRepository(BaseRepository):

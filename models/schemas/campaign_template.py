@@ -1,9 +1,23 @@
 from datetime import datetime
+from enum import Enum
 from typing import Dict, Any, Optional, List
 from uuid import UUID
 from pydantic import BaseModel, Field
 
-from models.campaign_template import TemplateCategory, TemplateStatus
+class TemplateCategory(str, Enum):
+    """Categories for campaign templates"""
+    PROMOTIONAL = "promotional"
+    TRANSACTIONAL = "transactional"
+    INFORMATIONAL = "informational"
+    REMINDER = "reminder"
+    SURVEY = "survey"
+    
+class TemplateStatus(str, Enum):
+    """Status values for templates"""
+    DRAFT = "draft"
+    ACTIVE = "active"
+    ARCHIVED = "archived"
+    DEPRECATED = "deprecated"
 
 class CampaignTemplateBase(BaseModel):
     """Base class for campaign template schemas"""
@@ -32,7 +46,7 @@ class CampaignTemplateRead(CampaignTemplateBase):
     updated_at: datetime
     created_by: Optional[UUID] = None
     
-    model_config = {"from_attributes": True}  # Pydantic v2 for ORM conversion
+    model_config = {"from_attributes": True}
 
 class CampaignTemplateList(BaseModel):
     """Schema for listing campaign templates"""

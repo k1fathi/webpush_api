@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.session import get_session
 from models.domain.cep_decision import CepDecisionModel
-from models.cep_decision import CepDecision, DecisionStatus
+from models.schemas.cep_decision import CepDecision, DecisionStatus
 from repositories.base import BaseRepository
 
 class CepDecisionRepository(BaseRepository):

@@ -13,7 +13,7 @@ except ImportError:
 from fastapi.encoders import jsonable_encoder
 
 from core.config import settings
-from models.cdp_integration import CdpIntegration, CdpSyncStatus
+from models.schemas.cdp_integration import CdpIntegration, CdpSyncStatus
 from repositories.cdp_integration import CdpIntegrationRepository
 from repositories.user import UserRepository
 from utils.audit import audit_log

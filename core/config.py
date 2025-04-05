@@ -26,6 +26,10 @@ class Settings(BaseSettings):
     POSTGRES_DB: str = os.environ.get("POSTGRES_DB", "")
     POSTGRES_PORT: str = os.environ.get("POSTGRES_PORT", "")
     SQLALCHEMY_DATABASE_URI: str | PostgresDsn = None
+    DB_ECHO_LOG: bool = os.getenv("DB_ECHO_LOG", "False").lower() == "true"
+    DB_POOL_SIZE: int = int(os.getenv("DB_POOL_SIZE", "5"))
+    DB_MAX_OVERFLOW: int = int(os.getenv("DB_MAX_OVERFLOW", "10"))
+    DB_POOL_RECYCLE: int = int(os.getenv("DB_POOL_RECYCLE", "3600"))
 
     # Redis
     REDIS_HOST: str = os.environ.get("REDIS_HOST", "redis")
@@ -40,6 +44,7 @@ class Settings(BaseSettings):
     VAPID_PRIVATE_KEY: str = os.environ.get("VAPID_PRIVATE_KEY", "")
     VAPID_PUBLIC_KEY: str = os.environ.get("VAPID_PUBLIC_KEY", "")
     VAPID_CLAIMS_EMAIL: str = os.environ.get("VAPID_CLAIMS_EMAIL", "mailto:admin@example.com")
+    DEFAULT_NOTIFICATION_BADGE: str = os.getenv("DEFAULT_NOTIFICATION_BADGE", "/static/badge.png")
     
     # CDP Integration
     CDP_API_URL: Optional[str] = os.environ.get("CDP_API_URL")

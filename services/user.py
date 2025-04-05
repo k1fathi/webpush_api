@@ -7,7 +7,7 @@ from passlib.context import CryptContext
 from jose import jwt
 
 from core.config import settings
-from models.user import User, UserStatus
+from models.schemas.user import User, UserStatus
 from models.schemas.user import UserCreate, UserUpdate, UserDevice
 from repositories.user import UserRepository
 from utils.audit import audit_log

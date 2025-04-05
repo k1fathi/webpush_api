@@ -3,8 +3,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Dict, Optional, Any, List
 
-# Update imports for Pydantic v2
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 
 class DecisionStatus(str, enum.Enum):
     """Status of a CEP decision"""

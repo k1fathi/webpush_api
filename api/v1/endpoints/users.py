@@ -9,10 +9,9 @@ from api.deps import get_current_active_user
 from core.exceptions.http import NotFoundException
 from core.permissions.dependencies import has_permission
 from models.domain.user import UserModel
-from models.user import UserStatus
 from models.schemas.user import (
     UserBase, UserCreate, UserRead, UserUpdate, UserList, 
-    UserDevice, UserPreferences, UserStats
+    UserDevice, UserPreferences, UserStats, UserStatus
 )
 from services.user import UserService
 

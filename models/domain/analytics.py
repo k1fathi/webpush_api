@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID, ENUM
 
 from db.base_class import Base
-from models.analytics import ConversionType
+from models.schemas.analytics import ConversionType
 
 class AnalyticsModel(Base):
     """Analytics model for tracking notification events"""

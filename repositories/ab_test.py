@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.session import get_session
 from models.domain.ab_test import AbTestModel
-from models.ab_test import AbTest
+from models.schemas.ab_test import AbTest
 from repositories.base import BaseRepository
 
 class AbTestRepository(BaseRepository):

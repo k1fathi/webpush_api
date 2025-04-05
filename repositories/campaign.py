@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.session import get_session
 from models.domain.campaign import CampaignModel, CampaignStatus, CampaignType
-from models.campaign import Campaign
+from models.schemas.campaign import Campaign
 from repositories.base import BaseRepository
 
 class CampaignRepository(BaseRepository):

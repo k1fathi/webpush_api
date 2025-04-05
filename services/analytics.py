@@ -6,7 +6,7 @@ from typing import Dict, List, Optional, Tuple, Union
 from fastapi.encoders import jsonable_encoder
 
 from core.config import settings
-from models.analytics import Analytics, ConversionType
+from models.schemas.analytics import Analytics, ConversionType
 from models.domain.notification import NotificationModel
 from repositories.analytics import AnalyticsRepository
 from repositories.campaign import CampaignRepository

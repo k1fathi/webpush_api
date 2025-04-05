@@ -3,8 +3,8 @@ import statistics
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple
 
-from models.ab_test import AbTest, WinningCriteria
-from models.test_variant import TestVariant
+from models.schemas.ab_test import AbTest, WinningCriteria
+from models.schemas.test_variant import TestVariant
 from repositories.ab_test import AbTestRepository
 from repositories.test_variant import TestVariantRepository
 from repositories.template import TemplateRepository

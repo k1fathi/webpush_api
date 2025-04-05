@@ -8,7 +8,7 @@ import httpx
 from fastapi.encoders import jsonable_encoder
 
 from core.config import settings
-from models.cep_decision import CepDecision, DecisionStatus
+from models.schemas.cep_decision import CepDecision, DecisionStatus
 from repositories.cep_decision import CepDecisionRepository
 from repositories.user import UserRepository
 from repositories.analytics import AnalyticsRepository

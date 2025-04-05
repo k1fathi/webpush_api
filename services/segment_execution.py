@@ -37,6 +37,7 @@ from repositories.segment import SegmentRepository
 from repositories.user import UserRepository
 from utils.audit import audit_log
 from utils.query_builder import build_segment_query
+from models.schemas.segment import SegmentRule, Segment, SegmentType, Criterion, CompositeRule, CompositeOperator
 
 class SegmentExecutionService:
     """

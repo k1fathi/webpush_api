@@ -3,13 +3,21 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
 
-from croniter import croniter
+# Optional import for croniter with fallback
+try:
+    from croniter import croniter
+except ImportError:
+    croniter = None
+    logging.warning("croniter module not found. Scheduled triggers with cron expressions will not work properly.")
+
 from fastapi.encoders import jsonable_encoder
+from fastapi import HTTPException, status
 
 from core.config import settings
-from models.trigger import (
+from models.schemas.trigger import (
     Trigger, TriggerStatus, TriggerType, TriggerAction,
-    ScheduleConfig, ActionConfig
+    ScheduleConfig, ActionConfig, TriggerCreate, TriggerRead, TriggerUpdate, TriggerList,
+    TriggerEvent, TriggerResult
 )
 from repositories.trigger import TriggerRepository
 from repositories.notification import NotificationRepository
@@ -20,280 +28,195 @@ from utils.audit import audit_log
 logger = logging.getLogger(__name__)
 
 class TriggerService:
-    """Service for trigger management according to trigger_based_flow.mmd"""
+    """Service for managing notification triggers"""
     
-    def __init__(self):
-        self.trigger_repo = TriggerRepository()
-        self.notification_repo = NotificationRepository()
-        self.campaign_repo = CampaignRepository()
-        self.segment_repo = SegmentRepository()
-
-    async def create_trigger(self, trigger_data: Dict, user_id: str = None) -> Trigger:
+    def __init__(self, repository: TriggerRepository):
+        self.repository = repository
+    
+    async def create_trigger(self, trigger_create: TriggerCreate) -> TriggerRead:
         """Create a new trigger"""
+        # Convert timedelta to seconds for storage
+        cooldown_seconds = None
+        if trigger_create.cooldown_period is not None:
+            cooldown_seconds = trigger_create.cooldown_period
+        
         # Create trigger object
         trigger = Trigger(
-            id=str(uuid.uuid4()),
-            status=TriggerStatus.ACTIVE,
+            name=trigger_create.name,
+            description=trigger_create.description,
+            trigger_type=trigger_create.trigger_type,
+            rules=trigger_create.rules,
+            schedule=trigger_create.schedule,
+            action=trigger_create.action,
             created_at=datetime.now(),
             updated_at=datetime.now(),
-            **trigger_data
+            status=TriggerStatus.ACTIVE,
+            cooldown_period=timedelta(seconds=cooldown_seconds) if cooldown_seconds else None,
+            max_triggers_per_day=trigger_create.max_triggers_per_day,
+            metadata=trigger_create.metadata,
+            enabled=True
         )
-
-        # Validate schedule if provided
-        if trigger.schedule:
-            self._validate_schedule(trigger.schedule)
-
-        # Validate action configuration
-        await self._validate_action_config(trigger.action)
-
-        # Save to repository
-        created_trigger = await self.trigger_repo.create(trigger)
-
-        # Log creation
-        audit_log(
-            message=f"Created trigger {created_trigger.name}",
-            user_id=user_id,
-            action_type="create_trigger",
-            resource_type="trigger",
-            resource_id=created_trigger.id
-        )
-
-        return created_trigger
-
-    async def update_trigger(
-        self,
-        trigger_id: str,
-        trigger_data: Dict,
-        user_id: str = None
-    ) -> Trigger:
-        """Update an existing trigger"""
-        # Get existing trigger
-        trigger = await self.trigger_repo.get(trigger_id)
+        
+        # Save to database
+        created_trigger = await self.repository.create(trigger)
+        return TriggerRead.model_validate(created_trigger)
+    
+    async def get_trigger(self, trigger_id: str) -> Optional[TriggerRead]:
+        """Get a trigger by ID"""
+        trigger = await self.repository.get(trigger_id)
         if not trigger:
-            raise ValueError(f"Trigger with ID {trigger_id} not found")
-
+            return None
+        return TriggerRead.model_validate(trigger)
+    
+    async def update_trigger(self, trigger_id: str, trigger_update: TriggerUpdate) -> Optional[TriggerRead]:
+        """Update a trigger"""
+        # First get existing trigger
+        trigger = await self.repository.get(trigger_id)
+        if not trigger:
+            return None
+        
         # Update fields
-        for key, value in trigger_data.items():
-            if hasattr(trigger, key):
+        update_data = trigger_update.model_dump(exclude_unset=True)
+        for key, value in update_data.items():
+            if key == "cooldown_period" and value is not None:
+                setattr(trigger, key, timedelta(seconds=value))
+            else:
                 setattr(trigger, key, value)
-
-        # Validate if schedule was updated
-        if "schedule" in trigger_data and trigger.schedule:
-            self._validate_schedule(trigger.schedule)
-
-        # Validate if action was updated
-        if "action" in trigger_data:
-            await self._validate_action_config(trigger.action)
-
+        
+        # Always update the updated_at field
         trigger.updated_at = datetime.now()
-
-        # Save updates
-        updated_trigger = await self.trigger_repo.update(trigger_id, trigger)
-
-        # Log update
-        audit_log(
-            message=f"Updated trigger {updated_trigger.name}",
-            user_id=user_id,
-            action_type="update_trigger",
-            resource_type="trigger",
-            resource_id=trigger_id
+        
+        # Save to database
+        updated_trigger = await self.repository.update(trigger_id, trigger)
+        return TriggerRead.model_validate(updated_trigger)
+    
+    async def delete_trigger(self, trigger_id: str) -> bool:
+        """Delete a trigger"""
+        return await self.repository.delete(trigger_id)
+    
+    async def list_triggers(
+        self, 
+        skip: int = 0, 
+        limit: int = 100,
+        trigger_type: Optional[str] = None,
+        status: Optional[str] = None
+    ) -> TriggerList:
+        """List all triggers with filtering options"""
+        filters = {}
+        if trigger_type:
+            filters["trigger_type"] = trigger_type
+        if status:
+            filters["status"] = status
+            
+        triggers = await self.repository.list(
+            skip=skip,
+            limit=limit,
+            filters=filters
         )
-
-        return updated_trigger
-
-    def _validate_schedule(self, schedule: ScheduleConfig) -> None:
-        """Validate trigger schedule configuration"""
-        if not schedule.frequency:
-            raise ValueError("Schedule frequency is required")
-
-        # Validate cron expression
-        try:
-            croniter(schedule.frequency)
-        except ValueError as e:
-            raise ValueError(f"Invalid cron expression: {str(e)}")
-
-        # Validate dates
-        if schedule.start_date and schedule.end_date:
-            if schedule.start_date >= schedule.end_date:
-                raise ValueError("End date must be after start date")
-
-    async def _validate_action_config(self, action: ActionConfig) -> None:
-        """Validate trigger action configuration"""
-        if action.action_type == TriggerAction.SEND_NOTIFICATION:
-            if not action.template_id:
-                raise ValueError("Template ID is required for notification actions")
-                
-            # Verify template exists
-            template = await self.template_repo.get(action.template_id)
-            if not template:
-                raise ValueError(f"Template {action.template_id} not found")
-
-        elif action.action_type == TriggerAction.START_CAMPAIGN:
-            if not action.campaign_id:
-                raise ValueError("Campaign ID is required for campaign actions")
-                
-            # Verify campaign exists
-            campaign = await self.campaign_repo.get(action.campaign_id)
-            if not campaign:
-                raise ValueError(f"Campaign {action.campaign_id} not found")
-
-        elif action.action_type == TriggerAction.UPDATE_SEGMENT:
-            if not action.segment_id:
-                raise ValueError("Segment ID is required for segment actions")
-                
-            # Verify segment exists
-            segment = await self.segment_repo.get(action.segment_id)
-            if not segment:
-                raise ValueError(f"Segment {action.segment_id} not found")
-
-        elif action.action_type == TriggerAction.WEBHOOK:
-            if not action.webhook_url:
-                raise ValueError("Webhook URL is required for webhook actions")
-
-    async def process_event(self, event_data: Dict) -> List[Dict]:
-        """Process an event and execute matching triggers"""
-        # Get all active triggers
-        active_triggers = await self.trigger_repo.get_active_triggers()
+        total = await self.repository.count(filters)
+        
+        return TriggerList(
+            items=[TriggerRead.model_validate(t) for t in triggers],
+            total=total,
+            page=skip // limit + 1,
+            page_size=limit
+        )
+    
+    async def activate_trigger(self, trigger_id: str) -> Optional[TriggerRead]:
+        """Activate a trigger"""
+        trigger = await self.repository.get(trigger_id)
+        if not trigger:
+            return None
+        
+        trigger.enabled = True
+        trigger.status = TriggerStatus.ACTIVE
+        trigger.updated_at = datetime.now()
+        
+        updated_trigger = await self.repository.update(trigger_id, trigger)
+        return TriggerRead.model_validate(updated_trigger)
+    
+    async def deactivate_trigger(self, trigger_id: str) -> Optional[TriggerRead]:
+        """Deactivate a trigger"""
+        trigger = await self.repository.get(trigger_id)
+        if not trigger:
+            return None
+        
+        trigger.enabled = False
+        trigger.status = TriggerStatus.INACTIVE
+        trigger.updated_at = datetime.now()
+        
+        updated_trigger = await self.repository.update(trigger_id, trigger)
+        return TriggerRead.model_validate(updated_trigger)
+    
+    async def process_event(self, event: TriggerEvent) -> List[TriggerResult]:
+        """
+        Process an incoming event against all active triggers
+        
+        Returns a list of trigger execution results
+        """
+        # Get all active event-based triggers
+        active_triggers = await self.repository.list_active_event_triggers()
         
         results = []
         for trigger in active_triggers:
-            if await self._should_execute_trigger(trigger, event_data):
-                try:
-                    result = await self._execute_trigger(trigger, event_data)
-                    results.append(result)
-                except Exception as e:
-                    logger.error(f"Error executing trigger {trigger.id}: {str(e)}")
-                    await self.trigger_repo.record_execution(
-                        trigger.id,
-                        success=False,
-                        error=str(e)
-                    )
-                    
+            # Check if the trigger matches this event
+            if self._does_trigger_match_event(trigger, event):
+                result = await self._execute_trigger_action(trigger, event)
+                results.append(result)
+                
+                # Update trigger metadata
+                if result.success:
+                    trigger.trigger_count += 1
+                    trigger.last_triggered_at = datetime.now()
+                else:
+                    trigger.error_count += 1
+                
+                await self.repository.update(trigger.id, trigger)
+                
         return results
-
-    async def _should_execute_trigger(self, trigger: Trigger, event_data: Dict) -> bool:
-        """Check if a trigger should be executed for an event"""
-        # Check if trigger is enabled
-        if not trigger.enabled:
-            return False
-
-        # Check cooldown period
-        if trigger.last_triggered_at and trigger.cooldown_period:
-            cooldown_ends = trigger.last_triggered_at + trigger.cooldown_period
-            if datetime.now() < cooldown_ends:
-                return False
-
-        # Check daily limit
-        if trigger.max_triggers_per_day:
-            today_count = await self._get_trigger_count_today(trigger.id)
-            if today_count >= trigger.max_triggers_per_day:
-                return False
-
-        # Match event against trigger rules
-        return self._event_matches_rules(event_data, trigger.rules)
-
-    def _event_matches_rules(self, event_data: Dict, rules: List[Dict]) -> bool:
-        """Check if an event matches trigger rules"""
-        # Implementation would depend on your rule matching logic
-        # This is a simplified version
-        for rule in rules:
-            if not self._match_single_rule(event_data, rule):
-                return False
-        return True
-
-    def _match_single_rule(self, event_data: Dict, rule: Dict) -> bool:
-        """Match an event against a single rule"""
-        # Simple rule matching logic
-        # Would be more sophisticated in a real implementation
-        for condition in rule.get('conditions', []):
-            field_value = event_data.get(condition['field'])
-            if not self._check_condition(field_value, condition):
-                return False
-        return True
-
-    def _check_condition(self, value: Any, condition: Dict) -> bool:
-        """Check a value against a condition"""
-        operator = condition.get('operator', 'equals')
-        test_value = condition.get('value')
-
-        if operator == 'equals':
-            return value == test_value
-        elif operator == 'not_equals':
-            return value != test_value
-        elif operator == 'contains':
-            return test_value in value if value else False
-        elif operator == 'greater_than':
-            return value > test_value if value is not None else False
-        elif operator == 'less_than':
-            return value < test_value if value is not None else False
+    
+    def _does_trigger_match_event(self, trigger: Trigger, event: TriggerEvent) -> bool:
+        """Check if a trigger's rules match an event"""
+        # Implementation of rule matching logic
+        # This would check the trigger's rules against the event data
+        # For now, a simple example implementation
         
+        # Check event type matches any rule condition
+        for rule in trigger.rules:
+            for condition in rule.conditions:
+                if condition.field == "event_type" and condition.value == event.event_type:
+                    return True
+                
         return False
-
-    async def _execute_trigger(self, trigger: Trigger, event_data: Dict) -> Dict:
-        """Execute a trigger's action"""
-        action = trigger.action
-        result = None
-        error = None
-
+    
+    async def _execute_trigger_action(self, trigger: Trigger, event: TriggerEvent) -> TriggerResult:
+        """
+        Execute the action associated with a trigger
+        
+        Returns a TriggerResult with execution status
+        """
         try:
-            if action.action_type == TriggerAction.SEND_NOTIFICATION:
-                result = await self._execute_notification_action(action, event_data)
-            elif action.action_type == TriggerAction.START_CAMPAIGN:
-                result = await self._execute_campaign_action(action, event_data)
-            elif action.action_type == TriggerAction.UPDATE_SEGMENT:
-                result = await self._execute_segment_action(action, event_data)
-            elif action.action_type == TriggerAction.WEBHOOK:
-                result = await self._execute_webhook_action(action, event_data)
-
-            success = True
-        except Exception as e:
-            success = False
-            error = str(e)
-            raise
-
-        finally:
-            # Record execution
-            await self.trigger_repo.record_execution(
-                trigger.id,
-                success=success,
-                action_result=result,
-                error=error
+            # Implementation of different trigger actions
+            # This could call other services based on the action type
+            # For now, just log the action
+            
+            logger.info(f"Executing trigger {trigger.id} action {trigger.action.action_type}")
+            
+            # In a real implementation, different actions would be handled here
+            # like sending notifications, starting campaigns, etc.
+            
+            return TriggerResult(
+                trigger_id=trigger.id,
+                executed_at=datetime.now(),
+                success=True,
+                action_result={"status": "executed", "action_type": trigger.action.action_type}
             )
-
-        return {
-            "trigger_id": trigger.id,
-            "action_type": action.action_type,
-            "success": success,
-            "result": result,
-            "error": error
-        }
-
-    async def _execute_notification_action(self, action: ActionConfig, event_data: Dict) -> Dict:
-        """Execute a notification action"""
-        # Implementation would create and send a notification
-        # This is a placeholder
-        return {"status": "notification_sent"}
-
-    async def _execute_campaign_action(self, action: ActionConfig, event_data: Dict) -> Dict:
-        """Execute a campaign action"""
-        # Implementation would start a campaign
-        # This is a placeholder
-        return {"status": "campaign_started"}
-
-    async def _execute_segment_action(self, action: ActionConfig, event_data: Dict) -> Dict:
-        """Execute a segment update action"""
-        # Implementation would update a segment
-        # This is a placeholder
-        return {"status": "segment_updated"}
-
-    async def _execute_webhook_action(self, action: ActionConfig, event_data: Dict) -> Dict:
-        """Execute a webhook action"""
-        # Implementation would call a webhook
-        # This is a placeholder
-        return {"status": "webhook_called"}
-
-    async def _get_trigger_count_today(self, trigger_id: str) -> int:
-        """Get the number of times a trigger has been executed today"""
-        # Implementation would count today's executions
-        # This is a placeholder
-        return 0
+            
+        except Exception as e:
+            logger.error(f"Error executing trigger {trigger.id}: {str(e)}")
+            return TriggerResult(
+                trigger_id=trigger.id,
+                executed_at=datetime.now(),
+                success=False,
+                error=str(e)
+            )

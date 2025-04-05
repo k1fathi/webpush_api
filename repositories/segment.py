@@ -18,7 +18,7 @@ except ImportError:
         yield None
 
 from models.domain.segment import SegmentModel
-from models.segment import Segment, SegmentType
+from models.schemas.segment import Segment, SegmentType
 from repositories.base import BaseRepository
 
 class SegmentRepository(BaseRepository):

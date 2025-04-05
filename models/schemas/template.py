@@ -18,6 +18,29 @@ class TemplateStatus(str, Enum):
     ARCHIVED = "archived"
     DELETED = "deleted"
 
+class Template(BaseModel):
+    """Template model"""
+    id: Optional[str] = None
+    name: str
+    description: Optional[str] = None
+    title: str
+    body: str
+    image_url: Optional[HttpUrl] = None
+    action_url: Optional[HttpUrl] = None
+    icon_url: Optional[HttpUrl] = None
+    template_type: TemplateType = TemplateType.WEBPUSH
+    content: Dict[str, Any] = Field(default_factory=dict)
+    variables: List[str] = Field(default_factory=list)
+    tags: List[str] = Field(default_factory=list)
+    status: TemplateStatus = TemplateStatus.DRAFT
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+    created_by: Optional[str] = None
+    version: int = 1
+    category: Optional[str] = None
+    
+    model_config = {"from_attributes": True}
+
 class TemplateBase(BaseModel):
     """Base schema for templates"""
     name: str
@@ -28,7 +51,7 @@ class TemplateBase(BaseModel):
     tags: List[str] = Field(default_factory=list)
 
     model_config = {
-        "from_attributes": True  # Updated from orm_mode = True
+        "from_attributes": True
     }
 
 class TemplateCreate(TemplateBase):
@@ -116,4 +139,4 @@ class TemplateVersion(BaseModel):
     created_at: datetime
     created_by: Optional[str] = None
     
-    model_config = {"from_attributes": True}  # Updated for Pydantic v2
+    model_config = {"from_attributes": True}

@@ -255,3 +255,24 @@ If you encounter an error like `KeyError: '<previous_revision_id>'`:
    docker-compose exec web alembic upgrade head
    ```
 5. Ensure the database state matches the migration files.
+
+
+
+
+npm install -g web-push
+web-push generate-vapid-keys
+
+
+Public Key:
+BJYUjNz-VuGHOxacd41ZnQ6Pre9asOClRgAt0RxXLg_VIxCHIeyTTMcZnkNt7V4sx6e3rFAQpnWVKCclKODATDo
+
+Private Key:
+wsckWSGo2wR6o4a65TuSh8a-T30mRR17EUjpp0Oc1-k
+
+
+
+https://astra2.zuzzuu.com:9000/docs
+
+
+
+curl -X POST http://localhost:5000/api/send-push -H "Content-Type: application/json" -d '{"message": "Hey there, this is a test!"}'

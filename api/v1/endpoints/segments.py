@@ -9,7 +9,6 @@ from api.deps import get_current_active_user
 from core.exceptions.http import NotFoundException
 from core.permissions.dependencies import has_permission
 from models.domain.user import UserModel
-from models.segment import SegmentType
 from models.schemas.segment import (
     SegmentCreate,
     SegmentRead,
@@ -17,7 +16,8 @@ from models.schemas.segment import (
     SegmentList,
     SegmentEvaluation,
     SegmentUserBatch,
-    SegmentStats
+    SegmentStats,
+    SegmentType
 )
 from services.segment import SegmentService
 from utils.audit import audit_log

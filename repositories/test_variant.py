@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.session import get_session
 from models.domain.test_variant import TestVariantModel
-from models.test_variant import TestVariant
+from models.schemas.test_variant import TestVariant
 from repositories.base import BaseRepository
 
 class TestVariantRepository(BaseRepository):

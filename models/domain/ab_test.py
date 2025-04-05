@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID, ENUM
 
 from db.base_class import Base
-from models.ab_test import WinningCriteria
+from models.schemas.ab_test import WinningCriteria
 
 class AbTestModel(Base):
     """A/B test model"""

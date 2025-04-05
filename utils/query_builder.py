@@ -1,7 +1,7 @@
 from typing import Dict, List, Any, Optional, Tuple
 from sqlalchemy import and_, or_, not_, column, text
 from sqlalchemy.sql.expression import BinaryExpression, ClauseElement
-from models.segment import SegmentOperator
+from models.schemas.segment import SegmentOperator
 
 def build_segment_query(
     criteria: Dict[str, Any], 

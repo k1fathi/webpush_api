@@ -5,7 +5,7 @@ from sqlalchemy.dialects.postgresql import UUID, ENUM
 from sqlalchemy.orm import relationship
 
 from db.base_class import Base
-from models.trigger import TriggerType, TriggerStatus
+from models.schemas.trigger import TriggerType, TriggerStatus
 
 class TriggerModel(Base):
     """Trigger model for database storage"""

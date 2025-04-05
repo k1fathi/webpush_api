@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID, ENUM
 
 from db.base_class import Base
-from models.notification import DeliveryStatus
+from models.schemas.notification import DeliveryStatus
 
 class NotificationModel(Base):
     """Notification model"""

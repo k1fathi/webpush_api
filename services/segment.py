@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Set, Any, Tuple, Union
 
 from core.config import settings
-from models.segment import Segment, SegmentType, SegmentOperator, CompositeOperator
+from models.schemas.segment import Segment, SegmentType, SegmentOperator, CompositeOperator
 from repositories.segment import SegmentRepository
 from repositories.user import UserRepository
 from repositories.campaign import CampaignRepository

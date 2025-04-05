@@ -6,7 +6,7 @@ from typing import Dict, List, Optional, Union
 from fastapi.encoders import jsonable_encoder
 
 from core.config import settings
-from models.campaign import Campaign, CampaignStatus, CampaignType
+from models.schemas.campaign import Campaign, CampaignStatus, CampaignType
 from models.domain.notification import DeliveryStatus
 from repositories.campaign import CampaignRepository
 from repositories.segment import SegmentRepository

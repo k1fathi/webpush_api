@@ -9,13 +9,7 @@ from api.deps import get_current_active_user
 from core.exceptions.http import NotFoundException
 from core.permissions.dependencies import has_permission
 from models.domain.user import UserModel
-from models.notification import DeliveryStatus
-from models.schemas.notification import (
-    NotificationCreate, 
-    NotificationRead, 
-    NotificationTrackEvent, 
-    NotificationList
-)
+from models.schemas.notification import DeliveryStatus, NotificationRead, NotificationCreate, NotificationUpdate, NotificationList
 from services.notification import NotificationService
 from utils.audit import audit_log
 

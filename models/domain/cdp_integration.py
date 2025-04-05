@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 
 from db.session import Base
-from models.cdp_integration import CdpSyncStatus
+from models.schemas.cdp_integration import CdpSyncStatus
 
 
 class CdpIntegrationModel(Base):

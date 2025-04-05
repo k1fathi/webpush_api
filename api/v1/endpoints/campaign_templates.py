@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import JSONResponse
 
 from api.deps import get_current_active_user
-from models.campaign_template import TemplateCategory, TemplateStatus
+from models.schemas.campaign_template import TemplateCategory, TemplateStatus
 from models.schemas.campaign_template import (
     CampaignTemplateCreate, CampaignTemplateRead, 
     CampaignTemplateUpdate, CampaignTemplateList

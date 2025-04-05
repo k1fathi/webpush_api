@@ -4,7 +4,7 @@ from sqlalchemy import Boolean, Column, String, Integer, DateTime, Text, JSON
 from sqlalchemy.dialects.postgresql import UUID, ENUM
 
 from db.base_class import Base
-from models.segment import SegmentType
+from models.schemas.segment import SegmentType
 
 class SegmentModel(Base):
     """Segment model for storing user segments"""

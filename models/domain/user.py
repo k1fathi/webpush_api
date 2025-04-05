@@ -6,7 +6,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID, ENUM, ARRAY
 
 from db.base_class import Base
-from models.user import UserStatus
+from models.schemas.user import UserStatus
 
 # Association table for user-role relationship
 user_role = Table(

@@ -9,7 +9,7 @@ from db.session import get_session
 from models.domain.user import UserModel
 from models.domain.user_role import UserRoleModel
 from models.domain.role import RoleModel
-from models.user import User
+from models.schemas.user import User
 from repositories.base import BaseRepository
 
 class UserRepository(BaseRepository):

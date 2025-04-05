@@ -8,7 +8,7 @@ from api.deps import get_current_active_user
 from core.exceptions.http import NotFoundException
 from core.permissions.dependencies import has_permission
 from models.domain.user import UserModel
-from models.cep_decision import CepDecisionCreate, CepDecisionRead, DecisionStatus
+from models.schemas.cep_decision import CepDecisionCreate, CepDecisionRead, DecisionStatus
 from services.cep import CepService
 from utils.audit import audit_log
 

@@ -4,12 +4,11 @@ from datetime import datetime
 from typing import Dict, List, Optional, Any
 
 from core.config import settings
-from models.notification import Notification, DeliveryStatus, NotificationType
+from models.schemas.notification import Notification, DeliveryStatus, NotificationType
 from repositories.notification import NotificationRepository
 from repositories.campaign import CampaignRepository
 from repositories.template import TemplateRepository
 from repositories.user import UserRepository
-from repositories.notification_delivery import NotificationDeliveryRepository
 from services.cep import CepService
 from utils.audit import audit_log
 

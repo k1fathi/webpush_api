@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import Dict, List, Optional, Any, Union
 
 from core.config import settings
-from models.template import Template
+from models.schemas.template import Template
 from models.schemas.template import TemplateStatus, TemplateType, TemplateValidation
 from repositories.template import TemplateRepository
 from repositories.campaign import CampaignRepository

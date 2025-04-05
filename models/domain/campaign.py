@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID, ENUM
 
 from db.base_class import Base
-from models.campaign import CampaignStatus, CampaignType
+from models.schemas.campaign import CampaignStatus, CampaignType
 
 class CampaignModel(Base):
     """Campaign model for storing campaign data"""

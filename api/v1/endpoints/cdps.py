@@ -8,7 +8,7 @@ from api.deps import get_current_active_user
 from core.exceptions.http import NotFoundException
 from core.permissions.dependencies import has_permission
 from models.domain.user import UserModel
-from models.cdp_integration import CdpIntegration, CdpIntegrationRead, CdpIntegrationUpdate
+from models.schemas.cdp_integration import CdpIntegration, CdpIntegrationRead, CdpIntegrationUpdate
 from services.cdp import CdpService
 from utils.audit import audit_log
 

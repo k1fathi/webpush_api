@@ -7,8 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.session import get_session
 from models.domain.template import TemplateModel, TemplateVersionModel
-from models.template import Template
-from models.schemas.template import TemplateStatus, TemplateType
+from models.schemas.template import TemplateStatus, TemplateType, Template
 from repositories.base import BaseRepository
 
 class TemplateRepository(BaseRepository):
