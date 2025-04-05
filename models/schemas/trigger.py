@@ -143,8 +143,7 @@ class TriggerRead(TriggerBase):
     cooldown_period: Optional[timedelta]
     max_triggers_per_day: Optional[int]
     
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}  # Updated from orm_mode = True for Pydantic v2
 
 class TriggerList(BaseModel):
     """Schema for listing triggers"""
