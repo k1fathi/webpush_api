@@ -23,7 +23,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.config import settings
 from db.session import get_async_session_context
-from models.domain import UserModel, RoleModel, NotificationModel
+# Import models from the central models/__init__.py file
+from models.domain import UserModel, RoleModel
 from models.schemas.user import UserRole, UserStatus
 
 # Configure logging
@@ -180,7 +181,7 @@ async def seed_users() -> None:
             if role:
                 # Insert directly into user_roles table
                 await session.execute(
-                    "INSERT INTO user_roles (user_id, role_id) VALUES (:user_id, :role_id)",
+                    "INSERT INTO user_role (user_id, role_id) VALUES (:user_id, :role_id)",
                     {"user_id": new_user.id, "role_id": role.id}
                 )
                 logger.info(f"Assigned role {role_name} to user {email}")

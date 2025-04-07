@@ -26,12 +26,8 @@ class RoleModel(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # Relationships
-    permissions = relationship(
-        "PermissionModel",
-        secondary=role_permission,
-        back_populates="roles",
-    )
-    users = relationship("UserModel", secondary="user_roles", back_populates="roles")
+    permissions = relationship("PermissionModel", secondary=role_permission)
+    users = relationship("UserModel", secondary="user_role")
 
     @property
     def permission_names(self) -> Set[str]:

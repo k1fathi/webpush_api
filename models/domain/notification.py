@@ -14,7 +14,7 @@ class NotificationModel(Base):
     __tablename__ = "notifications"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    campaign_id = Column(UUID(as_uuid=True), nullable=True, index=True)
+    campaign_id = Column(UUID(as_uuid=True), ForeignKey("campaigns.id", ondelete="SET NULL"), nullable=True, index=True)
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
     template_id = Column(UUID(as_uuid=True), nullable=True)
     
@@ -23,7 +23,7 @@ class NotificationModel(Base):
     image_url = Column(String, nullable=True)
     action_url = Column(String, nullable=True)
     
-    variant_id = Column(UUID(as_uuid=True), nullable=True)
+    variant_id = Column(UUID(as_uuid=True), ForeignKey("test_variants.id", ondelete="SET NULL"), nullable=True)
     personalized_data = Column(JSON, default=dict)
     
     delivery_status = Column(
@@ -47,6 +47,8 @@ class NotificationModel(Base):
     
     # Relationships
     user = relationship("UserModel", back_populates="notifications")
+    campaign = relationship("CampaignModel", back_populates="notifications")
+    variant = relationship("TestVariantModel", back_populates="notifications")
     
     def __repr__(self):
         return f"<Notification {self.id} - {self.title}>"

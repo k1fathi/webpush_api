@@ -66,11 +66,11 @@ class UserModel(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    # Relationships
-    role = relationship("RoleModel", back_populates="users")
-    roles = relationship("RoleModel", secondary=user_role, back_populates="users")
+    # Define relationship strings instead of direct imports to prevent circular imports
+    role = relationship("RoleModel")
+    roles = relationship("RoleModel", secondary=user_role)
     notifications = relationship("NotificationModel", back_populates="user")
     segments = relationship("SegmentModel", secondary=user_segment)
     cep_decisions = relationship("CepDecisionModel", back_populates="user")
     analytics = relationship("AnalyticsModel", back_populates="user")
-    campaign_templates = relationship("CampaignTemplateModel", back_populates="creator")
+    created_templates = relationship("CampaignTemplateModel", back_populates="creator", foreign_keys="CampaignTemplateModel.created_by")
