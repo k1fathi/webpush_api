@@ -10,7 +10,7 @@
 | [Segments]                    |  +-----------------------------+  |
 | [Contents]                    |  | Application Settings        |  |
 | [Campaigns]                   |  +-----------------------------+  |
-| [Triggers]                 |  | [✓] Enable Push Notifications|
+| [Automations]                 |  | [✓] Enable Push Notifications|
 | [Analytics]                   |  | Default Timezone: [UTC ▼]   |  |
 | [Integrations]                |  | Data Retention: [90 days ▼] |  |
 | [Settings] ►                  |  +-----------------------------+  |

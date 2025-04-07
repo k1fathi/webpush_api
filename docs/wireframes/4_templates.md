@@ -11,7 +11,7 @@
 | [Segments]                    |  + Create Template                 |
 | [Templates] ►                   |                                   |
 | [Campaigns]                   |  [Status: All ▼] [Search...] [🔍]  |
-| [Triggers]                  |                                   |
+| [Automations]                  |                                   |
 | [Analytics]                   |  Showing 18 push templates         |
 | [Integrations]                |                                   |
 | [Settings]                    |  +----+----------------+------+---+

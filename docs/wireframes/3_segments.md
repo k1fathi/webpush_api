@@ -10,7 +10,7 @@
 | [Segments] ►                  |  + Create Segment                 |
 | [Templates]                     |                                   |
 | [Campaigns]                   |  [Type: All ▼] [Search...] [🔍]   |
-| [Triggers]                  |                                   |
+| [Automations]                  |                                   |
 | [Analytics]                   |  Showing 15 segments              |
 | [Integrations]                |                                   |
 | [Settings]                    |  +----+----------------+------+---+

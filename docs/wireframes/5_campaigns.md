@@ -10,7 +10,7 @@
 | [Segments]                    |  + Create New Campaign              |
 | [Contents]                     |                                    |
 | [Campaigns] ►                 |  [Status: All ▼] [Search...] [🔍]   |
-| [Triggers]                  |                                    |
+| [Automations]                  |                                    |
 | [Analytics]                   |  Showing 42 campaigns               |
 | [Integrations]                |                                    |
 | [Settings]                    |  +----+----------------+------+----+
