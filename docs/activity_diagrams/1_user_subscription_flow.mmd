@@ -15,15 +15,15 @@ flowchart TD
     
     genToken --> storeUser[Store User & Push Token]
     storeUser --> sendConfirm[Send confirmation notification]
-    sendConfirm --> tagUser[Add to "Subscribed" segment]
+    sendConfirm --> tagUser[Add to Subscribed segment]
     
     checkValid -->|No| renewToken[Attempt to renew push token]
     renewToken --> renewSuccess{Renewal\nsuccessful?}
     renewSuccess -->|Yes| updateToken[Update push token]
     renewSuccess -->|No| inactivateUser[Mark user as inactive]
     
-    checkValid -->|Yes| end([End])
-    tagUser --> end
-    denyRecord --> end
-    updateToken --> end
-    inactivateUser --> end
+    checkValid -->|Yes| endNode([End])
+    tagUser --> endNode
+    denyRecord --> endNode
+    updateToken --> endNode
+    inactivateUser --> endNode

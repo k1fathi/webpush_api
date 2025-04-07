@@ -1,0 +1,80 @@
+flowchart TD
+    %% Main system components
+    subgraph UserManagement ["User Management"]
+        userSubscription[User Subscription Flow]
+        segmentManagement[Segment Management]
+    end
+
+    subgraph ContentManagement ["Content Management"]
+        templateCreation[Template Creation]
+        campaignCreation[Campaign Creation]
+        abTesting[A/B Testing]
+        triggerDefinition[Trigger-based Flow]
+    end
+
+    subgraph NotificationSystem ["Notification System"]
+        deliveryFlow[Notification Delivery]
+        cepDecision[CEP Decision Making]
+    end
+
+    subgraph DataAndAnalytics ["Data & Analytics"]
+        cdpIntegration[CDP Integration]
+        analyticsTracking[Analytics Tracking]
+        webhookProcessing[Webhook Processing]
+    end
+
+    %% Flow connections between components
+    
+    %% User Management flows
+    userSubscription -->|Subscribed Users| segmentManagement
+    
+    %% Content preparation flows
+    templateCreation --> campaignCreation
+    segmentManagement --> campaignCreation
+    campaignCreation --> abTesting
+    campaignCreation --> triggerDefinition
+    
+    %% Delivery system flows
+    abTesting --> deliveryFlow
+    triggerDefinition --> deliveryFlow
+    campaignCreation --> deliveryFlow
+    segmentManagement --> deliveryFlow
+    cepDecision --> deliveryFlow
+    
+    %% Data and analytics flows
+    deliveryFlow --> analyticsTracking
+    analyticsTracking --> webhookProcessing
+    userSubscription --> cdpIntegration
+    analyticsTracking --> cdpIntegration
+    cdpIntegration --> segmentManagement
+    
+    %% Main Events
+    userVisitEvent([User Visits Website]) --> userSubscription
+    marketingTeamEvent([Marketing Team Actions]) --> templateCreation
+    marketingTeamEvent --> campaignCreation
+    marketingTeamEvent --> abTesting
+    marketingTeamEvent --> triggerDefinition
+    
+    %% System events
+    systemEvent([System Event Occurs]) --> triggerDefinition
+    notificationSentEvent([Notification Sent]) --> analyticsTracking
+    dataUpdateEvent([User Data Updated]) --> cdpIntegration
+    
+    %% Decision points
+    userSubscription -->|Subscription Status| deliveryFlow
+    cepDecision -->|Channel Selection| deliveryFlow
+    
+    %% Feedback loops
+    analyticsTracking -->|Performance Data| abTesting
+    cdpIntegration -->|Enhanced User Profiles| segmentManagement
+    analyticsTracking -->|Engagement Data| cepDecision
+    
+    %% Legend/Description
+    classDef process fill:#d4f1f9,stroke:#05acda,stroke-width:1px;
+    classDef event fill:#ffecb3,stroke:#ffb74d,stroke-width:1px;
+    classDef subgraph_style fill:#e3f2fd,stroke:#2196f3,stroke-width:2px;
+    
+    class userSubscription,segmentManagement,templateCreation,campaignCreation,abTesting,triggerDefinition,deliveryFlow,cepDecision,cdpIntegration,analyticsTracking,webhookProcessing process;
+    class userVisitEvent,marketingTeamEvent,systemEvent,notificationSentEvent,dataUpdateEvent event;
+    
+    class UserManagement,ContentManagement,NotificationSystem,DataAndAnalytics subgraph_style;

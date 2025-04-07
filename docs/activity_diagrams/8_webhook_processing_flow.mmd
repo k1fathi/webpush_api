@@ -3,7 +3,7 @@ flowchart TD
     eventOccurs --> checkHooks[Check registered webhooks]
     checkHooks --> hooksExist{Matching\nwebhooks?}
     
-    hooksExist -->|No| end
+    hooksExist -->|No| endNode
     hooksExist -->|Yes| preparePayload[Prepare webhook payload]
     preparePayload --> addSignature[Add security signature]
     addSignature --> loopWebhooks[["For each matching webhook"]]
@@ -38,4 +38,4 @@ flowchart TD
     updateLastTriggered --> nextWebhook
     
     nextWebhook -->|Yes| loopWebhooks
-    nextWebhook -->|No| end([End])
+    nextWebhook -->|No| endNode([End])

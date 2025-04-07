@@ -1,0 +1,40 @@
+flowchart TD
+    start([Start]) --> createCampaign[Create new campaign]
+    createCampaign --> setCampaignDetails[Set campaign name & description]
+    setCampaignDetails --> selectType{Select campaign type}
+    
+    selectType -->|One-time| defineContentOneTime[Define campaign content]
+    selectType -->|Recurring| setScheduleRecurring[Set recurrence schedule]
+    selectType -->|Trigger-based| defineTriggerRules[Define trigger rules]
+    selectType -->|A/B Test| setupVariants[Set up test variants]
+    
+    setScheduleRecurring --> defineContentRecurring[Define campaign content]
+    defineTriggerRules --> defineContentTrigger[Define campaign content]
+    setupVariants --> defineVariants[Define variant content]
+    
+    defineContentOneTime --> selectTemplate[Select notification template]
+    defineContentRecurring --> selectTemplate
+    defineContentTrigger --> selectTemplate
+    defineVariants --> selectTemplate
+    
+    selectTemplate --> configurePersonalization[Configure personalization]
+    configurePersonalization --> selectAudience[Select target audience]
+    
+    selectAudience --> previewCampaign[Preview campaign]
+    previewCampaign --> campaignOk{Campaign\nlooks good?}
+    
+    campaignOk -->|No| editCampaign[Edit campaign]
+    editCampaign --> previewCampaign
+    
+    campaignOk -->|Yes| validateCampaign[Validate campaign]
+    validateCampaign --> isValid{Campaign valid?}
+    
+    isValid -->|No| fixErrors[Fix validation errors]
+    fixErrors --> validateCampaign
+    
+    isValid -->|Yes| scheduleCampaign[Schedule campaign]
+    scheduleCampaign --> saveCampaign[Save campaign]
+    
+    saveCampaign --> setCampaignActive[Set campaign to active]
+    setCampaignActive --> activateCampaign[Activate campaign]
+    activateCampaign --> endNode([End])

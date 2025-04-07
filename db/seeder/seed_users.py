@@ -17,21 +17,26 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from passlib.context import CryptContext
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from core.config import settings
 from db.session import get_async_session_context
-from models.domain.user import UserModel
-from models.domain.role import RoleModel
+from models.domain import UserModel, RoleModel, NotificationModel
 from models.schemas.user import UserRole, UserStatus
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, 
-                   format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, 
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+# Default users for seeding
 DEFAULT_USERS = [
     {
         "email": "admin@example.com",
@@ -111,7 +116,31 @@ async def get_user_by_email(session: AsyncSession, email: str) -> Optional[UserM
 
 async def seed_users() -> None:
     """Seed default users with different roles."""
-    async with get_async_session_context() as session:
+    # Use the database URL from settings
+    async_uri = settings.SQLALCHEMY_DATABASE_URI
+    
+    # Convert to asyncpg URI if needed
+    if async_uri.startswith('postgresql://'):
+        async_uri = async_uri.replace('postgresql://', 'postgresql+asyncpg://')
+    elif async_uri.startswith('sqlite://'):
+        async_uri = async_uri.replace('sqlite://', 'sqlite+aiosqlite://')
+    
+    logger.info(f"Connecting to database: {async_uri}")
+    
+    # Create engine and session factory directly from settings
+    engine = create_async_engine(
+        async_uri,
+        echo=settings.DB_ECHO_LOG,
+        future=True
+    )
+    
+    async_session = sessionmaker(
+        engine,
+        class_=AsyncSession,
+        expire_on_commit=False
+    )
+
+    async with async_session() as session:
         # Ensure roles exist
         roles = await ensure_roles_exist(session)
         
@@ -149,7 +178,7 @@ async def seed_users() -> None:
             # Assign role
             role = roles.get(role_name)
             if role:
-                # Direct SQL approach to add role
+                # Insert directly into user_roles table
                 await session.execute(
                     "INSERT INTO user_roles (user_id, role_id) VALUES (:user_id, :role_id)",
                     {"user_id": new_user.id, "role_id": role.id}
@@ -162,6 +191,9 @@ async def seed_users() -> None:
         
         # Commit all changes
         await session.commit()
+    
+    # Close the connection pool
+    await engine.dispose()
 
 async def main():
     try:

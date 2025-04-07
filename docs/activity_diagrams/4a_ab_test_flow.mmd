@@ -37,12 +37,12 @@ flowchart TD
     extendTest -->|Yes| adjustDuration[Adjust test duration]
     adjustDuration --> collectData
     extendTest -->|No| inconclusiveResults[Record inconclusive results]
-    inconclusiveResults --> end
+    inconclusiveResults --> endNode
     
     significantResult -->|Yes| declareWinner[Declare winning variant]
     declareWinner --> applyWinner{Apply winner\nto campaign?}
     
     applyWinner -->|Yes| updateCampaign[Update campaign with winning variant]
-    updateCampaign --> end
+    updateCampaign --> endNode
     applyWinner -->|No| documentResults[Document test results]
-    documentResults --> end([End])
+    documentResults --> endNode([End])

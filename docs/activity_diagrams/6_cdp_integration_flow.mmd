@@ -18,9 +18,9 @@ flowchart TD
     validateTransfer -->|No| logError[Log error]
     logError --> retryTransfer{Retry\nallowed?}
     retryTransfer -->|Yes| scheduleRetry[Schedule retry]
-    scheduleRetry --> end
+    scheduleRetry --> endNode
     retryTransfer -->|No| alertAdmin[Alert administrators]
-    alertAdmin --> end
+    alertAdmin --> endNode
     
     validateTransfer -->|Yes| cdpProcess[CDP processes data]
     cdpProcess --> updateProfile[Update user profile]
@@ -29,7 +29,7 @@ flowchart TD
     syncBack -->|Yes| pullCDPData[Pull updated profile from CDP]
     pullCDPData --> updateLocalProfile[Update local user profile]
     updateLocalProfile --> recalculateSegments[Recalculate user segments]
-    recalculateSegments --> end
+    recalculateSegments --> endNode
     
     syncBack -->|No| scheduleSync[Schedule future sync]
-    scheduleSync --> end([End])
+    scheduleSync --> endNode([End])

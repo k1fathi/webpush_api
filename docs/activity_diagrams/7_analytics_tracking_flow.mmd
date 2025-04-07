@@ -41,6 +41,6 @@ flowchart TD
     triggerWebhooks --> integrateCDP{CDP\nintegration?}
     
     integrateCDP -->|Yes| sendToCDP[Send data to CDP]
-    integrateCDP -->|No| end
+    integrateCDP -->|No| endNode
     
-    sendToCDP --> end([End])
+    sendToCDP --> endNode([End])

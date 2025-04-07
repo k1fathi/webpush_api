@@ -45,4 +45,4 @@ flowchart TD
     nextUser -->|Yes| loopUsers
     nextUser -->|No| updateCampaignStats[Update campaign statistics]
     updateCampaignStats --> triggerWebhooks[Trigger relevant webhooks]
-    triggerWebhooks --> end([End])
+    triggerWebhooks --> endNode([End])

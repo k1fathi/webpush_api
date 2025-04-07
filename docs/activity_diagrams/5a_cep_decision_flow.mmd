@@ -21,7 +21,7 @@ flowchart TD
     
     isWebPush -->|No| recordDecision[Record CEP decision]
     recordDecision --> executeAlt[Execute on alternative channel]
-    executeAlt --> end
+    executeAlt --> endNode([End])
     
     isWebPush -->|Yes| recordWebPushSelection[Record WebPush selection]
     recordWebPushSelection --> optimizeParams[Optimize notification parameters]
@@ -31,4 +31,4 @@ flowchart TD
     
     storeDecisionFactors --> trackPerformance[Track notification performance]
     trackPerformance --> feedbackLoop[Feed results back to CEP]
-    feedbackLoop --> end([End])
+    feedbackLoop --> endNode([End])
