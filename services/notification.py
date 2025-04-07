@@ -313,3 +313,57 @@ class NotificationService:
             List[Notification]: List of notifications
         """
         return await self.notification_repo.get_by_user(user_id, skip, limit)
+    
+    async def get_notifications_by_customer_id(
+        self, 
+        customer_id: str,
+        skip: int = 0, 
+        limit: int = 20,
+        status: Optional[DeliveryStatus] = None
+    ) -> List[Dict[str, Any]]:
+        """
+        Get notifications for a specific customer ID
+        
+        Args:
+            customer_id: The customer ID to filter by
+            skip: Number of items to skip
+            limit: Maximum number of items to return
+            status: Optional status filter
+            
+        Returns:
+            List[Dict[str, Any]]: List of notification data
+        """
+        # Get users associated with this customer ID
+        users = await self.user_repo.get_users_by_customer_id(customer_id)
+        
+        if not users:
+            logger.warning(f"No users found for customer ID: {customer_id}")
+            return []
+            
+        user_ids = [str(user.id) for user in users]
+        
+        # Get notifications for these users
+        notifications = []
+        
+        for user_id in user_ids:
+            user_notifications = await self.notification_repo.get_by_user(
+                user_id=user_id, 
+                limit=limit
+            )
+            
+            # Filter by status if specified
+            if status:
+                user_notifications = [n for n in user_notifications if n.delivery_status == status]
+                
+            # Transform to dictionary for consistent response format
+            for notification in user_notifications:
+                notification_dict = notification.model_dump()
+                # Add additional data if needed
+                notification_dict["user_email"] = next(
+                    (user.email for user in users if str(user.id) == notification.user_id),
+                    None
+                )
+                notifications.append(notification_dict)
+        
+        # Apply pagination
+        return notifications[skip:skip+limit]

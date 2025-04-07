@@ -31,7 +31,7 @@ class RoleModel(Base):
         secondary=role_permission,
         back_populates="roles",
     )
-    users = relationship("UserModel", secondary="user_role", back_populates="roles")
+    users = relationship("UserModel", secondary="user_roles", back_populates="roles")
 
     @property
     def permission_names(self) -> Set[str]:

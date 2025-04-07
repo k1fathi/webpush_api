@@ -156,3 +156,15 @@ class UserRepository(BaseRepository):
             )
             result = await session.execute(query)
             return [row[0] for row in result.all()]
+
+    async def get_by_customer_id(self, customer_id: str) -> Optional[UserModel]:
+        """Get a user by customer ID"""
+        query = select(UserModel).where(UserModel.custom_attributes["customer_id"].astext == customer_id)
+        result = await self.session.execute(query)
+        return result.scalar_one_or_none()
+        
+    async def get_users_by_customer_id(self, customer_id: str) -> List[UserModel]:
+        """Get all users associated with a customer ID"""
+        query = select(UserModel).where(UserModel.custom_attributes["customer_id"].astext == customer_id)
+        result = await self.session.execute(query)
+        return result.scalars().all()

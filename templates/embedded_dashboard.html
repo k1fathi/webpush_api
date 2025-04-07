@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebPush Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Set customer ID from template
+        const customerId = "{{ customer_id }}";
+        
+        // Function to fetch notifications for this customer
+        async function fetchNotifications() {
+            try {
+                const response = await fetch(`/api/v1/external/embed/notifications?customer_id=${customerId}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch notifications');
+                }
+                
+                const data = await response.json();
+                renderNotifications(data.notifications);
+            } catch (error) {
+                console.error('Error fetching notifications:', error);
+                document.getElementById('notifications-list').innerHTML = 
+                    `<div class="p-4 text-red-500">Error loading notifications: ${error.message}</div>`;
+            }
+        }
+        
+        // Render notifications to the page
+        function renderNotifications(notifications) {
+            const container = document.getElementById('notifications-list');
+            
+            if (!notifications || notifications.length === 0) {
+                container.innerHTML = '<div class="p-4 text-gray-500">No notifications found</div>';
+                return;
+            }
+            
+            const notificationHtml = notifications.map(notification => `
+                <div class="border border-gray-200 rounded p-4 mb-4">
+                    <h3 class="font-bold text-lg">${notification.title}</h3>
+                    <p class="text-gray-700">${notification.body}</p>
+                    <div class="mt-2 flex justify-between text-sm">
+                        <span class="text-blue-500">
+                            Status: ${notification.delivery_status}
+                        </span>
+                        <span class="text-gray-500">
+                            ${new Date(notification.created_at).toLocaleString()}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+            
+            container.innerHTML = notificationHtml;
+        }
+        
+        // Load notifications when page loads
+        window.addEventListener('DOMContentLoaded', fetchNotifications);
+    </script>
+</head>
+<body class="bg-gray-50">
+    <div class="max-w-4xl mx-auto p-4">
+        <h1 class="text-xl font-bold mb-6">Notifications Dashboard for Customer: {{ customer_id }}</h1>
+        
+        <div class="bg-white shadow rounded-lg p-6">
+            <h2 class="text-lg font-semibold mb-4">Recent Notifications</h2>
+            <div id="notifications-list" class="space-y-4">
+                <div class="animate-pulse flex space-x-4">
+                    <div class="flex-1 space-y-4 py-1">
+                        <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                        <div class="space-y-2">
+                            <div class="h-4 bg-gray-200 rounded"></div>
+                            <div class="h-4 bg-gray-200 rounded w-5/6"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

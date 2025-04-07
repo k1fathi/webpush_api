@@ -1,7 +1,11 @@
 from fastapi import APIRouter
 
-from .endpoints import ab_tests, analytics, campaigns, cdps, ceps, permissions, roles, segments
-from .endpoints import templates, triggers, users, webhooks, webpush, notification_delivery
+from .endpoints import (
+    ab_tests, analytics, campaigns, cdps, ceps, 
+    permissions, roles, segments, templates, triggers,
+    users, webhooks, webpush, notification_delivery,
+    external_auth  # Add the new endpoint
+)
 from .endpoints import notifications, segment_execution  # Add segment execution
 from .endpoints import campaign_templates
 
@@ -80,3 +84,10 @@ api_router.include_router(webpush.router, prefix="/webpush", tags=["webpush"])
 
 # Analytics
 api_router.include_router(analytics.router, prefix="/analytics", tags=["analytics"])
+
+# Add external auth router
+api_router.include_router(
+    external_auth.router,
+    prefix="/external",
+    tags=["external"]
+)

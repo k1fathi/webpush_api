@@ -14,6 +14,9 @@ class Settings(BaseSettings):
     
     # CORS - Fix parsing for CORS_ORIGINS
     CORS_ORIGINS: Union[List[str], str] = "*"
+    CORS_ALLOW_CREDENTIALS: bool = True
+    CORS_EXPOSE_HEADERS: List[str] = ["Content-Type", "X-CSRFToken", "Authorization"]
+    X_FRAME_OPTIONS: str = "ALLOW-FROM *"  # Allow embedding in iframes
     
     # Security
     SECRET_KEY: str = secrets.token_urlsafe(32)
@@ -58,6 +61,15 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = os.environ.get("LOG_LEVEL", "INFO")
     LOG_FORMAT: str = os.environ.get("LOG_FORMAT", "json")
 
+    # JWT Configuration for external authentication
+    JWT_SECRET_KEY: str = os.getenv("JWT_SECRET_KEY", secrets.token_urlsafe(32))
+    JWT_ALGORITHM: str = os.getenv("JWT_ALGORITHM", "HS256")
+    JWT_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("JWT_TOKEN_EXPIRE_MINUTES", 30))
+    
+    # External integration settings
+    EXTERNAL_APP_SECRET_KEY: str = os.getenv("EXTERNAL_APP_SECRET_KEY", "")
+    ALLOWED_EXTERNAL_DOMAINS: List[str] = []
+
     # Add validator for CORS_ORIGINS to handle string to list conversion
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
@@ -71,6 +83,15 @@ class Settings(BaseSettings):
         elif isinstance(v, (list, str)):
             return v
         raise ValueError("CORS_ORIGINS should be a string or list")
+
+    @field_validator("ALLOWED_EXTERNAL_DOMAINS", mode="before")
+    @classmethod
+    def assemble_allowed_domains(cls, v: Union[str, List[str]]) -> List[str]:
+        if isinstance(v, str) and not v.startswith("["):
+            return [domain.strip() for domain in v.split(",")]
+        elif isinstance(v, list):
+            return v
+        return []
 
     # Updated for Pydantic v2
     @model_validator(mode="before")

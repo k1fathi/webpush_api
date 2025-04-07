@@ -1,0 +1,17 @@
+
+# On Windows
+cd c:\K1\ZUZZUU\webpush\webpush_api
+.venv\Scripts\activate
+
+# Method 1: Run directly
+python db/seeder/seed_users.py
+
+# Method 2: Run as a module
+python -m db.seeder.seed_users
+
+[
+  {"Role": "Admin", "Email": "admin@example.com", "Password": "admin123"},
+  {"Role": "Marketer", "Email": "marketer@example.com", "Password": "marketer123"},
+  {"Role": "Developer", "Email": "developer@example.com", "Password": "developer123"},
+  {"Role": "User", "Email": "user@example.com", "Password": "user123"}
+]
