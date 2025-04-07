@@ -201,3 +201,550 @@ NOTIFICATION ||--|| WEBHOOKS : has
 NOTIFICATION ||--|| CEPSTRATEGY : has
 NOTIFICATION ||--|| CDPDATA : has
 CDPDATA ||--|| PROFILE : contains
+
+
+
+
+
+# How to access subscriptions in the system
+
+Based on the provided code, I'll show you how to get a list of subscriptions from the system. In this WebPush API, user subscriptions are stored in the `subscription_info` column of the `UserModel` class. I'll create a new utility module and router to access these subscriptions.
+
+## Step 1: Create a subscription service module
+
+### [subscription_service.py](file:///c%3A/K1/ZUZZUU/webpush/webpush_api/services/subscription_service.py)
+
+````python
+"""Service for managing user webpush subscriptions"""
+import uuid
+from datetime import datetime
+from typing import Dict, List, Optional, Any
+
+from sqlalchemy import select, update, func
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.sql.expression import true
+
+from models.domain import UserModel
+from models.schemas.user import UserStatus
+
+
+async def get_all_subscriptions(
+    db: AsyncSession, 
+    skip: int = 0, 
+    limit: int = 100,
+    active_only: bool = True
+) -> List[Dict[str, Any]]:
+    """
+    Get all subscriptions with pagination
+    
+    Args:
+        db: Database session
+        skip: Number of records to skip for pagination
+        limit: Maximum records to return
+        active_only: If True, only return subscriptions of active users
+    
+    Returns:
+        List of subscription information with user details
+    """
+    query = select(
+        UserModel.id, 
+        UserModel.email, 
+        UserModel.username,
+        UserModel.subscription_info,
+        UserModel.last_seen,
+        UserModel.webpush_enabled
+    )
+    
+    if active_only:
+        query = query.where(
+            UserModel.is_active == true(),
+            UserModel.webpush_enabled == true(),
+            UserModel.subscription_info.cast(str) != '{}'  # Only users with subscription info
+        )
+    
+    query = query.offset(skip).limit(limit)
+    result = await db.execute(query)
+    subscriptions = result.mappings().all()
+    
+    return [dict(sub) for sub in subscriptions]
+
+
+async def get_subscription_by_user_id(
+    db: AsyncSession, 
+    user_id: uuid.UUID
+) -> Optional[Dict[str, Any]]:
+    """
+    Get subscription for a specific user
+    
+    Args:
+        db: Database session
+        user_id: User ID to find subscription for
+        
+    Returns:
+        User's subscription information or None if not found
+    """
+    query = select(
+        UserModel.id,
+        UserModel.email,
+        UserModel.subscription_info,
+        UserModel.webpush_enabled
+    ).where(UserModel.id == user_id)
+    
+    result = await db.execute(query)
+    user = result.mappings().one_or_none()
+    
+    return dict(user) if user else None
+
+
+async def get_active_subscription_count(db: AsyncSession) -> int:
+    """
+    Get count of active subscriptions
+    
+    Args:
+        db: Database session
+        
+    Returns:
+        Count of active subscriptions
+    """
+    query = select(func.count()).select_from(UserModel).where(
+        UserModel.is_active == true(),
+        UserModel.webpush_enabled == true(),
+        UserModel.subscription_info.cast(str) != '{}'
+    )
+    
+    result = await db.execute(query)
+    count = result.scalar_one()
+    
+    return count
+
+
+async def update_subscription(
+    db: AsyncSession,
+    user_id: uuid.UUID,
+    subscription_data: Dict[str, Any]
+) -> bool:
+    """
+    Update a user's subscription info
+    
+    Args:
+        db: Database session
+        user_id: User ID to update
+        subscription_data: New subscription data
+        
+    Returns:
+        True if update was successful
+    """
+    stmt = update(UserModel).where(
+        UserModel.id == user_id
+    ).values(
+        subscription_info=subscription_data,
+        updated_at=datetime.utcnow()
+    )
+    
+    result = await db.execute(stmt)
+    await db.commit()
+    
+    return result.rowcount > 0
+
+
+async def get_subscriptions_by_segment_id(
+    db: AsyncSession,
+    segment_id: uuid.UUID,
+    skip: int = 0,
+    limit: int = 100
+) -> List[Dict[str, Any]]:
+    """
+    Get subscriptions for users in a specific segment
+    
+    Args:
+        db: Database session
+        segment_id: Segment ID
+        skip: Number of records to skip
+        limit: Maximum number of records to return
+        
+    Returns:
+        List of user subscriptions in the segment
+    """
+    # Query using the user_segment association table
+    query = select(
+        UserModel.id,
+        UserModel.email,
+        UserModel.subscription_info,
+        UserModel.webpush_enabled
+    ).select_from(UserModel).join(
+        "segments"
+    ).where(
+        UserModel.is_active == true(),
+        UserModel.webpush_enabled == true(),
+        UserModel.subscription_info.cast(str) != '{}',
+        UserModel.segments.any(id=segment_id)
+    ).offset(skip).limit(limit)
+    
+    result = await db.execute(query)
+    subscriptions = result.mappings().all()
+    
+    return [dict(sub) for sub in subscriptions]
+````
+
+## Step 2: Create a router for subscription endpoints
+
+### [subscriptions.py](file:///c%3A/K1/ZUZZUU/webpush/webpush_api/api/v1/endpoints/subscriptions.py)
+
+````python
+
+
+Made changes.
+
+"""API routes for managing user webpush subscriptions"""
+import uuid
+from typing import Dict, List, Any, Optional
+
+from fastapi import APIRouter, Depends, HTTPException, Query, Body, Path, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from api import deps
+from services import subscription_service
+from models.schemas.user import UserRole
+
+router = APIRouter()
+
+@router.get(
+    "/", 
+    response_model=List[Dict[str, Any]],
+    summary="Get all subscriptions",
+    description="Retrieve all user webpush subscriptions with pagination"
+)
+async def get_all_subscriptions(
+    db: AsyncSession = Depends(deps.get_db),
+    skip: int = Query(0, description="Number of records to skip"),
+    limit: int = Query(100, description="Maximum number of records to return"),
+    active_only: bool = Query(True, description="Only return active subscriptions"),
+    current_user = Depends(deps.get_current_user_with_permissions(["subscriptions:read"]))
+):
+    """Get all subscriptions with pagination"""
+    subscriptions = await subscription_service.get_all_subscriptions(
+        db, 
+        skip=skip, 
+        limit=limit, 
+        active_only=active_only
+    )
+    return subscriptions
+
+
+@router.get(
+    "/count",
+    response_model=Dict[str, int],
+    summary="Get subscription count",
+    description="Get count of active subscriptions"
+)
+async def get_subscription_count(
+    db: AsyncSession = Depends(deps.get_db),
+    current_user = Depends(deps.get_current_user_with_permissions(["subscriptions:read"]))
+):
+    """Get count of active subscriptions"""
+    count = await subscription_service.get_active_subscription_count(db)
+    return {"count": count}
+
+
+@router.get(
+    "/user/{user_id}",
+    response_model=Dict[str, Any],
+    summary="Get user subscription",
+    description="Get subscription details for a specific user"
+)
+async def get_user_subscription(
+    user_id: uuid.UUID = Path(..., description="User ID"),
+    db: AsyncSession = Depends(deps.get_db),
+    current_user = Depends(deps.get_current_user_with_permissions(["subscriptions:read"]))
+):
+    """Get subscription for a specific user"""
+    subscription = await subscription_service.get_subscription_by_user_id(db, user_id)
+    if not subscription:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Subscription not found"
+        )
+    return subscription
+
+
+@router.get(
+    "/segment/{segment_id}",
+    response_model=List[Dict[str, Any]],
+    summary="Get subscriptions by segment",
+    description="Get subscriptions for users in a specific segment"
+)
+async def get_segment_subscriptions(
+    segment_id: uuid.UUID = Path(..., description="Segment ID"),
+    skip: int = Query(0, description="Number of records to skip"),
+    limit: int = Query(100, description="Maximum number of records to return"),
+    db: AsyncSession = Depends(deps.get_db),
+    current_user = Depends(deps.get_current_user_with_permissions(["subscriptions:read", "segments:read"]))
+):
+    """Get subscriptions for users in a specific segment"""
+    subscriptions = await subscription_service.get_subscriptions_by_segment_id(
+        db,
+        segment_id=segment_id,
+        skip=skip,
+        limit=limit
+    )
+    return subscriptions
+
+
+@router.put(
+    "/user/{user_id}",
+    response_model=Dict[str, str],
+    summary="Update user subscription",
+    description="Update subscription information for a specific user"
+)
+async def update_user_subscription(
+    user_id: uuid.UUID = Path(..., description="User ID"),
+    subscription_data: Dict[str, Any] = Body(..., description="Subscription data"),
+    db: AsyncSession = Depends(deps.get_db),
+    current_user = Depends(deps.get_current_user_with_permissions(["subscriptions:write"]))
+):
+    """Update subscription for a specific user"""
+    success = await subscription_service.update_subscription(db, user_id, subscription_data)
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found or subscription update failed"
+        )
+    
+    return {"status": "success", "message": "Subscription updated successfully"}
+````
+
+## Step 3: Update the API router to include subscription endpoints
+
+### [api.py](file:///c%3A/K1/ZUZZUU/webpush/webpush_api/api/v1/api.py)
+
+````python
+
+
+Made changes.
+
+from fastapi import APIRouter
+
+from api.v1.endpoints import (
+    users, 
+    auth, 
+    roles, 
+    notifications, 
+    campaigns, 
+    segments, 
+    templates,
+    subscriptions,  # Add this import
+    analytics
+)
+
+api_router = APIRouter()
+api_router.include_router(auth.router, prefix="/auth", tags=["Authentication"])
+api_router.include_router(users.router, prefix="/users", tags=["Users"])
+api_router.include_router(roles.router, prefix="/roles", tags=["Roles"])
+api_router.include_router(notifications.router, prefix="/notifications", tags=["Notifications"])
+api_router.include_router(campaigns.router, prefix="/campaigns", tags=["Campaigns"])
+api_router.include_router(segments.router, prefix="/segments", tags=["Segments"])
+api_router.include_router(templates.router, prefix="/templates", tags=["Templates"])
+api_router.include_router(subscriptions.router, prefix="/subscriptions", tags=["Subscriptions"])  # Add this line
+api_router.include_router(analytics.router, prefix="/analytics", tags=["Analytics"])
+````
+
+## Step 4: Create a schema for subscription flow management
+
+### [subscription.py](file:///c%3A/K1/ZUZZUU/webpush/webpush_api/models/schemas/subscription.py)
+
+````python
+
+
+Made changes.
+
+"""Schemas for subscription data"""
+import enum
+from datetime import datetime
+from typing import Dict, Any, Optional, List
+from uuid import UUID
+
+from pydantic import BaseModel, Field, EmailStr
+
+
+class SubscriptionStatus(str, enum.Enum):
+    """Subscription status enum"""
+    ACTIVE = "active"
+    INACTIVE = "inactive"
+    PENDING = "pending"
+    EXPIRED = "expired"
+    REVOKED = "revoked"
+
+
+class PushSubscriptionInfo(BaseModel):
+    """Web Push Subscription object format"""
+    endpoint: str = Field(..., description="Push subscription endpoint URL")
+    keys: Dict[str, str] = Field(..., description="Encryption keys")
+    expirationTime: Optional[int] = Field(None, description="Expiration timestamp (if any)")
+
+
+class SubscriptionCreate(BaseModel):
+    """Schema for creating a subscription"""
+    subscription_info: PushSubscriptionInfo
+    user_agent: Optional[str] = Field(None, description="Browser user agent")
+    device_type: Optional[str] = Field(None, description="Device type")
+
+
+class SubscriptionUpdate(BaseModel):
+    """Schema for updating a subscription"""
+    subscription_info: Optional[PushSubscriptionInfo] = None
+    webpush_enabled: Optional[bool] = None
+    status: Optional[SubscriptionStatus] = None
+
+
+class SubscriptionRead(BaseModel):
+    """Schema for reading a subscription"""
+    id: UUID
+    user_id: UUID
+    email: EmailStr
+    subscription_info: PushSubscriptionInfo
+    webpush_enabled: bool
+    status: SubscriptionStatus
+    last_seen: Optional[datetime] = None
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+
+
+class SubscriptionStats(BaseModel):
+    """Subscription statistics"""
+    total_count: int
+    active_count: int
+    new_this_week: int
+    lost_this_week: int
+````
+
+## Step 5: Create a public endpoint for subscription management
+
+### [public.py](file:///c%3A/K1/ZUZZUU/webpush/webpush_api/api/v1/endpoints/public.py)
+
+````python
+
+
+Made changes.
+
+"""Public API endpoints that don't require authentication"""
+import uuid
+from typing import Dict, Any
+
+from fastapi import APIRouter, Depends, HTTPException, Body, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from api import deps
+from services import subscription_service
+from models.schemas.subscription import SubscriptionCreate, SubscriptionUpdate
+
+router = APIRouter()
+
+@router.post(
+    "/subscribe", 
+    response_model=Dict[str, str],
+    summary="Subscribe to notifications",
+    description="Public endpoint for users to subscribe to web push notifications"
+)
+async def subscribe(
+    subscription_data: SubscriptionCreate = Body(...),
+    user_id: uuid.UUID = Body(..., description="User ID"),
+    db: AsyncSession = Depends(deps.get_db)
+):
+    """Subscribe to push notifications"""
+    # Create subscription data dictionary
+    sub_info = subscription_data.subscription_info.dict()
+    
+    # Add metadata
+    metadata = {
+        "user_agent": subscription_data.user_agent,
+        "device_type": subscription_data.device_type,
+        "subscribed_at": str(datetime.utcnow())
+    }
+    
+    # Combine with existing subscription data
+    success = await subscription_service.update_subscription(
+        db, 
+        user_id, 
+        {
+            "push_subscription": sub_info,
+            "metadata": metadata
+        }
+    )
+    
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    return {"status": "success", "message": "Subscription created successfully"}
+
+
+@router.post(
+    "/unsubscribe",
+    response_model=Dict[str, str],
+    summary="Unsubscribe from notifications",
+    description="Public endpoint for users to unsubscribe from web push notifications"
+)
+async def unsubscribe(
+    endpoint: str = Body(..., embed=True, description="Push subscription endpoint"),
+    user_id: uuid.UUID = Body(..., embed=True, description="User ID"),
+    db: AsyncSession = Depends(deps.get_db)
+):
+    """Unsubscribe from push notifications"""
+    user_sub = await subscription_service.get_subscription_by_user_id(db, user_id)
+    if not user_sub or "subscription_info" not in user_sub:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Subscription not found"
+        )
+    
+    # Get current subscription info
+    sub_info = user_sub["subscription_info"]
+    
+    # If the endpoint matches, mark as unsubscribed
+    if "push_subscription" in sub_info and sub_info["push_subscription"].get("endpoint") == endpoint:
+        # Keep the subscription info but mark as inactive
+        sub_info["active"] = False
+        sub_info["unsubscribed_at"] = str(datetime.utcnow())
+        
+        success = await subscription_service.update_subscription(db, user_id, sub_info)
+        if success:
+            return {"status": "success", "message": "Unsubscribed successfully"}
+    
+    raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail="Invalid subscription endpoint"
+    )
+````
+
+## Step 6: Update the public API router to include subscription endpoints
+
+### [public_api.py](file:///c%3A/K1/ZUZZUU/webpush/webpush_api/api/public_api.py)
+
+````python
+
+
+Made changes.
+
+from fastapi import APIRouter
+
+from api.v1.endpoints import public
+
+public_api_router = APIRouter()
+public_api_router.include_router(public.router, tags=["Public"])
+````
+
+These files provide all the necessary functionality to:
+
+1. Get a list of all subscriptions in the system
+2. Filter subscriptions by active/inactive status
+3. Get subscriptions for a specific user
+4. Get subscriptions for users in a specific segment
+5. Update subscription information
+6. Get subscription counts
+7. Allow users to subscribe/unsubscribe through public endpoints
+
+You can now use these endpoints to manage and list all the subscriptions in your system.
+
+Made changes.
