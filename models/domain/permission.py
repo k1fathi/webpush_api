@@ -5,7 +5,7 @@ from typing import List, Optional
 from sqlalchemy import Column, String, Boolean, DateTime
 from sqlalchemy.dialects.postgresql import UUID
 
-from db.session import Base
+from db.base_class import Base
 
 class PermissionModel(Base):
     """Permission model for database operations"""

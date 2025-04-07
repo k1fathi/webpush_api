@@ -6,6 +6,8 @@ Domain models for SQLAlchemy ORM
 from models.domain.user import UserModel, user_role, user_segment
 from models.domain.role import RoleModel, role_permission
 from models.domain.permission import PermissionModel
+from models.domain.role_permission import RolePermissionModel
+from models.domain.user_role import UserRoleModel
 from models.domain.segment import SegmentModel
 from models.domain.notification import NotificationModel
 from models.domain.template import TemplateModel, TemplateVersionModel

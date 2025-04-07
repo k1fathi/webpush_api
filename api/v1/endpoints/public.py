@@ -1,5 +1,6 @@
 """Public API endpoints that don't require authentication"""
 import uuid
+from datetime import datetime
 from typing import Dict, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Body, status

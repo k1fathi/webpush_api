@@ -6,7 +6,7 @@ from sqlalchemy import Column, ForeignKey, DateTime
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
-from db.session import Base
+from db.base_class import Base
 
 class UserRoleModel(Base):
     """User role association model for database operations"""

@@ -8,7 +8,11 @@ from api.v1.endpoints import (
     campaigns, 
     segments, 
     templates,
-    subscriptions,  # Add this import
+    subscriptions,
+    subscription_management,
+    segment_management,
+    template_management,
+    campaign_management, # Add this import
     analytics
 )
 
@@ -20,5 +24,9 @@ api_router.include_router(notifications.router, prefix="/notifications", tags=["
 api_router.include_router(campaigns.router, prefix="/campaigns", tags=["Campaigns"])
 api_router.include_router(segments.router, prefix="/segments", tags=["Segments"])
 api_router.include_router(templates.router, prefix="/templates", tags=["Templates"])
-api_router.include_router(subscriptions.router, prefix="/subscriptions", tags=["Subscriptions"])  # Add this line
+api_router.include_router(subscriptions.router, prefix="/subscriptions/status", tags=["Subscription Status"])
+api_router.include_router(subscription_management.router, prefix="/subscriptions", tags=["Subscription Management"])
+api_router.include_router(segment_management.router, prefix="/segments", tags=["Segment Management"])
+api_router.include_router(template_management.router, prefix="/templates", tags=["Template Management"])
+api_router.include_router(campaign_management.router, prefix="/campaigns", tags=["Campaign Management"]) # Add this line
 api_router.include_router(analytics.router, prefix="/analytics", tags=["Analytics"])

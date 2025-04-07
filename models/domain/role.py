@@ -25,9 +25,9 @@ class RoleModel(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    # Relationships
+    # Fix relationships to use the proper tables and avoid circular references
     permissions = relationship("PermissionModel", secondary=role_permission)
-    users = relationship("UserModel", secondary="user_role")
+    users = relationship("UserModel", secondary="user_role", overlaps="roles,user")
 
     @property
     def permission_names(self) -> Set[str]:

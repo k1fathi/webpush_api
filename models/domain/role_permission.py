@@ -6,7 +6,7 @@ from sqlalchemy import Column, String, ForeignKey, DateTime
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
-from db.session import Base
+from db.base_class import Base
 
 class RolePermissionModel(Base):
     """Role permission association model for database operations"""

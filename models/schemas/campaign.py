@@ -1,105 +1,66 @@
-import uuid
-from datetime import datetime
-from enum import Enum
-from typing import Dict, List, Optional, Union
-from pydantic import BaseModel, Field, HttpUrl
+"""Schemas for campaign data"""
+import enum
+from datetime import datetime, timezone
+from typing import Dict, Any, Optional, List
+from uuid import UUID
 
-class CampaignStatus(str, Enum):
+from pydantic import BaseModel, Field
+
+
+class CampaignStatus(str, enum.Enum):
+    """Campaign status enum"""
     DRAFT = "draft"
     SCHEDULED = "scheduled"
     RUNNING = "running"
-    PAUSED = "paused"
     COMPLETED = "completed"
+    PAUSED = "paused"
     CANCELLED = "cancelled"
 
-class CampaignType(str, Enum):
+
+class CampaignType(str, enum.Enum):
+    """Campaign type enum"""
     ONE_TIME = "one_time"
     RECURRING = "recurring"
-    TRIGGER_BASED = "trigger_based"
-    AB_TEST = "ab_test"
+    TRIGGERED = "triggered"
 
-class Campaign(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    name: str
-    description: Optional[str] = None
-    scheduled_time: Optional[datetime] = None
-    status: CampaignStatus = CampaignStatus.DRAFT
-    created_at: datetime = Field(default_factory=datetime.now)
-    updated_at: datetime = Field(default_factory=datetime.now)
-    is_recurring: bool = False
-    recurrence_pattern: Optional[str] = None
-    campaign_type: CampaignType = CampaignType.ONE_TIME
-    
-    model_config = {"from_attributes": True}
 
-class CampaignBase(BaseModel):
-    """Base schema for campaigns"""
-    name: str
-    description: Optional[str] = None
-    campaign_type: CampaignType = CampaignType.ONE_TIME
-    is_recurring: bool = False
-    recurrence_pattern: Optional[str] = None
-    
-    model_config = {
-        "from_attributes": True
-    }
+class CampaignCreate(BaseModel):
+    """Schema for creating a campaign"""
+    name: str = Field(..., description="Campaign name")
+    description: Optional[str] = Field(None, description="Campaign description")
+    scheduled_time: Optional[datetime] = Field(None, description="Scheduled time")
+    status: CampaignStatus = Field(CampaignStatus.DRAFT, description="Campaign status")
+    is_recurring: bool = Field(False, description="Is the campaign recurring")
+    recurrence_pattern: Optional[str] = Field(None, description="Recurrence pattern")
+    campaign_type: CampaignType = Field(CampaignType.ONE_TIME, description="Campaign type")
+    segment_id: Optional[UUID] = Field(None, description="Segment ID")
+    template_id: Optional[UUID] = Field(None, description="Template ID")
 
-class CampaignCreate(CampaignBase):
-    """Schema for creating campaigns"""
-    segment_id: Optional[str] = None
-    template_id: Optional[str] = None
-    scheduled_time: Optional[datetime] = None
 
 class CampaignUpdate(BaseModel):
-    """Schema for updating campaigns"""
-    name: Optional[str] = None
-    description: Optional[str] = None
-    segment_id: Optional[str] = None
-    template_id: Optional[str] = None
-    scheduled_time: Optional[datetime] = None
-    is_recurring: Optional[bool] = None
-    recurrence_pattern: Optional[str] = None
-    campaign_type: Optional[CampaignType] = None
+    """Schema for updating a campaign"""
+    name: Optional[str] = Field(None, description="Campaign name")
+    description: Optional[str] = Field(None, description="Campaign description")
+    scheduled_time: Optional[datetime] = Field(None, description="Scheduled time")
+    status: Optional[CampaignStatus] = Field(None, description="Campaign status")
+    is_recurring: Optional[bool] = Field(None, description="Is the campaign recurring")
+    recurrence_pattern: Optional[str] = Field(None, description="Recurrence pattern")
+    campaign_type: Optional[CampaignType] = Field(None, description="Campaign type")
+    segment_id: Optional[UUID] = Field(None, description="Segment ID")
+    template_id: Optional[UUID] = Field(None, description="Template ID")
 
-class CampaignRead(CampaignBase):
-    """Schema for reading campaigns"""
-    id: str
+
+class CampaignRead(BaseModel):
+    """Schema for reading a campaign"""
+    id: UUID
+    name: str
+    description: Optional[str]
+    scheduled_time: Optional[datetime]
     status: CampaignStatus
+    is_recurring: bool
+    recurrence_pattern: Optional[str]
+    campaign_type: CampaignType
+    segment_id: Optional[UUID]
+    template_id: Optional[UUID]
     created_at: datetime
-    updated_at: datetime
-    scheduled_time: Optional[datetime] = None
-    segment_id: Optional[str] = None
-    template_id: Optional[str] = None
-    
-    model_config = {
-        "from_attributes": True
-    }
-
-class CampaignList(BaseModel):
-    """Schema for listing campaigns with pagination"""
-    items: List[CampaignRead]
-    total: int
-    skip: int
-    limit: int
-
-class CampaignPreview(BaseModel):
-    """Schema for campaign preview"""
-    title: str
-    body: str
-    image_url: Optional[HttpUrl] = None
-    action_url: Optional[HttpUrl] = None
-    campaign_id: str
-    template_id: str
-    personalized: bool
-
-class CampaignValidation(BaseModel):
-    """Schema for campaign validation result"""
-    campaign_id: str
-    is_valid: bool
-    errors: List[str] = []
-    warnings: List[str] = []
-
-class ABTestCampaignCreate(BaseModel):
-    """Schema for creating an A/B test campaign"""
-    campaign: CampaignCreate
-    ab_test: Dict
+    updated_at: Optional[datetime]

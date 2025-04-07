@@ -1,6 +1,3 @@
-# This file ensures that the tasks module is recognized as a Python package
-
-import logging
 import sys
 
 # Set up logging
