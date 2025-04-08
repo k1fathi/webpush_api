@@ -1,68 +1,32 @@
 from fastapi import APIRouter
 
 from .endpoints import (
-    ab_tests, analytics, campaigns, cdps, ceps, 
-    permissions, roles, segments, templates, triggers,
-    users, webhooks, webpush, notification_delivery,
-    external_auth  # Add the new endpoint
+    users,
+    campaigns,
+    segments,
+    templates,
+    webhooks,
+    notifications,
+    ab_tests,
+    analytics,
+    triggers,
+    external_auth,
+    health  # Now this import will work
 )
-from .endpoints import notifications, segment_execution  # Add segment execution
-# User management
+
+# Define the API router
+api_router = APIRouter()
+
+# Include all endpoint routers
 api_router.include_router(users.router, prefix="/users", tags=["users"])
-api_router.include_router(roles.router, prefix="/roles", tags=["roles"])
-#api_router.include_router(roles.router, prefix="/roles", tags=["roles"])
-# Segmentation
+api_router.include_router(campaigns.router, prefix="/campaigns", tags=["campaigns"])
 api_router.include_router(segments.router, prefix="/segments", tags=["segments"])
 api_router.include_router(templates.router, prefix="/templates", tags=["templates"])
-api_router.include_router(campaigns.router, prefix="/campaigns", tags=["campaigns"])
-api_router.include_router(campaign_templates.router, prefix="/campaign-templates", tags=["campaign templates"])
-api_router.include_router(ab_tests.router, prefix="/ab-tests", tags=["ab-tests"])
-api_router.include_router(triggers.router, prefix="/triggers", tags=["triggers"])
 api_router.include_router(webhooks.router, prefix="/webhooks", tags=["webhooks"])
-api_router.include_router(cdps.router, prefix="/cdp", tags=["cdp"])
-# Notifications and delivery
 api_router.include_router(notifications.router, prefix="/notifications", tags=["notifications"])
-api_router.include_router(notification_delivery.router, prefix="/delivery", tags=["delivery"])
-api_router.include_router(webpush.router, prefix="/webpush", tags=["webpush"])
-
-# Endpoints for Campaigns
-#api_router.include_router(campaigns.router, prefix="/campaigns", tags=["campaigns"])
-
-# Endpoints for A/B Testing
-#api_router.include_router(ab_tests.router, prefix="/ab-tests", tags=["ab-tests"])
-
-# Endpoints for Triggers
-#api_router.include_router(triggers.router, prefix="/triggers", tags=["triggers"])
-
-# Endpoints for Analytics
-#api_router.include_router(analytics.router, prefix="/analytics", tags=["analytics"])
-
-# Endpoints for Webhooks
-#api_router.include_router(webhooks.router, prefix="/webhooks", tags=["webhooks"])
-
-# Endpoints for CDP Integration
-#api_router.include_router(cdps.router, prefix="/cdp", tags=["cdp"])
-
-# Endpoints for CEP (Customer Engagement Platform)
-#api_router.include_router(ceps.router, prefix="/cep", tags=["cep"])
-
-# Endpoints for Webpush
-#api_router.include_router(webpush.router, prefix="/webpush", tags=["webpush"])
-
-# Endpoints for Notification Delivery
-#api_router.include_router(notification_delivery.router, prefix="/delivery", tags=["delivery"])
-
-# Endpoints for Notifications
-#api_router.include_router(notifications.router, prefix="/notifications", tags=["notifications"])
-#api_router.include_router(campaign_templates.router, prefix="/campaign-templates", tags=["campaign templates"])
-
-# Analytics
+api_router.include_router(ab_tests.router, prefix="/ab-tests", tags=["ab-tests"])
 api_router.include_router(analytics.router, prefix="/analytics", tags=["analytics"])
-
-# Add external auth router
-api_router.include_router(
-    external_auth.router,
-    prefix="/external",
-    tags=["external"]
-)
+api_router.include_router(triggers.router, prefix="/triggers", tags=["triggers"])
+api_router.include_router(external_auth.router, prefix="/external-auth", tags=["external-auth"])
+api_router.include_router(health.router, prefix="/health", tags=["health"])
 

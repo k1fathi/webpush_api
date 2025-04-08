@@ -24,6 +24,24 @@ class CampaignType(str, enum.Enum):
     TRIGGERED = "triggered"
 
 
+class Campaign(BaseModel):
+    """Schema for campaign data"""
+    id: Optional[str] = None
+    name: str
+    description: Optional[str] = None
+    scheduled_time: Optional[datetime] = None
+    status: CampaignStatus = CampaignStatus.DRAFT
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+    is_recurring: bool = False
+    recurrence_pattern: Optional[str] = None
+    campaign_type: CampaignType = CampaignType.ONE_TIME
+    segment_id: Optional[str] = None
+    template_id: Optional[str] = None
+    
+    model_config = {"from_attributes": True}
+
+
 class CampaignCreate(BaseModel):
     """Schema for creating a campaign"""
     name: str = Field(..., description="Campaign name")
@@ -64,3 +82,40 @@ class CampaignRead(BaseModel):
     template_id: Optional[UUID]
     created_at: datetime
     updated_at: Optional[datetime]
+
+
+class CampaignList(BaseModel):
+    """Schema for listing campaigns with pagination"""
+    items: List[CampaignRead]
+    total: int
+    page: int = 0
+    page_size: int = 100
+
+
+class CampaignPreview(BaseModel):
+    """Schema for campaign preview"""
+    id: Optional[UUID] = None
+    name: str
+    description: Optional[str] = None
+    template: Dict[str, Any] = Field(default_factory=dict)
+    segment_info: Optional[Dict[str, Any]] = None
+    scheduled_time: Optional[datetime] = None
+    status: CampaignStatus = CampaignStatus.DRAFT
+    estimated_audience: Optional[int] = None
+    personalization_example: Optional[Dict[str, Any]] = None
+    
+    class Config:
+        json_encoders = {
+            datetime: lambda v: v.isoformat()
+        }
+
+
+class CampaignValidation(BaseModel):
+    """Schema for campaign validation"""
+    is_valid: bool = True
+    errors: List[str] = Field(default_factory=list)
+    warnings: List[str] = Field(default_factory=list)
+    segment_size: Optional[int] = None
+    estimated_delivery_time: Optional[str] = None
+    template_variables: Optional[List[str]] = None
+    missing_variables: Optional[List[str]] = None
