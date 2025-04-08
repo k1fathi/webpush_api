@@ -8,12 +8,10 @@ from sqlalchemy.dialects.postgresql import UUID, ARRAY
 from db.base_class import Base
 
 # Association table for role-permission relationship
-# Updated with proper foreign key references
 role_permission = Table(
     'role_permission',
     Base.metadata,
     Column('role_id', UUID(as_uuid=True), ForeignKey('roles.id'), primary_key=True),
-    # Changed to properly reference the permissions table's primary key
     Column('permission_name', String, ForeignKey('permissions.name'), primary_key=True)
 )
 
@@ -27,16 +25,15 @@ class RoleModel(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    # Update the relationship definition with explicit join conditions
+    # Update the relationship to use the association table correctly
     permissions = relationship(
         "PermissionModel", 
         secondary=role_permission,
-        primaryjoin="RoleModel.id == role_permission.c.role_id",
-        secondaryjoin="PermissionModel.name == role_permission.c.permission_name",
         backref="roles"
     )
     
-    users = relationship("UserModel", secondary="user_role", overlaps="roles,user")
+    # Relationship with user_role table
+    users = relationship("UserModel", secondary="user_role", back_populates="roles")
 
     @property
     def permission_names(self) -> Set[str]:
