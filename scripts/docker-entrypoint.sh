@@ -10,11 +10,12 @@ mkdir -p /app/db_backups
 chmod -R 777 /app/db_backups
 
 # Wait for postgres to be ready
-echo "Waiting for PostgreSQL..."
+echo "Checking PostgreSQL connection..."
 until pg_isready -h db -p ${POSTGRES_PORT:-5432} -U postgres; do
-  sleep 2
+  echo "PostgreSQL is unavailable - sleeping"
+  sleep 1
 done
-echo "PostgreSQL is ready!"
+echo "PostgreSQL is up - executing command"
 
 # Run any startup commands or migrations if needed
 if [ "${RUN_MIGRATIONS}" = "true" ]; then

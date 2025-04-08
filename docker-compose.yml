@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   db:
     image: postgres:13
@@ -23,9 +21,8 @@ services:
   web:
     build: .
     volumes:
-      - .:/app
+      - .:/app:delegated
       - ./scripts:/app/scripts:ro
-      - ./postgres-data:/app/postgres-data
     ports:
       - "8000:8000"
     environment:
