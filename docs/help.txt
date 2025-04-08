@@ -206,7 +206,7 @@ docker exec -it webpush_api-web-1 ./scripts/db_manager.sh full-reset
 
 
 alembic revision --autogenerate -m "Initial migration"
-alembic revision --autogenerate -m "Initial migration"
+alembic revision --autogenerate -m "role model added"
 alembic upgrade head
 
 alembic list_templates
@@ -278,3 +278,8 @@ https://astra2.zuzzuu.com:9000/docs
 curl -X POST http://localhost:5000/api/send-push -H "Content-Type: application/json" -d '{"message": "Hey there, this is a test!"}'
 
 python -m db.seeder.seed_users
+
+
+
+
+chmod +x scripts/docker-entrypoint.sh
