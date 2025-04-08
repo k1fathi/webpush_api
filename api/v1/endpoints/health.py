@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import text
 from db.session import get_db
 
 router = APIRouter()
@@ -10,8 +11,8 @@ async def health_check(db: AsyncSession = Depends(get_db)):
     Health check endpoint to verify API is running and database connection is working
     """
     try:
-        # Try a simple database query to verify connection
-        await db.execute("SELECT 1")
+        # Use SQLAlchemy's text() function for raw SQL
+        await db.execute(text("SELECT 1"))
         return {
             "status": "ok",
             "message": "Service is running",

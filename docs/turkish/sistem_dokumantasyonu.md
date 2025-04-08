@@ -272,8 +272,3 @@ Bu bileşenler, kullanıcılara doğru zamanda, doğru içerikle, doğru kanalda
 ---
 
 **Not**: Bu doküman, WebPush bildirim sistemimizin tasarımı için wireframe çalışmalarında kullanılmak üzere hazırlanmıştır. Sistemin işleyişi ve entegrasyonlar hakkında genel bir bakış sunmaktadır.
-## Pandoc Dönüşüm Komutları
-
-```bash
-pandoc sistem_dokumantasyonu.md -o sistem_dokumantasyonu.pdf
-pandoc teknik_arayuz.md -o teknik_arayuz.pdf
