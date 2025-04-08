@@ -95,4 +95,6 @@ services:
 
 volumes:
   postgres_data:
-    # Named volume instead of bind mount to avoid permission issues
+    driver: local
+  app_data:
+    driver: local
