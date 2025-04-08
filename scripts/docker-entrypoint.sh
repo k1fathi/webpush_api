@@ -8,7 +8,8 @@ echo "Current user: $(whoami)"
 echo "Current working directory: $(pwd)"
 
 # Create postgres data directories with more robust permission management
-for dir in "/app/postgres-data" "/home/ubuntu/webpush_api/postgres-data" "/app/db_backups"; do
+# Removed reference to problematic directory
+for dir in "/app/postgres-data" "/app/db_backups"; do
     if [ -d "$dir" ]; then
         echo "Directory $dir exists, ensuring permissions"
         chmod -R 777 "$dir" || echo "Warning: Could not chmod $dir"
@@ -19,11 +20,7 @@ for dir in "/app/postgres-data" "/home/ubuntu/webpush_api/postgres-data" "/app/d
     fi
 done
 
-# Try to fix any existing permissions in parent directories
-if [ -d "/home/ubuntu/webpush_api" ]; then
-    echo "Setting permissions on /home/ubuntu/webpush_api"
-    chmod 777 /home/ubuntu/webpush_api || echo "Warning: Could not chmod /home/ubuntu/webpush_api"
-fi
+# Removed attempt to fix permissions on parent directory
 
 # Wait for postgres to be ready
 echo "Checking PostgreSQL connection..."
