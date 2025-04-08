@@ -20,13 +20,15 @@ COPY requirements.txt .
 
 # Install dependencies with verbose output
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -v -r requirements.txt
+    pip install --no-cache-dir -v -r requirements.txt && \
+    pip install --no-cache-dir jinja2>=3.1.2
 
 # Copy the project
 COPY . .
 
-# Create backup directory
-RUN mkdir -p /app/db_backups
+# Create backup directory with proper permissions
+RUN mkdir -p /app/db_backups && \
+    chmod -R 777 /app/db_backups
 
 # Set environment variables
 ENV PYTHONPATH=/app/webpush_api

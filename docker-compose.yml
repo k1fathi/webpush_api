@@ -4,42 +4,52 @@ services:
   db:
     image: postgres:13
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./scripts/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+      - ./postgres-data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=webpush
     ports:
       - "${POSTGRES_PORT}:${POSTGRES_PORT}"
-    # Add these restart settings to ensure the database persists across restarts
     restart: always
-    # Add command to disable automatic vacuuming that might be related to the issue
     command: postgres -c 'max_connections=100' -c 'shared_buffers=256MB' -c 'autovacuum=on' -c 'log_statement=all'
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
-      start_period: 20s # Give more time for initial setup
+      start_period: 20s
 
   web:
     build: .
     volumes:
       - .:/app
+      - ./postgres-data:/app/postgres-data
     ports:
       - "8000:8000"
     environment:
       - PYTHONPATH=/app
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/webpush
     env_file:
       - .env
     depends_on:
       db:
-        condition: service_healthy # Ensure DB is ready before starting
+        condition: service_healthy
       redis:
         condition: service_started
       rabbitmq:
         condition: service_healthy
+    entrypoint: ["/app/scripts/docker-entrypoint.sh"]
+    command:
+      [
+        "uvicorn",
+        "api.main:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000",
+        "--reload",
+      ]
 
   redis:
     image: redis:6
@@ -78,7 +88,7 @@ services:
       - .env
     depends_on:
       db:
-        condition: service_healthy # Ensure DB is ready before starting
+        condition: service_healthy
       rabbitmq:
         condition: service_healthy
       redis:
@@ -87,9 +97,8 @@ services:
 
 volumes:
   postgres_data:
-    # Add driver_opts for better persistence
     driver: local
     driver_opts:
       type: none
-      device: ${PWD}/postgres-data # Store data in local directory
+      device: ${PWD}/postgres-data
       o: bind
