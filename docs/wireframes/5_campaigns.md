@@ -5,12 +5,12 @@
 +-------------------------------+------------------------------------+
 
 ===================== CAMPAIGN LISTING PAGE =====================
-| [Notifications]                   |  Campaigns                          |
+| [Notifications]               |  Campaigns                          |
 | [Subscriptions]               |                                    |
 | [Segments]                    |  + Create New Campaign              |
-| [Contents]                     |                                    |
+| [Contents]                    |                                    |
 | [Campaigns] ►                 |  [Status: All ▼] [Search...] [🔍]   |
-| [Automations]                  |                                    |
+| [Triggers]                    |                                    |
 | [Analytics]                   |  Showing 42 campaigns               |
 | [Integrations]                |                                    |
 | [Settings]                    |  +----+----------------+------+----+

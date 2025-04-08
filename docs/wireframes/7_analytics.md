@@ -10,7 +10,7 @@
 | [Segments]                    |  [▢ Daily] [▢ Weekly] [✓ Monthly]  |
 | [Contents]                     |  [Last 30 Days ▼] [Export CSV]     |
 | [Campaigns]                   |                                    |
-| [Automations]                  |  +------------+ +------------+     |
+| [Triggers]                    |  +------------+ +------------+     |
 | [Analytics] ►                 |  | 1,245K     | | 42.8%      |     |
 | [Integrations]                |  | Delivered  | | Open Rate  |     |
 | [Settings]                    |  +------------+ +------------+     |

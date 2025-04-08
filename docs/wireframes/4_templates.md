@@ -6,12 +6,12 @@
 | NAVIGATION                    |  CONTENT (TEMPLATES)               |
 +-------------------------------+------------------------------------+
 ===================== TEMPLATE LISTING PAGE =====================
-| [Notifications]                   |  Push Templates                   |
+| [Notifications]               |  Push Templates                   |
 | [Subscriptions]               |                                   |
 | [Segments]                    |  + Create Template                 |
-| [Templates] ►                   |                                   |
+| [Templates] ►                 |                                   |
 | [Campaigns]                   |  [Status: All ▼] [Search...] [🔍]  |
-| [Automations]                  |                                   |
+| [Triggers]                    |                                   |
 | [Analytics]                   |  Showing 18 push templates         |
 | [Integrations]                |                                   |
 | [Settings]                    |  +----+----------------+------+---+

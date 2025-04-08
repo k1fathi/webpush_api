@@ -10,7 +10,7 @@
 | [Segments]                    |  + Add Subscription                |
 | [Templates]                     |                                    |
 | [Campaigns]                   |  [Status: All ▼] [Search...] [🔍]  |
-| [Automations]                  |                                    |
+| [Triggers]                    |                                    |
 | [Analytics]                   |  Showing 1,245 subscriptions       |
 | [Integrations]                |                                    |
 | [Settings]                    |  +------+-------------------+------+
