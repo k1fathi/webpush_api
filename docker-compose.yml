@@ -4,7 +4,7 @@ services:
   db:
     image: postgres:13
     volumes:
-      - ./postgres-data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_USER=postgres
@@ -24,6 +24,7 @@ services:
     build: .
     volumes:
       - .:/app
+      - ./scripts:/app/scripts:ro
       - ./postgres-data:/app/postgres-data
     ports:
       - "8000:8000"
@@ -97,8 +98,4 @@ services:
 
 volumes:
   postgres_data:
-    driver: local
-    driver_opts:
-      type: none
-      device: ${PWD}/postgres-data
-      o: bind
+    # Named volume instead of bind mount to avoid permission issues
