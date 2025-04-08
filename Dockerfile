@@ -10,20 +10,21 @@ RUN apt-get update && \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Make scripts executable
+# Make scripts directory
 RUN mkdir -p /app/scripts
-COPY scripts/ /app/scripts/
-RUN chmod +x /app/scripts/*.sh
 
 # Copy requirements first to leverage Docker cache
 COPY requirements.txt .
-
-# Install dependencies with verbose output
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -v -r requirements.txt && \
-    pip install --no-cache-dir jinja2>=3.1.2
+    pip install --no-cache-dir -r requirements.txt
 
-# Copy the project
+# Copy the entrypoint script first and set permissions
+COPY scripts/docker-entrypoint.sh /app/scripts/
+RUN chmod +x /app/scripts/docker-entrypoint.sh && \
+    # Ensure Unix line endings
+    sed -i 's/\r$//' /app/scripts/docker-entrypoint.sh
+
+# Copy the rest of the project
 COPY . .
 
 # Create backup directory with proper permissions
