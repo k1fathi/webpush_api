@@ -2,8 +2,9 @@ import os
 import sys
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
+from sqlalchemy import engine_from_config, create_engine
 from sqlalchemy import pool
+from pathlib import Path
 
 from alembic import context
 import logging
@@ -33,13 +34,7 @@ try:
     masked_connection = connection_str.replace(settings.POSTGRES_PASSWORD, "********") if settings.POSTGRES_PASSWORD else connection_str
     logger.info(f"Using database connection: {masked_connection}")
     
-    # Set the database URL in the Alembic config directly from settings
-    # Ensure we are using the correct database URL
-    config.set_main_option("sqlalchemy.url", str(settings.SQLALCHEMY_DATABASE_URI))
-    
     # Import all models for Alembic to detect
-    # These imports cause the models to be registered with Base.metadata
-    # You only need to import them, not assign them to variables
     from models.domain.user import UserModel
     from models.domain.role import RoleModel
     from models.domain.permission import PermissionModel
@@ -70,16 +65,70 @@ except ImportError as e:
     logger.error(f"Error importing configuration or models: {e}")
     raise
 
+def create_empty_migration_file(revision_id):
+    """Create an empty migration file with the given revision ID."""
+    versions_dir = Path(os.path.dirname(__file__)) / "versions"
+    versions_dir.mkdir(exist_ok=True)
+    
+    # Find the latest file in the versions directory to determine dependencies
+    existing_files = list(versions_dir.glob("*.py"))
+    
+    # Default values if we can't determine anything from existing files
+    down_revision = None
+    depends_on = None
+    
+    # Try to find the revision that depends on the missing one
+    for file_path in existing_files:
+        content = file_path.read_text()
+        if f"down_revision = '{revision_id}'" in content or f'down_revision = "{revision_id}"' in content:
+            # This file depends on our missing migration
+            logger.info(f"Found file {file_path.name} that depends on missing revision {revision_id}")
+            # Extract the revision of this file to use as the revision our new file upgrades to
+            revision_line = [line for line in content.split('\n') if line.strip().startswith('revision = ')][0]
+            depends_on = revision_line.split('=')[1].strip().strip("'").strip('"')
+            break
+
+    # Create migration file with the missing revision ID
+    filename = f"{revision_id}_empty_migration_for_missing_revision.py"
+    file_path = versions_dir / filename
+    
+    # Basic migration file template
+    template = f"""
+\"\"\"empty migration for missing revision
+
+Revision ID: {revision_id}
+Revises: {down_revision or ''}
+Create Date: (manually created)
+
+\"\"\"
+
+# revision identifiers, used by Alembic.
+revision = '{revision_id}'
+down_revision = {repr(down_revision)}
+depends_on = {repr(depends_on)}
+
+def upgrade():
+    pass
+
+def downgrade():
+    pass
+"""
+    
+    file_path.write_text(template)
+    logger.info(f"Created empty migration file: {file_path}")
+    return file_path
+
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode."""
-    url = config.get_main_option("sqlalchemy.url")
+    # Use the database URL directly from settings
+    url = str(settings.SQLALCHEMY_DATABASE_URI)
     context.configure(
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
-        compare_type=True,  # Compare column types
-        compare_server_default=True  # Compare server defaults
+        compare_type=True,
+        compare_server_default=True
     )
 
     with context.begin_transaction():
@@ -87,16 +136,17 @@ def run_migrations_offline() -> None:
 
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode."""
-    # Add error handling for database connection
+    # Create engine directly from settings instead of from config
     try:
-        connectable = engine_from_config(
-            config.get_section(config.config_ini_section),
-            prefix="sqlalchemy.",
+        # Create engine directly using settings
+        connectable = create_engine(
+            str(settings.SQLALCHEMY_DATABASE_URI),
             poolclass=pool.NullPool,
+            echo=settings.DB_ECHO_LOG,
+            pool_pre_ping=True
         )
         
         with connectable.connect() as connection:
-            # Configure Alembic context with our connection and metadata
             context.configure(
                 connection=connection, 
                 target_metadata=target_metadata,
@@ -105,20 +155,28 @@ def run_migrations_online() -> None:
                 include_schemas=True,
             )
 
-            # Run the migrations
             try:
                 with context.begin_transaction():
                     context.run_migrations()
             except KeyError as e:
                 missing_revision = str(e).strip("'")
-                logger.error(f"Missing migration '{missing_revision}'. Ensure all migration files are present in 'alembic/versions/'.")
-                logger.error("Run `alembic history` to inspect the migration history and verify the missing revision.")
-                logger.error("If the migration file is missing, restore it from version control or recreate it manually.")
-                logger.error("If the issue persists, consider resetting the database and reapplying migrations.")
-                raise
+                logger.error(f"Missing migration '{missing_revision}'. Attempting to create an empty migration file.")
+                
+                # Check if ALEMBIC_AUTO_CREATE_MISSING env var is set
+                auto_create = os.environ.get("ALEMBIC_AUTO_CREATE_MISSING", "").lower() in ("true", "1", "yes")
+                
+                if auto_create:
+                    # Create empty migration file
+                    create_empty_migration_file(missing_revision)
+                    logger.info("Created empty migration file. Please try running 'alembic upgrade head' again.")
+                else:
+                    logger.error("Set ALEMBIC_AUTO_CREATE_MISSING=true environment variable to automatically create missing migration files.")
+                    logger.error("Run `alembic history` to inspect the migration history and verify the missing revision.")
+                    logger.error("If the migration file is missing, restore it from version control or recreate it manually.")
+                    logger.error("If the issue persists, consider resetting the database and reapplying migrations.")
+                    raise
     except Exception as e:
         logger.error(f"Database connection error: {e}")
-        # Print more details about configuration
         logger.error(f"Database URL: {masked_connection}")
         logger.error(f"Database server: {settings.POSTGRES_SERVER}")
         logger.error(f"Database name: {settings.POSTGRES_DB}")
