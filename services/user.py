@@ -1,6 +1,6 @@
 import logging
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any, Tuple
 
 from passlib.context import CryptContext
@@ -31,6 +31,15 @@ class UserService:
         """Verify a password against a hash"""
         return pwd_context.verify(plain_password, hashed_password)
     
+    async def ensure_admin_user(self) -> None:
+        """Ensure that an admin user exists in the system"""
+        try:
+            admin_user = await self.user_repo.ensure_admin_exists()
+            if admin_user:
+                logger.info(f"Admin user available: {admin_user.username}")
+        except Exception as e:
+            logger.error(f"Error ensuring admin user exists: {str(e)}")
+
     async def create_user(self, user_data: UserCreate) -> User:
         """
         Create a new user

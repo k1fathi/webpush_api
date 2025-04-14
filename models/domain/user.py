@@ -9,14 +9,6 @@ from sqlalchemy.sql import func
 from db.base_class import Base
 from models.schemas.user import UserStatus
 
-# Association table for user-role relationship
-user_role = Table(
-    'user_role',
-    Base.metadata,
-    Column('user_id', UUID(as_uuid=True), ForeignKey('users.id'), primary_key=True),
-    Column('role_id', UUID(as_uuid=True), ForeignKey('roles.id'), primary_key=True)
-)
-
 # Association table for user-segment relationship
 user_segment = Table(
     'user_segment',
@@ -68,8 +60,8 @@ class UserModel(Base):
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     
     # Define relationship strings instead of direct imports to prevent circular imports
-    role = relationship("RoleModel")
-    roles = relationship("RoleModel", secondary=user_role)
+    role = relationship("RoleModel") # Direct role relationship
+    roles = relationship("UserRoleModel", back_populates="user") # Changed to reference the model instead of the association table
     notifications = relationship("NotificationModel", back_populates="user")
     segments = relationship("SegmentModel", secondary=user_segment)
     cep_decisions = relationship("CepDecisionModel", back_populates="user")

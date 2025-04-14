@@ -16,43 +16,42 @@ class SubscriptionStatus(str, enum.Enum):
     REVOKED = "revoked"
 
 
-class PushSubscriptionInfo(BaseModel):
-    """Web Push Subscription object format"""
-    endpoint: str = Field(..., description="Push subscription endpoint URL")
-    keys: Dict[str, str] = Field(..., description="Encryption keys")
-    expirationTime: Optional[int] = Field(None, description="Expiration timestamp (if any)")
+class SubscriptionBase(BaseModel):
+    """Base subscription schema"""
+    endpoint: str
+    p256dh: str
+    auth: str
 
 
-class SubscriptionCreate(BaseModel):
+class SubscriptionCreate(SubscriptionBase):
     """Schema for creating a subscription"""
-    subscription_info: PushSubscriptionInfo
-    user_agent: Optional[str] = Field(None, description="Browser user agent")
-    device_type: Optional[str] = Field(None, description="Device type")
+    user_id: Optional[UUID] = None
 
 
 class SubscriptionUpdate(BaseModel):
     """Schema for updating a subscription"""
-    subscription_info: Optional[PushSubscriptionInfo] = None
-    webpush_enabled: Optional[bool] = None
-    status: Optional[SubscriptionStatus] = None
+    endpoint: Optional[str] = None
+    p256dh: Optional[str] = None
+    auth: Optional[str] = None
+    is_active: Optional[bool] = None
 
 
-class SubscriptionRead(BaseModel):
+class SubscriptionRead(SubscriptionBase):
     """Schema for reading a subscription"""
     id: UUID
-    user_id: UUID
-    email: EmailStr
-    subscription_info: PushSubscriptionInfo
-    webpush_enabled: bool
-    status: SubscriptionStatus
-    last_seen: Optional[datetime] = None
+    user_id: Optional[str] = None
     created_at: datetime
-    updated_at: Optional[datetime] = None
+    updated_at: datetime
+    last_notified_at: Optional[datetime] = None
+    is_active: bool
+
+    class Config:
+        orm_mode = True
 
 
-class SubscriptionStats(BaseModel):
-    """Subscription statistics"""
-    total_count: int
-    active_count: int
-    new_this_week: int
-    lost_this_week: int
+class SubscriptionList(BaseModel):
+    """Schema for subscription list with pagination"""
+    items: List[SubscriptionRead]
+    total: int
+    page: int
+    page_size: int

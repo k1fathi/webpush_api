@@ -1,0 +1,30 @@
+Core User and Role Management:
+
+UserModel, RoleModel, PermissionModel
+Association tables for UserRole and RolePermission
+Notifications and Templates:
+
+NotificationModel for user notifications
+TemplateModel and TemplateVersionModel for managing notification templates
+Campaign Management:
+
+CampaignModel and CampaignTemplateModel for marketing campaigns
+A/B Testing:
+
+AbTestModel and TestVariantModel for testing different notification variants
+Analytics:
+
+AnalyticsModel for tracking notification metrics
+User Segmentation:
+
+SegmentModel and UserSegment for targeting specific user groups
+Customer Engagement and Integration:
+
+CdpIntegrationModel for third-party integrations
+CepDecisionModel for customer engagement decisions
+Automation:
+
+TriggerModel and TriggerExecutionModel for event-based actions
+Subscriptions:
+
+SubscriptionModel for web push subscriptions

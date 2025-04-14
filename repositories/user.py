@@ -5,19 +5,23 @@ from typing import Dict, List, Optional, Any
 from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from db.session import get_session
+from db.session import get_async_session_context
 from models.domain.user import UserModel
 from models.domain.user_role import UserRoleModel
 from models.domain.role import RoleModel
-from models.schemas.user import User
+from models.schemas.user import User, UserStatus
 from repositories.base import BaseRepository
+from passlib.context import CryptContext
+
+# Password hashing context
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class UserRepository(BaseRepository):
     """Repository for user operations"""
     
     async def create(self, user: User) -> User:
         """Create a new user"""
-        async with get_session() as session:
+        async with get_async_session_context() as session:
             db_user = UserModel(
                 id=str(uuid.uuid4()) if not user.id else user.id,
                 email=user.email,
@@ -44,7 +48,7 @@ class UserRepository(BaseRepository):
 
     async def update_last_login(self, user_id: str) -> bool:
         """Update user's last login timestamp"""
-        async with get_session() as session:
+        async with get_async_session_context() as session:
             result = await session.execute(
                 select(UserModel).where(UserModel.id == user_id)
             )
@@ -57,7 +61,7 @@ class UserRepository(BaseRepository):
 
     async def update_last_seen(self, user_id: str) -> bool:
         """Update user's last seen timestamp"""
-        async with get_session() as session:
+        async with get_async_session_context() as session:
             result = await session.execute(
                 select(UserModel).where(UserModel.id == user_id)
             )
@@ -70,7 +74,7 @@ class UserRepository(BaseRepository):
 
     async def add_device(self, user_id: str, device_data: Dict) -> bool:
         """Add a new device for a user"""
-        async with get_session() as session:
+        async with get_async_session_context() as session:
             result = await session.execute(
                 select(UserModel).where(UserModel.id == user_id)
             )
@@ -91,7 +95,7 @@ class UserRepository(BaseRepository):
 
     async def get_notification_settings(self, user_id: str) -> Optional[Dict]:
         """Get user's notification settings"""
-        async with get_session() as session:
+        async with get_async_session_context() as session:
             result = await session.execute(
                 select(UserModel).where(UserModel.id == user_id)
             )
@@ -118,7 +122,7 @@ class UserRepository(BaseRepository):
         Returns:
             List of matching user models
         """
-        async with get_session() as session:
+        async with get_async_session_context() as session:
             # Convert string query to SQLAlchemy text object
             sql = text(query)
             
@@ -138,7 +142,7 @@ class UserRepository(BaseRepository):
 
     async def get_user_roles(self, user_id: str) -> List[str]:
         """Get all role IDs for a user"""
-        async with get_session() as session:
+        async with get_async_session_context() as session:
             query = select(UserRoleModel.role_id).where(
                 UserRoleModel.user_id == user_id
             )
@@ -147,7 +151,7 @@ class UserRepository(BaseRepository):
 
     async def get_user_role_names(self, user_id: str) -> List[str]:
         """Get all role names for a user"""
-        async with get_session() as session:
+        async with get_async_session_context() as session:
             query = select(RoleModel.name).join(
                 UserRoleModel,
                 UserRoleModel.role_id == RoleModel.id
@@ -171,7 +175,53 @@ class UserRepository(BaseRepository):
 
     async def get_by_email(self, email: str) -> Optional[UserModel]:
         """Get a user by email address"""
-        async with get_session() as session:
+        async with get_async_session_context() as session:
             query = select(UserModel).where(UserModel.email == email)
             result = await session.execute(query)
             return result.scalar_one_or_none()
+
+    async def ensure_admin_exists(self) -> Optional[UserModel]:
+        """
+        Check if an admin user exists and create one if it doesn't
+        
+        Returns:
+            Optional[UserModel]: The admin user that was created or found
+        """
+        async with get_async_session_context() as session:
+            # Check if admin user already exists
+            query = select(UserModel).where(
+                (UserModel.username == "admin") | 
+                (UserModel.email == "admin@example.com")
+            )
+            result = await session.execute(query)
+            admin_user = result.scalar_one_or_none()
+            
+            if admin_user:
+                return admin_user
+            
+            # Create admin user if it doesn't exist
+            hashed_password = pwd_context.hash("admin123")
+            admin_user = UserModel(
+                id=uuid.uuid4(),
+                email="admin@example.com",
+                username="admin",
+                hashed_password=hashed_password,
+                full_name="Admin User",
+                status=UserStatus.ACTIVE,
+                is_active=True,
+                is_superuser=True,
+                notification_enabled=True,
+                webpush_enabled=True,
+                email_notification_enabled=True,
+                timezone="UTC",
+                language="en",
+                custom_attributes={},
+                created_at=datetime.datetime.utcnow(),
+                updated_at=datetime.datetime.utcnow()
+            )
+            
+            session.add(admin_user)
+            await session.commit()
+            await session.refresh(admin_user)
+            
+            return admin_user

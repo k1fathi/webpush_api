@@ -18,7 +18,7 @@ class UserRoleModel(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     # Relationships
-    role = relationship("RoleModel", back_populates="users")
+    role = relationship("RoleModel") # Removed back_populates to avoid circular reference
     user = relationship("UserModel", back_populates="roles")
 
     def __repr__(self):

@@ -10,6 +10,7 @@ from core.config import settings
 from core.exceptions.handlers import register_exception_handlers
 from core.logging.config import configure_logging
 from core.db import init_db, create_tables
+from services.user import UserService
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +43,10 @@ async def lifespan(app: FastAPI):
         
         if db_init_success:
             logger.info("Database setup complete")
+            
+            # Ensure admin user exists
+            user_service = UserService()
+            await user_service.ensure_admin_user()
     except Exception as e:
         logger.error(f"Failed to initialize database: {e}")
         raise

@@ -1,0 +1,306 @@
+erDiagram
+    %% Core User and Role Management
+    UserModel {
+        uuid id PK
+        string email
+        string username
+        string hashed_password
+        string full_name
+        enum status
+        boolean is_active
+        boolean is_superuser
+        uuid role_id FK
+        array permissions
+        boolean notification_enabled
+        boolean webpush_enabled
+        boolean email_notification_enabled
+        integer quiet_hours_start
+        integer quiet_hours_end
+        json subscription_info
+        json devices
+        string timezone
+        string language
+        json custom_attributes
+        datetime last_login
+        datetime last_seen
+        datetime created_at
+        datetime updated_at
+    }
+    
+    RoleModel {
+        uuid id PK
+        string name
+        string description
+        boolean is_active
+        datetime created_at
+        datetime updated_at
+    }
+    
+    PermissionModel {
+        uuid id PK
+        string name
+        string description
+        string resource
+        string action
+        boolean is_active
+        datetime created_at
+        datetime updated_at
+    }
+    
+    %% Association Tables
+    UserRole {
+        uuid user_id PK,FK
+        uuid role_id PK,FK
+    }
+    
+    RolePermission {
+        uuid role_id PK,FK
+        uuid permission_id PK,FK
+    }
+    
+    %% Notifications and Templates
+    NotificationModel {
+        uuid id PK
+        string title
+        text body
+        jsonb data
+        string status
+        string type
+        uuid campaign_id FK
+        uuid variant_id FK
+        uuid user_id FK
+        datetime created_at
+        datetime updated_at
+        datetime scheduled_at
+        datetime sent_at
+        boolean is_read
+        boolean is_delivered
+        boolean is_active
+    }
+    
+    TemplateModel {
+        uuid id PK
+        string name
+        text description
+        string title
+        text body
+        string image_url
+        string action_url
+        string icon_url
+        enum template_type
+        json content
+        array variables
+        array tags
+        string category
+        enum status
+        integer version
+        datetime created_at
+        datetime updated_at
+        uuid created_by FK
+    }
+    
+    TemplateVersionModel {
+        uuid id PK
+        uuid template_id FK
+        integer version
+        string title
+        text body
+        string image_url
+        string action_url
+        string icon_url
+        json content
+        datetime created_at
+        uuid created_by FK
+    }
+    
+    %% Campaign Management
+    CampaignModel {
+        uuid id PK
+        string name
+        text description
+        datetime scheduled_time
+        enum status
+        boolean is_recurring
+        string recurrence_pattern
+        enum campaign_type
+        uuid segment_id FK
+        uuid template_id FK
+        datetime created_at
+        datetime updated_at
+    }
+    
+    CampaignTemplateModel {
+        uuid id PK
+        string name
+        string description
+        enum category
+        enum status
+        json content
+        datetime created_at
+        datetime updated_at
+        uuid created_by FK
+    }
+    
+    %% A/B Testing
+    AbTestModel {
+        uuid id PK
+        string name
+        text description
+        enum status
+        datetime start_date
+        datetime end_date
+        integer expected_reach
+        string success_metric
+        json metrics_config
+        uuid campaign_id FK
+        datetime created_at
+        datetime updated_at
+    }
+    
+    TestVariantModel {
+        uuid id PK
+        uuid test_id FK
+        string name
+        text description
+        float weight
+        json content_changes
+        uuid template_id FK
+        datetime created_at
+        datetime updated_at
+    }
+    
+    %% Analytics
+    AnalyticsModel {
+        uuid id PK
+        uuid notification_id FK
+        uuid campaign_id FK
+        uuid user_id FK
+        string delivery_status
+        boolean opened
+        boolean clicked
+        integer open_count
+        integer click_count
+        string device_type
+        string platform
+        string browser
+        string country
+        string region
+        string city
+        jsonb data_metadata
+        datetime created_at
+        datetime updated_at
+        datetime delivered_at
+        datetime opened_at
+        datetime clicked_at
+    }
+    
+    %% User Segmentation
+    SegmentModel {
+        uuid id PK
+        string name
+        text description
+        json criteria
+        boolean is_dynamic
+        string query
+        datetime created_at
+        datetime updated_at
+    }
+    
+    UserSegment {
+        uuid user_id PK,FK
+        uuid segment_id PK,FK
+    }
+    
+    %% CDP Integration
+    CdpIntegrationModel {
+        uuid id PK
+        string name
+        string provider
+        string api_key
+        string endpoint
+        json configuration
+        boolean is_active
+        datetime created_at
+        datetime updated_at
+    }
+    
+    %% Customer Engagement Platform
+    CepDecisionModel {
+        uuid id PK
+        uuid user_id FK
+        uuid campaign_id FK
+        boolean engaged
+        json context
+        string channel
+        string decision
+        float score
+        datetime decided_at
+        datetime created_at
+    }
+    
+    %% Triggers
+    TriggerModel {
+        uuid id PK
+        string name
+        text description
+        json condition
+        json action
+        boolean is_active
+        string event_type
+        datetime created_at
+        datetime updated_at
+    }
+    
+    TriggerExecutionModel {
+        uuid id PK
+        uuid trigger_id FK
+        string status
+        json context
+        json result
+        datetime executed_at
+        datetime created_at
+    }
+    
+    %% Subscriptions
+    SubscriptionModel {
+        uuid id PK
+        uuid user_id FK
+        string endpoint
+        string p256dh
+        string auth
+        json subscription_data
+        string user_agent
+        boolean is_active
+        datetime created_at
+        datetime updated_at
+    }
+    
+    %% Relationships
+    UserModel ||--o{ UserRole : "has roles"
+    RoleModel ||--o{ UserRole : "assigned to users"
+    RoleModel ||--o{ RolePermission : "has permissions"
+    PermissionModel ||--o{ RolePermission : "assigned to roles"
+    UserModel ||--o{ NotificationModel : "receives"
+    UserModel ||--o{ AnalyticsModel : "generates"
+    UserModel ||--o{ UserSegment : "belongs to segments"
+    UserModel ||--o{ SubscriptionModel : "has subscriptions"
+    UserModel ||--o{ CepDecisionModel : "has engagement decisions"
+    
+    SegmentModel ||--o{ UserSegment : "includes users"
+    SegmentModel ||--o{ CampaignModel : "targeted by"
+    
+    CampaignModel ||--o{ NotificationModel : "sends"
+    CampaignModel ||--o{ AnalyticsModel : "generates"
+    CampaignModel ||--o{ AbTestModel : "may have"
+    CampaignModel ||--o{ CepDecisionModel : "involves"
+    
+    TemplateModel ||--o{ CampaignModel : "used in"
+    TemplateModel ||--o{ TemplateVersionModel : "has versions"
+    TemplateModel ||--o{ TestVariantModel : "customized in"
+    
+    AbTestModel ||--o{ TestVariantModel : "has variants"
+    TestVariantModel ||--o{ NotificationModel : "generates"
+    
+    NotificationModel ||--o{ AnalyticsModel : "tracked by"
+    
+    TriggerModel ||--o{ TriggerExecutionModel : "executed as"

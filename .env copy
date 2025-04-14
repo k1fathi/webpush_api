@@ -1,0 +1,47 @@
+# API settings
+API_PREFIX=/api
+PROJECT_NAME=WebPush API
+API_HOST=57.129.71.50
+
+# CORS
+CORS_ORIGINS=*
+
+# Security
+SECRET_KEY=your_secret_key_here
+ACCESS_TOKEN_EXPIRE_MINUTES=11520
+
+# Database
+POSTGRES_SERVER=57.129.71.50
+POSTGRES_PORT=5432
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_DB=webpush
+DEBUG=true
+AUTO_CREATE_TABLES=true
+
+
+# Redis
+REDIS_HOST=57.129.71.50
+REDIS_PORT=6379
+
+# RabbitMQ
+RABBITMQ_HOST=57.129.71.50
+RABBITMQ_USER=guest
+RABBITMQ_PASSWORD=guest
+
+# WebPush settings
+VAPID_PRIVATE_KEY=your_vapid_private_key_here
+VAPID_PUBLIC_KEY=your_vapid_public_key_here
+VAPID_CLAIMS_EMAIL=mailto:admin@example.com
+
+# CDP Integration
+CDP_API_URL=https://cdp.example.com/api
+CDP_API_KEY=your_cdp_api_key_here
+
+# CEP Integration
+CEP_API_URL=https://cep.example.com/api
+CEP_API_KEY=your_cep_api_key_here
+
+# Logging
+LOG_LEVEL=INFO
+LOG_FORMAT=json
