@@ -4,6 +4,9 @@ import uvicorn
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.openapi.docs import get_swagger_ui_html, get_redoc_html
+from fastapi.openapi.utils import get_openapi
 
 from api.v1.router import api_router
 from core.config import settings
@@ -61,8 +64,8 @@ app = FastAPI(
     title=settings.PROJECT_NAME,
     description="WebPush Notification API",
     version="1.0.0",
-    docs_url="/docs",
-    redoc_url="/redoc",
+    docs_url=None,  # We'll define custom routes for docs
+    redoc_url=None,  # We'll define custom routes for redoc
     openapi_url=f"{settings.API_PREFIX}/openapi.json",
     lifespan=lifespan,
 )
@@ -85,10 +88,33 @@ register_exception_handlers(app)
 # Include API router
 app.include_router(api_router, prefix=settings.API_PREFIX)
 
-# Redirect root path to Swagger docs
+# Root endpoint - Return info instead of redirecting
 @app.get("/", include_in_schema=False)
-def redirect_to_docs():
-    return RedirectResponse(url="/docs")
+def read_root():
+    return {"message": "Webpush API is running", "docs_url": "/docs", "redoc_url": "/redoc"}
+
+# Custom Swagger UI route that works in all environments
+@app.get("/docs", include_in_schema=False)
+async def custom_swagger_ui_html():
+    return get_swagger_ui_html(
+        openapi_url=f"{settings.API_PREFIX}/openapi.json",
+        title=f"{settings.PROJECT_NAME} - Swagger UI",
+        oauth2_redirect_url=None,
+        swagger_js_url="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.9.0/swagger-ui-bundle.js",
+        swagger_css_url="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.9.0/swagger-ui.css",
+    )
+
+# Custom ReDoc route that works in all environments
+@app.get("/redoc", include_in_schema=False)
+async def custom_redoc_html():
+    return get_redoc_html(
+        openapi_url=f"{settings.API_PREFIX}/openapi.json",
+        title=f"{settings.PROJECT_NAME} - ReDoc",
+        redoc_js_url="https://cdn.jsdelivr.net/npm/redoc@2.0.0/bundles/redoc.standalone.js",
+    )
+
+# Mount static files directory for any local static assets
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Health check endpoint
 @app.get("/health", tags=["Health"])

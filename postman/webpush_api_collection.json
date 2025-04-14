@@ -1,0 +1,1566 @@
+{
+    "info": {
+        "name": "WebPush API Collection",
+        "description": "A comprehensive collection for testing the WebPush API endpoints",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:8000",
+            "description": "Base URL for the API"
+        }
+    ],
+    "item": [
+        {
+            "name": "Authentication",
+            "item": [
+                {
+                    "name": "Login (Get Token)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/x-www-form-urlencoded"
+                            }
+                        ],
+                        "body": {
+                            "mode": "urlencoded",
+                            "urlencoded": [
+                                {
+                                    "key": "username",
+                                    "value": "admin@example.com",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "password",
+                                    "value": "your_password",
+                                    "type": "text"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/users/token",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "users",
+                                "token"
+                            ]
+                        },
+                        "description": "Get an access token for authenticated requests"
+                    }
+                },
+                {
+                    "name": "Get Current User",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/users/me",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "users",
+                                "me"
+                            ]
+                        },
+                        "description": "Get the currently authenticated user's profile"
+                    }
+                }
+            ],
+            "description": "Endpoints for authentication and authorization"
+        },
+        {
+            "name": "User Management",
+            "item": [
+                {
+                    "name": "Create User",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"user@example.com\",\n  \"name\": \"John Doe\",\n  \"password\": \"secure_password\",\n  \"role_id\": \"role_id_here\",\n  \"status\": \"active\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/users",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "users"
+                            ]
+                        },
+                        "description": "Create a new user"
+                    }
+                },
+                {
+                    "name": "List Users",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/users?skip=0&limit=100",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "users"
+                            ],
+                            "query": [
+                                {
+                                    "key": "skip",
+                                    "value": "0"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "100"
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "active",
+                                    "disabled": true
+                                }
+                            ]
+                        },
+                        "description": "List all users with pagination"
+                    }
+                },
+                {
+                    "name": "Get User",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/users/{{userId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "users",
+                                "{{userId}}"
+                            ]
+                        },
+                        "description": "Get a user by ID"
+                    }
+                },
+                {
+                    "name": "Update User",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Updated Name\",\n  \"email\": \"updated@example.com\",\n  \"custom_attributes\": {\n    \"company\": \"ACME Inc\"\n  }\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/users/{{userId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "users",
+                                "{{userId}}"
+                            ]
+                        },
+                        "description": "Update a user"
+                    }
+                },
+                {
+                    "name": "Delete User",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/users/{{userId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "users",
+                                "{{userId}}"
+                            ]
+                        },
+                        "description": "Delete a user"
+                    }
+                },
+                {
+                    "name": "Activate User",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/users/{{userId}}/activate",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "users",
+                                "{{userId}}",
+                                "activate"
+                            ]
+                        },
+                        "description": "Activate a user"
+                    }
+                },
+                {
+                    "name": "Deactivate User",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/users/{{userId}}/deactivate",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "users",
+                                "{{userId}}",
+                                "deactivate"
+                            ]
+                        },
+                        "description": "Deactivate a user"
+                    }
+                },
+                {
+                    "name": "Add User Device",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"device_token\": \"device_token_here\",\n  \"device_type\": \"web\",\n  \"platform\": \"Chrome\",\n  \"os_version\": \"Windows 10\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/users/{{userId}}/devices",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "users",
+                                "{{userId}}",
+                                "devices"
+                            ]
+                        },
+                        "description": "Add a device to a user"
+                    }
+                },
+                {
+                    "name": "Update Notification Settings",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"opted_in\": true,\n  \"notification_preferences\": {\n    \"marketing\": true,\n    \"transactional\": true\n  }\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/users/{{userId}}/notification-settings",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "users",
+                                "{{userId}}",
+                                "notification-settings"
+                            ]
+                        },
+                        "description": "Update notification settings for a user"
+                    }
+                },
+                {
+                    "name": "Get User Stats",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/users/{{userId}}/stats",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "users",
+                                "{{userId}}",
+                                "stats"
+                            ]
+                        },
+                        "description": "Get statistics for a user"
+                    }
+                }
+            ],
+            "description": "Endpoints for managing users"
+        },
+        {
+            "name": "WebPush",
+            "item": [
+                {
+                    "name": "Get VAPID Public Key",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/webpush/vapid-public-key",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "webpush",
+                                "vapid-public-key"
+                            ]
+                        },
+                        "description": "Get the VAPID public key for WebPush subscription"
+                    }
+                },
+                {
+                    "name": "Subscribe",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"user@example.com\",\n  \"name\": \"John Doe\",\n  \"subscription_json\": {\n    \"endpoint\": \"https://fcm.googleapis.com/fcm/send/example\",\n    \"expirationTime\": null,\n    \"keys\": {\n      \"p256dh\": \"key_p256dh\",\n      \"auth\": \"key_auth\"\n    }\n  },\n  \"browser\": \"Chrome\",\n  \"device_info\": \"Windows 10\",\n  \"custom_attributes\": {\n    \"company\": \"ACME Inc\"\n  }\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/webpush/subscribe",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "webpush",
+                                "subscribe"
+                            ]
+                        },
+                        "description": "Subscribe a user to WebPush notifications"
+                    }
+                },
+                {
+                    "name": "Unsubscribe",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"user@example.com\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/webpush/unsubscribe",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "webpush",
+                                "unsubscribe"
+                            ]
+                        },
+                        "description": "Unsubscribe a user from WebPush notifications"
+                    }
+                },
+                {
+                    "name": "Track Notification Open",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/webpush/track/{{notificationId}}/open",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "webpush",
+                                "track",
+                                "{{notificationId}}",
+                                "open"
+                            ]
+                        },
+                        "description": "Track when a notification is opened"
+                    }
+                },
+                {
+                    "name": "Track Notification Click",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/webpush/track/{{notificationId}}/click?redirect_url=https://example.com",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "webpush",
+                                "track",
+                                "{{notificationId}}",
+                                "click"
+                            ],
+                            "query": [
+                                {
+                                    "key": "redirect_url",
+                                    "value": "https://example.com",
+                                    "description": "Optional URL to redirect to after tracking the click"
+                                }
+                            ]
+                        },
+                        "description": "Track when a notification is clicked"
+                    }
+                },
+                {
+                    "name": "Send Test Notification",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"Test Notification\",\n  \"body\": \"This is a test notification\",\n  \"icon\": \"https://example.com/icon.png\",\n  \"image\": \"https://example.com/image.jpg\",\n  \"action_url\": \"https://example.com/action\",\n  \"data\": {\n    \"custom_key\": \"custom_value\"\n  },\n  \"ttl\": 86400\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/webpush/send-test",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "webpush",
+                                "send-test"
+                            ]
+                        },
+                        "description": "Send a test notification to the current user"
+                    }
+                }
+            ],
+            "description": "Endpoints for WebPush functionality"
+        },
+        {
+            "name": "Notifications",
+            "item": [
+                {
+                    "name": "Create Notification",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"user_id\": \"user_id_here\",\n  \"title\": \"Important Notification\",\n  \"body\": \"This is an important notification\",\n  \"icon\": \"https://example.com/icon.png\",\n  \"image\": \"https://example.com/image.jpg\",\n  \"action_url\": \"https://example.com/action\",\n  \"data\": {\n    \"type\": \"promotional\",\n    \"campaign_id\": \"campaign_id_here\"\n  },\n  \"ttl\": 86400\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/notifications",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "notifications"
+                            ]
+                        },
+                        "description": "Create a new notification"
+                    }
+                },
+                {
+                    "name": "Create Campaign Notifications",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"user_ids\": [\"user_id_1\", \"user_id_2\", \"user_id_3\"]\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/notifications/campaign/{{campaignId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "notifications",
+                                "campaign",
+                                "{{campaignId}}"
+                            ]
+                        },
+                        "description": "Create notifications for all users in a campaign"
+                    }
+                },
+                {
+                    "name": "Send Notification",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/notifications/{{notificationId}}/send",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "notifications",
+                                "{{notificationId}}",
+                                "send"
+                            ]
+                        },
+                        "description": "Send a notification"
+                    }
+                },
+                {
+                    "name": "Get Notification",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/notifications/{{notificationId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "notifications",
+                                "{{notificationId}}"
+                            ]
+                        },
+                        "description": "Get a notification by ID"
+                    }
+                },
+                {
+                    "name": "Get User Notifications",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/notifications/user/{{userId}}?page=1&page_size=20",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "notifications",
+                                "user",
+                                "{{userId}}"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "page_size",
+                                    "value": "20"
+                                }
+                            ]
+                        },
+                        "description": "Get notifications for a user"
+                    }
+                },
+                {
+                    "name": "Get Campaign Notification Stats",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/notifications/campaign/{{campaignId}}/stats",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "notifications",
+                                "campaign",
+                                "{{campaignId}}",
+                                "stats"
+                            ]
+                        },
+                        "description": "Get notification statistics for a campaign"
+                    }
+                },
+                {
+                    "name": "Track Notification Open",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/notifications/track/{{notificationId}}/open",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "notifications",
+                                "track",
+                                "{{notificationId}}",
+                                "open"
+                            ]
+                        },
+                        "description": "Track when a notification is opened"
+                    }
+                },
+                {
+                    "name": "Track Notification Click",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/notifications/track/{{notificationId}}/click?redirect_url=https://example.com",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "notifications",
+                                "track",
+                                "{{notificationId}}",
+                                "click"
+                            ],
+                            "query": [
+                                {
+                                    "key": "redirect_url",
+                                    "value": "https://example.com",
+                                    "description": "Optional URL to redirect to after tracking the click"
+                                }
+                            ]
+                        },
+                        "description": "Track when a notification is clicked and redirect to target URL"
+                    }
+                }
+            ],
+            "description": "Endpoints for managing notifications"
+        },
+        {
+            "name": "Campaigns",
+            "item": [
+                {
+                    "name": "Create Campaign",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Spring Promotion\",\n  \"description\": \"Spring sales promotion campaign\",\n  \"segment_id\": \"segment_id_here\",\n  \"template_id\": \"template_id_here\",\n  \"scheduled_at\": \"2025-04-20T10:00:00Z\",\n  \"status\": \"draft\",\n  \"metadata\": {\n    \"category\": \"promotion\",\n    \"priority\": \"high\"\n  }\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/campaigns",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "campaigns"
+                            ]
+                        },
+                        "description": "Create a new campaign"
+                    }
+                },
+                {
+                    "name": "List Campaigns",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/campaigns?skip=0&limit=20&status=active",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "campaigns"
+                            ],
+                            "query": [
+                                {
+                                    "key": "skip",
+                                    "value": "0"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "20"
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "active"
+                                }
+                            ]
+                        },
+                        "description": "List all campaigns with pagination and filtering"
+                    }
+                },
+                {
+                    "name": "Get Campaign",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/campaigns/{{campaignId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "campaigns",
+                                "{{campaignId}}"
+                            ]
+                        },
+                        "description": "Get a campaign by ID"
+                    }
+                },
+                {
+                    "name": "Update Campaign",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Updated Campaign Name\",\n  \"description\": \"Updated campaign description\",\n  \"scheduled_at\": \"2025-04-25T10:00:00Z\",\n  \"status\": \"scheduled\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/campaigns/{{campaignId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "campaigns",
+                                "{{campaignId}}"
+                            ]
+                        },
+                        "description": "Update a campaign"
+                    }
+                },
+                {
+                    "name": "Delete Campaign",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/campaigns/{{campaignId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "campaigns",
+                                "{{campaignId}}"
+                            ]
+                        },
+                        "description": "Delete a campaign"
+                    }
+                },
+                {
+                    "name": "Launch Campaign",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/campaigns/{{campaignId}}/launch",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "campaigns",
+                                "{{campaignId}}",
+                                "launch"
+                            ]
+                        },
+                        "description": "Launch a campaign immediately"
+                    }
+                },
+                {
+                    "name": "Schedule Campaign",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"scheduled_at\": \"2025-04-25T10:00:00Z\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/campaigns/{{campaignId}}/schedule",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "campaigns",
+                                "{{campaignId}}",
+                                "schedule"
+                            ]
+                        },
+                        "description": "Schedule a campaign for a future date"
+                    }
+                },
+                {
+                    "name": "Cancel Campaign",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/campaigns/{{campaignId}}/cancel",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "campaigns",
+                                "{{campaignId}}",
+                                "cancel"
+                            ]
+                        },
+                        "description": "Cancel a scheduled campaign"
+                    }
+                },
+                {
+                    "name": "Campaign Performance",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/campaigns/{{campaignId}}/performance",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "campaigns",
+                                "{{campaignId}}",
+                                "performance"
+                            ]
+                        },
+                        "description": "Get campaign performance metrics"
+                    }
+                }
+            ],
+            "description": "Endpoints for managing campaigns"
+        },
+        {
+            "name": "Analytics",
+            "item": [
+                {
+                    "name": "Get Notification Stats",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/analytics/notifications?start_date=2025-01-01&end_date=2025-04-14",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "analytics",
+                                "notifications"
+                            ],
+                            "query": [
+                                {
+                                    "key": "start_date",
+                                    "value": "2025-01-01"
+                                },
+                                {
+                                    "key": "end_date",
+                                    "value": "2025-04-14"
+                                }
+                            ]
+                        },
+                        "description": "Get notification statistics over a time period"
+                    }
+                },
+                {
+                    "name": "Get User Activity",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/analytics/user-activity?start_date=2025-01-01&end_date=2025-04-14",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "analytics",
+                                "user-activity"
+                            ],
+                            "query": [
+                                {
+                                    "key": "start_date",
+                                    "value": "2025-01-01"
+                                },
+                                {
+                                    "key": "end_date",
+                                    "value": "2025-04-14"
+                                }
+                            ]
+                        },
+                        "description": "Get user activity statistics"
+                    }
+                },
+                {
+                    "name": "Get Campaign Performance",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/analytics/campaigns?start_date=2025-01-01&end_date=2025-04-14",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "analytics",
+                                "campaigns"
+                            ],
+                            "query": [
+                                {
+                                    "key": "start_date",
+                                    "value": "2025-01-01"
+                                },
+                                {
+                                    "key": "end_date",
+                                    "value": "2025-04-14"
+                                }
+                            ]
+                        },
+                        "description": "Get campaign performance statistics"
+                    }
+                },
+                {
+                    "name": "Get Subscription Stats",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/analytics/subscriptions?start_date=2025-01-01&end_date=2025-04-14",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "analytics",
+                                "subscriptions"
+                            ],
+                            "query": [
+                                {
+                                    "key": "start_date",
+                                    "value": "2025-01-01"
+                                },
+                                {
+                                    "key": "end_date",
+                                    "value": "2025-04-14"
+                                }
+                            ]
+                        },
+                        "description": "Get subscription statistics"
+                    }
+                },
+                {
+                    "name": "Export Report",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/analytics/export?report_type=campaign_performance&start_date=2025-01-01&end_date=2025-04-14&format=csv",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "analytics",
+                                "export"
+                            ],
+                            "query": [
+                                {
+                                    "key": "report_type",
+                                    "value": "campaign_performance"
+                                },
+                                {
+                                    "key": "start_date",
+                                    "value": "2025-01-01"
+                                },
+                                {
+                                    "key": "end_date",
+                                    "value": "2025-04-14"
+                                },
+                                {
+                                    "key": "format",
+                                    "value": "csv"
+                                }
+                            ]
+                        },
+                        "description": "Export an analytics report in CSV or JSON format"
+                    }
+                }
+            ],
+            "description": "Endpoints for analytics and reporting"
+        },
+        {
+            "name": "Health",
+            "item": [
+                {
+                    "name": "Health Check",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/health",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "health"
+                            ]
+                        },
+                        "description": "Check the health status of the API"
+                    }
+                },
+                {
+                    "name": "Database Status",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/health/database",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "health",
+                                "database"
+                            ]
+                        },
+                        "description": "Check the status of the database connection"
+                    }
+                },
+                {
+                    "name": "Services Status",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/health/services",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "health",
+                                "services"
+                            ]
+                        },
+                        "description": "Check the status of dependent services"
+                    }
+                }
+            ],
+            "description": "Endpoints for health and status checks"
+        },
+        {
+            "name": "Templates",
+            "item": [
+                {
+                    "name": "Create Template",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Standard Notification\",\n  \"title\": \"{{title}}\",\n  \"body\": \"{{body}}\",\n  \"icon\": \"https://example.com/icon.png\",\n  \"image\": \"https://example.com/image.jpg\",\n  \"action_url\": \"{{action_url}}\",\n  \"template_type\": \"webpush\",\n  \"variables\": [\"title\", \"body\", \"action_url\"],\n  \"metadata\": {\n    \"category\": \"marketing\"\n  }\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/templates",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "templates"
+                            ]
+                        },
+                        "description": "Create a new notification template"
+                    }
+                },
+                {
+                    "name": "List Templates",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/templates?skip=0&limit=20&template_type=webpush",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "templates"
+                            ],
+                            "query": [
+                                {
+                                    "key": "skip",
+                                    "value": "0"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "20"
+                                },
+                                {
+                                    "key": "template_type",
+                                    "value": "webpush"
+                                }
+                            ]
+                        },
+                        "description": "List all templates with pagination and filtering"
+                    }
+                },
+                {
+                    "name": "Get Template",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/templates/{{templateId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "templates",
+                                "{{templateId}}"
+                            ]
+                        },
+                        "description": "Get a template by ID"
+                    }
+                },
+                {
+                    "name": "Update Template",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Updated Template Name\",\n  \"title\": \"{{title}} - Updated\",\n  \"body\": \"{{body}}\",\n  \"icon\": \"https://example.com/updated-icon.png\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/templates/{{templateId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "templates",
+                                "{{templateId}}"
+                            ]
+                        },
+                        "description": "Update a template"
+                    }
+                },
+                {
+                    "name": "Delete Template",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/templates/{{templateId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "templates",
+                                "{{templateId}}"
+                            ]
+                        },
+                        "description": "Delete a template"
+                    }
+                },
+                {
+                    "name": "Preview Template",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"variables\": {\n    \"title\": \"Welcome to Our Service\",\n    \"body\": \"Thank you for subscribing!\",\n    \"action_url\": \"https://example.com/welcome\"\n  }\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/templates/{{templateId}}/preview",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "templates",
+                                "{{templateId}}",
+                                "preview"
+                            ]
+                        },
+                        "description": "Preview a template with specific variable values"
+                    }
+                }
+            ],
+            "description": "Endpoints for managing notification templates"
+        }
+    ]
+}
