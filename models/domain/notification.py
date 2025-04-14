@@ -1,39 +1,46 @@
+"""
+Notification model for storing notification data.
+"""
+
+import uuid
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, JSON, Text
+from typing import List, Optional
+
+from sqlalchemy import Column, String, DateTime, Boolean, Text, ForeignKey
+from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
-import enum
 
-from core.db import Base
-
-class DeliveryStatus(str, enum.Enum):
-    PENDING = "pending"
-    SENT = "sent"
-    DELIVERED = "delivered"
-    FAILED = "failed"
-    CLICKED = "clicked"
+from db.base_class import Base
 
 class NotificationModel(Base):
+    """
+    Notification model for storing notification data.
+    
+    This model represents a notification that can be sent to users through various channels.
+    """
     __tablename__ = "notifications"
     
-    id = Column(Integer, primary_key=True, index=True)
-    subscription_id = Column(Integer, ForeignKey("subscriptions.id"), nullable=False)
-    title = Column(String, nullable=False)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    title = Column(String(255), nullable=False)
     body = Column(Text, nullable=True)
-    icon = Column(String, nullable=True)
-    badge = Column(String, nullable=True)
-    image = Column(String, nullable=True)
-    data = Column(JSON, nullable=True)
-    actions = Column(JSON, nullable=True)
-    tag = Column(String, nullable=True)
-    silent = Column(Boolean, default=False)
-    require_interaction = Column(Boolean, default=False)
-    renotify = Column(Boolean, default=False)
-    sent_at = Column(DateTime(timezone=True), server_default=func.now())
-    delivered = Column(Boolean, default=False)
-    delivered_at = Column(DateTime(timezone=True), nullable=True)
+    data = Column(JSONB, nullable=True)
+    status = Column(String(50), nullable=False, default="pending")
+    type = Column(String(50), nullable=False, default="general")
     
-    subscription = relationship("SubscriptionModel", back_populates="notifications")
+    # Timestamps
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=True, onupdate=datetime.utcnow)
+    scheduled_at = Column(DateTime, nullable=True)
+    sent_at = Column(DateTime, nullable=True)
+    
+    # Status flags
+    is_read = Column(Boolean, default=False)
+    is_delivered = Column(Boolean, default=False)
+    is_active = Column(Boolean, default=True)
+    
+    # Relationships - use string references to avoid circular imports
+    # Analytics relationship - reverse side
+    analytics = relationship("AnalyticsModel", back_populates="notification", cascade="all, delete-orphan")
     
     def __repr__(self):
         return f"<Notification {self.id}: {self.title}>"

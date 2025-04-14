@@ -9,8 +9,20 @@ from pathlib import Path
 from alembic import context
 import logging
 
-# Add the parent directory to the path so we can import from the project
+# Add the project root directory to the Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Import the MetaData object from our declarative base
+from db.base_class import Base
+
+# Import our models helper to ensure all models are loaded in the correct order
+from db.models_helper import load_all_models
+
+# Import our settings module
+from core.config import settings
+
+# Load all models to ensure they are registered with Base.metadata
+load_all_models()
 
 # Set up logging
 logger = logging.getLogger("alembic")
@@ -24,37 +36,17 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
+# Set the database URL in the Alembic configuration
+config.set_main_option("sqlalchemy.url", settings.SQLALCHEMY_DATABASE_URI)
+
+# Metadata object that contains all table definitions
+target_metadata = Base.metadata
+
 try:
-    # Import models and settings more safely
-    from db.base_class import Base
-    from core.config import settings
-    
     # Log database connection info (with password masked)
     connection_str = str(settings.SQLALCHEMY_DATABASE_URI)
     masked_connection = connection_str.replace(settings.POSTGRES_PASSWORD, "********") if settings.POSTGRES_PASSWORD else connection_str
     logger.info(f"Using database connection: {masked_connection}")
-    
-    # Import all models for Alembic to detect
-    from models.domain.user import UserModel
-    from models.domain.role import RoleModel
-    from models.domain.permission import PermissionModel
-    from models.domain.campaign import CampaignModel
-    from models.domain.notification import NotificationModel
-    from models.domain.segment import SegmentModel
-    from models.domain.template import TemplateModel
-    from models.domain.trigger import TriggerModel
-    from models.domain.ab_test import AbTestModel
-    from models.domain.test_variant import TestVariantModel
-    from models.domain.analytics import AnalyticsModel
-    from models.domain.cep_decision import CepDecisionModel
-    from models.domain.campaign_template import CampaignTemplateModel
-    # Add new models here
-    from models.domain.role_permission import RolePermissionModel
-    from models.domain.user_role import UserRoleModel
-    from models.domain.cdp_integration import CdpIntegrationModel
-    
-    # Set the target metadata for Alembic
-    target_metadata = Base.metadata
     
     # Print detected tables for debugging
     logger.info("Detected tables:")

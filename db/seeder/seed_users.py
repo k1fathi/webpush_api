@@ -19,12 +19,12 @@ from passlib.context import CryptContext
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.config import settings
 from db.session import get_async_session_context
-# Import models from the central models/__init__.py file
-from models.domain import UserModel, RoleModel
+# Import domain models separately - this avoids the circular dependency issues
+from models.domain.user import UserModel
+from models.domain.role import RoleModel
 from models.schemas.user import UserRole, UserStatus
 
 # Configure logging
@@ -117,6 +117,13 @@ async def get_user_by_email(session: AsyncSession, email: str) -> Optional[UserM
 
 async def seed_users() -> None:
     """Seed default users with different roles."""
+    # Add this try block to fix circular imports if needed
+    try:
+        # This might help resolve the circular dependency issue
+        import models.domain
+    except Exception as e:
+        logger.warning(f"Note about imports: {str(e)}")
+    
     # Use the database URL from settings
     async_uri = settings.SQLALCHEMY_DATABASE_URI
     
@@ -170,20 +177,25 @@ async def seed_users() -> None:
                 is_superuser=user_data["is_superuser"],
                 status=UserStatus.ACTIVE,
                 created_at=datetime.utcnow(),
-                updated_at=datetime.utcnow()
+                updated_at=datetime.utcnow(),
+                # Initialize default notification preferences
+                notification_enabled=True,
+                webpush_enabled=True,
+                email_notification_enabled=True,
+                # Default user settings
+                timezone="UTC",
+                language="en",
+                custom_attributes={}
             )
             
             session.add(new_user)
             await session.flush()
             
-            # Assign role
+            # Assign role - use SQLAlchemy relationship instead of raw SQL
             role = roles.get(role_name)
             if role:
-                # Insert directly into user_roles table
-                await session.execute(
-                    "INSERT INTO user_role (user_id, role_id) VALUES (:user_id, :role_id)",
-                    {"user_id": new_user.id, "role_id": role.id}
-                )
+                # Properly append the role using the relationship
+                new_user.roles.append(role)
                 logger.info(f"Assigned role {role_name} to user {email}")
             else:
                 logger.warning(f"Role {role_name} not found, user {email} created without role")

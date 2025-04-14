@@ -186,8 +186,6 @@ multidb - Rudimentary multi-database configuration.
 ---------------------------------------
 
 
-alembic revision -m "initiate tables"
-
 alembic upgrade head
 
 
