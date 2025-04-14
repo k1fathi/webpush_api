@@ -46,6 +46,62 @@ class UserRepository(BaseRepository):
             await session.refresh(db_user)
             return User.from_orm(db_user)
 
+    async def create_with_password(self, user: User, hashed_password: str) -> User:
+        """Create a new user with a hashed password
+        
+        Args:
+            user: User data
+            hashed_password: Pre-hashed password
+            
+        Returns:
+            User: The created user
+        """
+        async with get_async_session_context() as session:
+            db_user = UserModel(
+                id=uuid.UUID(user.id) if isinstance(user.id, str) else user.id,
+                email=user.email,
+                username=user.username,
+                hashed_password=hashed_password,
+                full_name=user.full_name,
+                status=UserStatus.ACTIVE if user.is_superuser else UserStatus.PENDING,
+                is_active=user.is_active,
+                is_superuser=user.is_superuser,
+                notification_enabled=user.notification_enabled,
+                webpush_enabled=user.webpush_enabled,
+                email_notification_enabled=user.email_notification_enabled,
+                timezone=user.timezone,
+                language=user.language,
+                subscription_info=user.subscription_info if hasattr(user, "subscription_info") else {},
+                devices=user.devices if hasattr(user, "devices") else [],
+                custom_attributes=user.custom_attributes if hasattr(user, "custom_attributes") else {},
+                created_at=datetime.datetime.utcnow(),
+                updated_at=datetime.datetime.utcnow()
+            )
+            
+            session.add(db_user)
+            await session.commit()
+            await session.refresh(db_user)
+            
+            # Convert back to schema model
+            result = User(
+                id=str(db_user.id),
+                email=db_user.email,
+                username=db_user.username,
+                full_name=db_user.full_name,
+                status=db_user.status,
+                is_active=db_user.is_active,
+                is_superuser=db_user.is_superuser,
+                notification_enabled=db_user.notification_enabled,
+                webpush_enabled=db_user.webpush_enabled,
+                email_notification_enabled=db_user.email_notification_enabled,
+                timezone=db_user.timezone,
+                language=db_user.language,
+                created_at=db_user.created_at,
+                updated_at=db_user.updated_at
+            )
+            
+            return result
+
     async def update_last_login(self, user_id: str) -> bool:
         """Update user's last login timestamp"""
         async with get_async_session_context() as session:
@@ -179,6 +235,180 @@ class UserRepository(BaseRepository):
             query = select(UserModel).where(UserModel.email == email)
             result = await session.execute(query)
             return result.scalar_one_or_none()
+
+    async def get_by_username(self, username: str) -> Optional[UserModel]:
+        """Get a user by username
+        
+        Args:
+            username: The username to search for
+            
+        Returns:
+            Optional[UserModel]: The user if found
+        """
+        async with get_async_session_context() as session:
+            query = select(UserModel).where(UserModel.username == username)
+            result = await session.execute(query)
+            return result.scalar_one_or_none()
+
+    async def get_password_hash(self, user_id: str) -> Optional[str]:
+        """Get the hashed password for a user
+        
+        Args:
+            user_id: The user ID
+            
+        Returns:
+            Optional[str]: The hashed password if found
+        """
+        async with get_async_session_context() as session:
+            query = select(UserModel.hashed_password).where(UserModel.id == user_id)
+            result = await session.execute(query)
+            row = result.one_or_none()
+            return row[0] if row else None
+
+    async def update(self, user_id: str, user: User) -> User:
+        """Update an existing user
+        
+        Args:
+            user_id: The user ID
+            user: Updated user data
+            
+        Returns:
+            User: The updated user
+        """
+        async with get_async_session_context() as session:
+            query = select(UserModel).where(UserModel.id == user_id)
+            result = await session.execute(query)
+            db_user = result.scalar_one_or_none()
+            
+            if not db_user:
+                raise ValueError(f"User with ID {user_id} not found")
+                
+            # Update fields
+            if hasattr(user, "email"):
+                db_user.email = user.email
+            if hasattr(user, "username"):
+                db_user.username = user.username
+            if hasattr(user, "full_name"):
+                db_user.full_name = user.full_name
+            if hasattr(user, "status"):
+                db_user.status = user.status
+            if hasattr(user, "is_active"):
+                db_user.is_active = user.is_active
+            if hasattr(user, "is_superuser"):
+                db_user.is_superuser = user.is_superuser
+            if hasattr(user, "notification_enabled"):
+                db_user.notification_enabled = user.notification_enabled
+            if hasattr(user, "webpush_enabled"):
+                db_user.webpush_enabled = user.webpush_enabled
+            if hasattr(user, "email_notification_enabled"):
+                db_user.email_notification_enabled = user.email_notification_enabled
+            if hasattr(user, "quiet_hours_start"):
+                db_user.quiet_hours_start = user.quiet_hours_start
+            if hasattr(user, "quiet_hours_end"):
+                db_user.quiet_hours_end = user.quiet_hours_end
+            if hasattr(user, "timezone"):
+                db_user.timezone = user.timezone
+            if hasattr(user, "language"):
+                db_user.language = user.language
+                
+            db_user.updated_at = datetime.datetime.utcnow()
+            
+            await session.commit()
+            await session.refresh(db_user)
+            
+            # Convert back to schema model
+            result = User(
+                id=str(db_user.id),
+                email=db_user.email,
+                username=db_user.username,
+                full_name=db_user.full_name,
+                status=db_user.status,
+                is_active=db_user.is_active,
+                is_superuser=db_user.is_superuser,
+                notification_enabled=db_user.notification_enabled,
+                webpush_enabled=db_user.webpush_enabled,
+                email_notification_enabled=db_user.email_notification_enabled,
+                timezone=db_user.timezone,
+                language=db_user.language,
+                created_at=db_user.created_at,
+                updated_at=db_user.updated_at
+            )
+            
+            return result
+
+    async def update_with_password(self, user_id: str, user: User, hashed_password: str) -> User:
+        """Update a user with a new password
+        
+        Args:
+            user_id: The user ID
+            user: Updated user data
+            hashed_password: New hashed password
+            
+        Returns:
+            User: The updated user
+        """
+        async with get_async_session_context() as session:
+            query = select(UserModel).where(UserModel.id == user_id)
+            result = await session.execute(query)
+            db_user = result.scalar_one_or_none()
+            
+            if not db_user:
+                raise ValueError(f"User with ID {user_id} not found")
+                
+            # Update fields
+            if hasattr(user, "email"):
+                db_user.email = user.email
+            if hasattr(user, "username"):
+                db_user.username = user.username
+            if hasattr(user, "full_name"):
+                db_user.full_name = user.full_name
+            if hasattr(user, "status"):
+                db_user.status = user.status
+            if hasattr(user, "is_active"):
+                db_user.is_active = user.is_active
+            if hasattr(user, "is_superuser"):
+                db_user.is_superuser = user.is_superuser
+            if hasattr(user, "notification_enabled"):
+                db_user.notification_enabled = user.notification_enabled
+            if hasattr(user, "webpush_enabled"):
+                db_user.webpush_enabled = user.webpush_enabled
+            if hasattr(user, "email_notification_enabled"):
+                db_user.email_notification_enabled = user.email_notification_enabled
+            if hasattr(user, "quiet_hours_start"):
+                db_user.quiet_hours_start = user.quiet_hours_start
+            if hasattr(user, "quiet_hours_end"):
+                db_user.quiet_hours_end = user.quiet_hours_end
+            if hasattr(user, "timezone"):
+                db_user.timezone = user.timezone
+            if hasattr(user, "language"):
+                db_user.language = user.language
+                
+            # Update password
+            db_user.hashed_password = hashed_password
+            db_user.updated_at = datetime.datetime.utcnow()
+            
+            await session.commit()
+            await session.refresh(db_user)
+            
+            # Convert back to schema model
+            result = User(
+                id=str(db_user.id),
+                email=db_user.email,
+                username=db_user.username,
+                full_name=db_user.full_name,
+                status=db_user.status,
+                is_active=db_user.is_active,
+                is_superuser=db_user.is_superuser,
+                notification_enabled=db_user.notification_enabled,
+                webpush_enabled=db_user.webpush_enabled,
+                email_notification_enabled=db_user.email_notification_enabled,
+                timezone=db_user.timezone,
+                language=db_user.language,
+                created_at=db_user.created_at,
+                updated_at=db_user.updated_at
+            )
+            
+            return result
 
     async def ensure_admin_exists(self) -> Optional[UserModel]:
         """
