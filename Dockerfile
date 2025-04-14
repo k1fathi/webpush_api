@@ -8,6 +8,7 @@ RUN apt-get update && \
     gcc \
     postgresql-client \
     dos2unix \
+    netcat-traditional \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -21,11 +22,11 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Copy entrypoint script first and set explicit permissions
-COPY scripts/docker-entrypoint.sh /app/scripts/
-RUN dos2unix /app/scripts/docker-entrypoint.sh && \
-    chmod +x /app/scripts/docker-entrypoint.sh && \
-    chown root:root /app/scripts/docker-entrypoint.sh
+# Copy all script files first and set permissions
+COPY scripts/ /app/scripts/
+RUN find /app/scripts/ -type f -name "*.sh" -exec dos2unix {} \; && \
+    find /app/scripts/ -type f -name "*.sh" -exec chmod +x {} \; && \
+    chown -R root:root /app/scripts/
 
 # Copy the rest of the project
 COPY . .
