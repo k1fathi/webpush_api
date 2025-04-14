@@ -20,6 +20,15 @@ for dir in "/app/postgres-data" "/app/db_backups"; do
     fi
 done
 
+# Create static files directory if it doesn't exist
+if [ ! -d "/app/static" ]; then
+    echo "Creating static directory for FastAPI static files"
+    mkdir -p /app/static || echo "Warning: Could not create /app/static"
+    chmod -R 755 /app/static || echo "Warning: Could not chmod /app/static"
+    # Create a placeholder file to ensure the directory isn't empty
+    echo "This is a placeholder file for the static directory" > /app/static/placeholder.txt
+fi
+
 # Removed attempt to fix permissions on parent directory
 
 # Wait for postgres to be ready

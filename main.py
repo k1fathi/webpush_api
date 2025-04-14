@@ -1,4 +1,5 @@
 import logging
+import os
 from contextlib import asynccontextmanager
 import uvicorn
 from fastapi import FastAPI, Depends
@@ -113,8 +114,22 @@ async def custom_redoc_html():
         redoc_js_url="https://cdn.jsdelivr.net/npm/redoc@2.0.0/bundles/redoc.standalone.js",
     )
 
-# Mount static files directory for any local static assets
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# Mount static files directory with better error handling
+static_dir = "static"
+try:
+    # Create static directory if it doesn't exist
+    if not os.path.exists(static_dir):
+        logger.warning(f"Static directory '{static_dir}' not found. Creating it...")
+        os.makedirs(static_dir, exist_ok=True)
+        # Create a placeholder file to ensure the directory isn't empty
+        with open(os.path.join(static_dir, "placeholder.txt"), "w") as f:
+            f.write("This is a placeholder file for the static directory")
+    
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
+    logger.info(f"Successfully mounted static files from '{static_dir}'")
+except Exception as e:
+    logger.error(f"Failed to mount static directory: {e}")
+    logger.warning("Static file serving will be disabled. This may affect UI components.")
 
 # Health check endpoint
 @app.get("/health", tags=["Health"])
