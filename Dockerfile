@@ -7,6 +7,7 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     gcc \
     postgresql-client \
+    dos2unix \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -22,10 +23,9 @@ RUN pip install --no-cache-dir --upgrade pip && \
 
 # Copy entrypoint script first and set explicit permissions
 COPY scripts/docker-entrypoint.sh /app/scripts/
-RUN chmod 755 /app/scripts/docker-entrypoint.sh && \
-    chown root:root /app/scripts/docker-entrypoint.sh && \
-    # Convert Windows line endings to Unix
-    sed -i 's/\r$//' /app/scripts/docker-entrypoint.sh
+RUN dos2unix /app/scripts/docker-entrypoint.sh && \
+    chmod +x /app/scripts/docker-entrypoint.sh && \
+    chown root:root /app/scripts/docker-entrypoint.sh
 
 # Copy the rest of the project
 COPY . .
