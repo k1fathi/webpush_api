@@ -19,6 +19,11 @@ class Settings(BaseSettings):
     SECRET_KEY: str = secrets.token_urlsafe(32)
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8  # 8 days
     
+    # Debug settings - Add these to help troubleshoot lifespan issues
+    DEBUG: bool = os.getenv("DEBUG", "False").lower() == "true"
+    LOG_LIFESPAN_EVENTS: bool = os.getenv("LOG_LIFESPAN_EVENTS", "True").lower() == "true"
+    LIFESPAN_TIMEOUT: int = int(os.getenv("LIFESPAN_TIMEOUT", "15"))  # seconds for lifespan timeouts
+    
     # Database - Update to use PostgreSQL user for both username and DB name
     POSTGRES_SERVER: str = os.environ.get("POSTGRES_SERVER", "")
     POSTGRES_USER: str = os.environ.get("POSTGRES_USER", "")
@@ -31,17 +36,20 @@ class Settings(BaseSettings):
     DB_MAX_OVERFLOW: int = int(os.getenv("DB_MAX_OVERFLOW", "10"))
     DB_POOL_RECYCLE: int = int(os.getenv("DB_POOL_RECYCLE", "3600"))
 
+    # Database validation settings
+    DB_VALIDATION_TIMEOUT: int = int(os.getenv("DB_VALIDATION_TIMEOUT", "30"))  # seconds for DB validation timeout
+    DB_RETRY_ATTEMPTS: int = int(os.getenv("DB_RETRY_ATTEMPTS", "3"))  # number of attempts to connect to DB
+    DB_RETRY_DELAY: int = int(os.getenv("DB_RETRY_DELAY", "5"))  # seconds between retry attempts
+    REQUIRED_TABLES: List[str] = os.getenv("REQUIRED_TABLES", "users,subscriptions,notifications").split(",")
+    VALIDATE_DB_ON_STARTUP: bool = os.getenv("VALIDATE_DB_ON_STARTUP", "True").lower() == "true"
+    AUTO_CREATE_TABLES: bool = os.getenv("AUTO_CREATE_TABLES", "True").lower() == "true"
+
     # Redis
     REDIS_HOST: str = os.environ.get("REDIS_HOST", "redis")
     REDIS_PORT: int = int(os.environ.get("REDIS_PORT", 6379))
 
     # RabbitMQ
     RABBITMQ_HOST: str = os.environ.get("RABBITMQ_HOST", "rabbitmq")
-    RABBITMQ_USER: str = os.environ.get("RABBITMQ_USER", "guest")
-    RABBITMQ_PASSWORD: str = os.environ.get("RABBITMQ_PASSWORD", "guest")
-    
-    # WebPush settings
-    VAPID_PRIVATE_KEY: str = os.environ.get("VAPID_PRIVATE_KEY", "")
     VAPID_PUBLIC_KEY: str = os.environ.get("VAPID_PUBLIC_KEY", "")
     VAPID_CLAIMS_EMAIL: str = os.environ.get("VAPID_CLAIMS_EMAIL", "mailto:admin@example.com")
     DEFAULT_NOTIFICATION_BADGE: str = os.getenv("DEFAULT_NOTIFICATION_BADGE", "/static/badge.png")

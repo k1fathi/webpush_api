@@ -1,54 +1,39 @@
-import uuid
 from datetime import datetime
-from typing import Dict, Any, Optional
-
-from sqlalchemy import Column, String, DateTime, JSON, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, JSON, Text
 from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import UUID, ENUM
+from sqlalchemy.sql import func
+import enum
 
-from db.base_class import Base
-from models.schemas.notification import DeliveryStatus, NotificationType
+from core.db import Base
+
+class DeliveryStatus(str, enum.Enum):
+    PENDING = "pending"
+    SENT = "sent"
+    DELIVERED = "delivered"
+    FAILED = "failed"
+    CLICKED = "clicked"
 
 class NotificationModel(Base):
-    """Notification model for database operations"""
     __tablename__ = "notifications"
-
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    campaign_id = Column(UUID(as_uuid=True), ForeignKey("campaigns.id", ondelete="SET NULL"), nullable=True, index=True)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
-    template_id = Column(UUID(as_uuid=True), nullable=True)
     
+    id = Column(Integer, primary_key=True, index=True)
+    subscription_id = Column(Integer, ForeignKey("subscriptions.id"), nullable=False)
     title = Column(String, nullable=False)
-    body = Column(String, nullable=False)
-    image_url = Column(String, nullable=True)
-    action_url = Column(String, nullable=True)
+    body = Column(Text, nullable=True)
+    icon = Column(String, nullable=True)
+    badge = Column(String, nullable=True)
+    image = Column(String, nullable=True)
+    data = Column(JSON, nullable=True)
+    actions = Column(JSON, nullable=True)
+    tag = Column(String, nullable=True)
+    silent = Column(Boolean, default=False)
+    require_interaction = Column(Boolean, default=False)
+    renotify = Column(Boolean, default=False)
+    sent_at = Column(DateTime(timezone=True), server_default=func.now())
+    delivered = Column(Boolean, default=False)
+    delivered_at = Column(DateTime(timezone=True), nullable=True)
     
-    variant_id = Column(UUID(as_uuid=True), ForeignKey("test_variants.id", ondelete="SET NULL"), nullable=True)
-    personalized_data = Column(JSON, default=dict)
-    
-    delivery_status = Column(
-        ENUM(DeliveryStatus, name="delivery_status_enum", create_type=False),
-        default=DeliveryStatus.PENDING
-    )
-    notification_type = Column(
-        ENUM(NotificationType, name="notification_type_enum", create_type=False),
-        default=NotificationType.CAMPAIGN
-    )
-    
-    sent_at = Column(DateTime, nullable=True)
-    delivered_at = Column(DateTime, nullable=True)
-    opened_at = Column(DateTime, nullable=True)
-    clicked_at = Column(DateTime, nullable=True)
-    
-    device_info = Column(JSON, default=dict)
-    
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
-    # Relationships
-    user = relationship("UserModel", back_populates="notifications")
-    campaign = relationship("CampaignModel", back_populates="notifications")
-    variant = relationship("TestVariantModel", back_populates="notifications")
+    subscription = relationship("SubscriptionModel", back_populates="notifications")
     
     def __repr__(self):
-        return f"<Notification {self.id} - {self.title}>"
+        return f"<Notification {self.id}: {self.title}>"

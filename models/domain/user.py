@@ -4,6 +4,7 @@ from typing import Dict, List, Optional, Set
 from sqlalchemy import Boolean, Column, String, DateTime, Table, ForeignKey, JSON, Integer
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID, ENUM, ARRAY
+from sqlalchemy.sql import func
 
 from db.base_class import Base
 from models.schemas.user import UserStatus
@@ -63,8 +64,8 @@ class UserModel(Base):
     # Tracking
     last_login = Column(DateTime, nullable=True)
     last_seen = Column(DateTime, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     
     # Define relationship strings instead of direct imports to prevent circular imports
     role = relationship("RoleModel")
@@ -74,3 +75,7 @@ class UserModel(Base):
     cep_decisions = relationship("CepDecisionModel", back_populates="user")
     analytics = relationship("AnalyticsModel", back_populates="user")
     created_templates = relationship("CampaignTemplateModel", back_populates="creator", foreign_keys="CampaignTemplateModel.created_by")
+    subscriptions = relationship("SubscriptionModel", back_populates="user")
+
+    def __repr__(self):
+        return f"<User {self.email}>"
