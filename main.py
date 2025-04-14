@@ -66,7 +66,7 @@ app = FastAPI(
     version="1.0.0",
     docs_url=None,  # We'll define custom routes for docs
     redoc_url=None,  # We'll define custom routes for redoc
-    openapi_url=f"{settings.API_PREFIX}/openapi.json",
+    openapi_url="/openapi.json",  # Remove the API prefix for easier access
     lifespan=lifespan,
 )
 
@@ -97,7 +97,7 @@ def read_root():
 @app.get("/docs", include_in_schema=False)
 async def custom_swagger_ui_html():
     return get_swagger_ui_html(
-        openapi_url=f"{settings.API_PREFIX}/openapi.json",
+        openapi_url="/openapi.json",  # Updated to match the openapi_url in FastAPI app
         title=f"{settings.PROJECT_NAME} - Swagger UI",
         oauth2_redirect_url=None,
         swagger_js_url="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.9.0/swagger-ui-bundle.js",
@@ -108,7 +108,7 @@ async def custom_swagger_ui_html():
 @app.get("/redoc", include_in_schema=False)
 async def custom_redoc_html():
     return get_redoc_html(
-        openapi_url=f"{settings.API_PREFIX}/openapi.json",
+        openapi_url="/openapi.json",  # Updated to match the openapi_url in FastAPI app
         title=f"{settings.PROJECT_NAME} - ReDoc",
         redoc_js_url="https://cdn.jsdelivr.net/npm/redoc@2.0.0/bundles/redoc.standalone.js",
     )
