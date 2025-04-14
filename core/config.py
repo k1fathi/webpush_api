@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: str = os.environ.get("POSTGRES_PASSWORD", "postgres")  # Change this to your actual password
     POSTGRES_DB: str = os.environ.get("POSTGRES_DB", "webpush")
     POSTGRES_PORT: str = os.environ.get("POSTGRES_PORT", "5432")
-    SQLALCHEMY_DATABASE_URI: str | PostgresDsn = None
+    SQLALCHEMY_DATABASE_URI: Union[str, PostgresDsn] = None
     DB_ECHO_LOG: bool = os.getenv("DB_ECHO_LOG", "False").lower() == "true"
     DB_POOL_SIZE: int = int(os.getenv("DB_POOL_SIZE", "5"))
     DB_MAX_OVERFLOW: int = int(os.getenv("DB_MAX_OVERFLOW", "10"))
