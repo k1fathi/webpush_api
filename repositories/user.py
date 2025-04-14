@@ -168,3 +168,10 @@ class UserRepository(BaseRepository):
         query = select(UserModel).where(UserModel.custom_attributes["customer_id"].astext == customer_id)
         result = await self.session.execute(query)
         return result.scalars().all()
+
+    async def get_by_email(self, email: str) -> Optional[UserModel]:
+        """Get a user by email address"""
+        async with get_session() as session:
+            query = select(UserModel).where(UserModel.email == email)
+            result = await session.execute(query)
+            return result.scalar_one_or_none()

@@ -25,11 +25,11 @@ class Settings(BaseSettings):
     LIFESPAN_TIMEOUT: int = int(os.getenv("LIFESPAN_TIMEOUT", "15"))  # seconds for lifespan timeouts
     
     # Database - Update to use PostgreSQL user for both username and DB name
-    POSTGRES_SERVER: str = os.environ.get("POSTGRES_SERVER", "")
-    POSTGRES_USER: str = os.environ.get("POSTGRES_USER", "")
-    POSTGRES_PASSWORD: str = os.environ.get("POSTGRES_PASSWORD", "")
-    POSTGRES_DB: str = os.environ.get("POSTGRES_DB", "")
-    POSTGRES_PORT: str = os.environ.get("POSTGRES_PORT", "")
+    POSTGRES_SERVER: str = os.environ.get("POSTGRES_SERVER", "db")
+    POSTGRES_USER: str = os.environ.get("POSTGRES_USER", "postgres")
+    POSTGRES_PASSWORD: str = os.environ.get("POSTGRES_PASSWORD", "postgres")  # Change this to your actual password
+    POSTGRES_DB: str = os.environ.get("POSTGRES_DB", "webpush")
+    POSTGRES_PORT: str = os.environ.get("POSTGRES_PORT", "5432")
     SQLALCHEMY_DATABASE_URI: str | PostgresDsn = None
     DB_ECHO_LOG: bool = os.getenv("DB_ECHO_LOG", "False").lower() == "true"
     DB_POOL_SIZE: int = int(os.getenv("DB_POOL_SIZE", "5"))

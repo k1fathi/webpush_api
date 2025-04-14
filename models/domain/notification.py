@@ -3,6 +3,7 @@ Notification model for storing notification data.
 """
 
 import uuid
+import enum
 from datetime import datetime
 from typing import List, Optional
 
@@ -11,6 +12,15 @@ from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
 
 from db.base_class import Base
+
+class DeliveryStatus(str, enum.Enum):
+    """Enum for notification delivery status."""
+    PENDING = "pending"
+    SENT = "sent"
+    DELIVERED = "delivered"
+    FAILED = "failed"
+    READ = "read"
+    CLICKED = "clicked"
 
 class NotificationModel(Base):
     """
