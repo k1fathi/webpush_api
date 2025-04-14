@@ -26,6 +26,20 @@ class AnalyticsModel(Base):
         nullable=False
     )
     
+    # Foreign key to campaigns table
+    campaign_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("campaigns.id", ondelete="SET NULL"),
+        nullable=True
+    )
+    
+    # Foreign key to users table
+    user_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True
+    )
+    
     # Analytics data
     delivery_status = Column(String(50), nullable=False, default="pending")
     opened = Column(Boolean, default=False)
@@ -55,6 +69,10 @@ class AnalyticsModel(Base):
     
     # Relationship to notifications table - use string reference to avoid circular imports
     notification = relationship("NotificationModel", back_populates="analytics")
+    # Relationship to campaigns table
+    campaign = relationship("CampaignModel", back_populates="analytics")
+    # Relationship to users table
+    user = relationship("UserModel", back_populates="analytics")
     
     def __repr__(self):
         return f"<Analytics {self.id} for notification {self.notification_id}>"

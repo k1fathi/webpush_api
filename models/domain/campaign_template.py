@@ -26,6 +26,3 @@ class CampaignTemplateModel(Base):
     
     # Relationship with user who created the template
     creator = relationship("UserModel", back_populates="created_templates")
-    
-    # Relationship with campaigns using this template
-    campaigns = relationship("CampaignModel", back_populates="template")

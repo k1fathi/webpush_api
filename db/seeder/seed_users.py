@@ -191,11 +191,19 @@ async def seed_users() -> None:
             session.add(new_user)
             await session.flush()
             
-            # Assign role - use SQLAlchemy relationship instead of raw SQL
+            # Assign role - use the direct role_id assignment instead of relationship
             role = roles.get(role_name)
             if role:
-                # Properly append the role using the relationship
-                new_user.roles.append(role)
+                # Set the main role 
+                new_user.role_id = role.id
+                
+                # Use SQL to insert into the user_role association table after flush
+                from sqlalchemy import text
+                await session.execute(
+                    text("INSERT INTO user_role (user_id, role_id) VALUES (:user_id, :role_id)"),
+                    {"user_id": new_user.id, "role_id": role.id}
+                )
+                
                 logger.info(f"Assigned role {role_name} to user {email}")
             else:
                 logger.warning(f"Role {role_name} not found, user {email} created without role")

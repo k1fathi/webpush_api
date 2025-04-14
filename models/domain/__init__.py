@@ -14,6 +14,7 @@ from .notification import NotificationModel
 from .permission import PermissionModel
 from .role import RoleModel
 from .segment import SegmentModel
+from .subscription import SubscriptionModel
 from .template import TemplateModel, TemplateVersionModel
 from .test_variant import TestVariantModel
 from .trigger import TriggerModel, TriggerExecutionModel

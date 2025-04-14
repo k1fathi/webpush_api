@@ -37,6 +37,11 @@ class NotificationModel(Base):
     status = Column(String(50), nullable=False, default="pending")
     type = Column(String(50), nullable=False, default="general")
     
+    # Foreign keys
+    campaign_id = Column(UUID(as_uuid=True), ForeignKey("campaigns.id"), nullable=True)
+    variant_id = Column(UUID(as_uuid=True), ForeignKey("test_variants.id"), nullable=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    
     # Timestamps
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
     updated_at = Column(DateTime, nullable=True, onupdate=datetime.utcnow)
@@ -51,6 +56,12 @@ class NotificationModel(Base):
     # Relationships - use string references to avoid circular imports
     # Analytics relationship - reverse side
     analytics = relationship("AnalyticsModel", back_populates="notification", cascade="all, delete-orphan")
+    # Campaign relationship
+    campaign = relationship("CampaignModel", back_populates="notifications")
+    # Test variant relationship
+    variant = relationship("TestVariantModel", back_populates="notifications")
+    # User relationship
+    user = relationship("UserModel", back_populates="notifications")
     
     def __repr__(self):
         return f"<Notification {self.id}: {self.title}>"
