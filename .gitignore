@@ -185,3 +185,14 @@ cython_debug/
 
 # Postman environment-specific files
 postman/*.local.json
+\[celery_worker
+\[web
+c7fd83cf7ae8,
+ERROR
+extracting
+FETCH_HEAD
+reset_migrations,
+transferring
+alembic/versions/current
+=
+CACHED
