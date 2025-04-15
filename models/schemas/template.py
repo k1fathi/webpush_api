@@ -28,6 +28,17 @@ class Template(BaseModel):
     image_url: Optional[HttpUrl] = None
     action_url: Optional[HttpUrl] = None
     icon_url: Optional[HttpUrl] = None
+    badge_url: Optional[HttpUrl] = None
+    
+    # Web Push specific configuration
+    vibrate: Optional[List[int]] = None
+    require_interaction: Optional[bool] = False
+    silent: Optional[bool] = False
+    renotify: Optional[bool] = False
+    time_to_live: Optional[int] = None
+    priority: Optional[int] = 0
+    actions: Optional[List[Dict[str, Any]]] = None
+    
     template_type: TemplateType = TemplateType.WEBPUSH
     content: Dict[str, Any] = Field(default_factory=dict)
     variables: List[str] = Field(default_factory=list)
@@ -61,7 +72,17 @@ class TemplateCreate(TemplateBase):
     image_url: Optional[HttpUrl] = None
     action_url: Optional[HttpUrl] = None
     icon_url: Optional[HttpUrl] = None
+    badge_url: Optional[HttpUrl] = None
     category: Optional[str] = None
+    
+    # Web Push specific configuration
+    vibrate: Optional[List[int]] = None
+    require_interaction: Optional[bool] = False
+    silent: Optional[bool] = False
+    renotify: Optional[bool] = False
+    time_to_live: Optional[int] = None
+    priority: Optional[int] = 0
+    actions: Optional[List[Dict[str, Any]]] = None
 
     @field_validator('variables')
     @classmethod
@@ -83,11 +104,21 @@ class TemplateUpdate(BaseModel):
     image_url: Optional[HttpUrl] = None
     action_url: Optional[HttpUrl] = None
     icon_url: Optional[HttpUrl] = None
+    badge_url: Optional[HttpUrl] = None
     content: Optional[Dict[str, Any]] = None
     variables: Optional[List[str]] = None
     tags: Optional[List[str]] = None
     category: Optional[str] = None
     status: Optional[TemplateStatus] = None
+    
+    # Web Push specific configuration updates
+    vibrate: Optional[List[int]] = None
+    require_interaction: Optional[bool] = None
+    silent: Optional[bool] = None
+    renotify: Optional[bool] = None
+    time_to_live: Optional[int] = None
+    priority: Optional[int] = None
+    actions: Optional[List[Dict[str, Any]]] = None
 
 class TemplateRead(TemplateBase):
     """Schema for reading templates"""
@@ -97,12 +128,22 @@ class TemplateRead(TemplateBase):
     image_url: Optional[HttpUrl] = None
     action_url: Optional[HttpUrl] = None
     icon_url: Optional[HttpUrl] = None
+    badge_url: Optional[HttpUrl] = None
     created_at: datetime
     updated_at: datetime
     created_by: Optional[str] = None
     status: TemplateStatus
     version: int = 1
     category: Optional[str] = None
+    
+    # Web Push specific configuration
+    vibrate: Optional[List[int]] = None
+    require_interaction: Optional[bool] = None
+    silent: Optional[bool] = None
+    renotify: Optional[bool] = None
+    time_to_live: Optional[int] = None
+    priority: Optional[int] = None
+    actions: Optional[List[Dict[str, Any]]] = None
     
     model_config = {
         "from_attributes": True
@@ -122,7 +163,17 @@ class TemplatePreview(BaseModel):
     image_url: Optional[HttpUrl] = None
     action_url: Optional[HttpUrl] = None
     icon_url: Optional[HttpUrl] = None
+    badge_url: Optional[HttpUrl] = None
     rendered_content: Dict[str, Any] = Field(default_factory=dict)
+    
+    # Web Push specific preview fields
+    vibrate: Optional[List[int]] = None
+    require_interaction: Optional[bool] = None
+    silent: Optional[bool] = None
+    renotify: Optional[bool] = None
+    time_to_live: Optional[int] = None
+    priority: Optional[int] = None
+    actions: Optional[List[Dict[str, Any]]] = None
     
 class TemplateValidation(BaseModel):
     """Schema for template validation"""
@@ -135,8 +186,23 @@ class TemplateVersion(BaseModel):
     id: str
     template_id: str
     version: int
+    title: str
+    body: str
+    image_url: Optional[HttpUrl] = None
+    action_url: Optional[HttpUrl] = None
+    icon_url: Optional[HttpUrl] = None
+    badge_url: Optional[HttpUrl] = None
     content: Dict[str, Any]
     created_at: datetime
     created_by: Optional[str] = None
+    
+    # Web Push specific configuration (version history)
+    vibrate: Optional[List[int]] = None
+    require_interaction: Optional[bool] = None
+    silent: Optional[bool] = None
+    renotify: Optional[bool] = None
+    time_to_live: Optional[int] = None
+    priority: Optional[int] = None
+    actions: Optional[List[Dict[str, Any]]] = None
     
     model_config = {"from_attributes": True}

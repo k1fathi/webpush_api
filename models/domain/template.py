@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from sqlalchemy import Column, String, Integer, DateTime, Text, ForeignKey, JSON, Boolean
 from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import UUID, ENUM, ARRAY
+from sqlalchemy.dialects.postgresql import UUID, ENUM, ARRAY, JSONB
 
 from db.base_class import Base
 from models.schemas.template import TemplateType, TemplateStatus
@@ -21,6 +21,18 @@ class TemplateModel(Base):
     image_url = Column(String, nullable=True)
     action_url = Column(String, nullable=True)
     icon_url = Column(String, nullable=True)
+    badge_url = Column(String, nullable=True)  # Badge shown when notification is collapsed
+    
+    # Web Push specific configuration
+    vibrate = Column(JSONB, nullable=True)     # Vibration pattern for mobile devices
+    require_interaction = Column(Boolean, default=False)  # Require user interaction to dismiss
+    silent = Column(Boolean, default=False)    # Whether notification should be silent
+    renotify = Column(Boolean, default=False)  # Whether to notify user again for a new notification
+    time_to_live = Column(Integer, nullable=True)  # How long to keep trying to deliver (seconds)
+    priority = Column(Integer, default=0)      # Priority of the notification (0 = normal, 2 = high)
+    
+    # Action buttons configuration
+    actions = Column(JSONB, nullable=True)     # Action buttons for the notification
     
     # Template metadata
     template_type = Column(
@@ -64,6 +76,19 @@ class TemplateVersionModel(Base):
     image_url = Column(String, nullable=True)
     action_url = Column(String, nullable=True)
     icon_url = Column(String, nullable=True)
+    badge_url = Column(String, nullable=True)  # Badge shown when notification is collapsed
+    
+    # Web Push specific configuration
+    vibrate = Column(JSONB, nullable=True)
+    require_interaction = Column(Boolean, nullable=True)
+    silent = Column(Boolean, nullable=True)
+    renotify = Column(Boolean, nullable=True)
+    time_to_live = Column(Integer, nullable=True)
+    priority = Column(Integer, nullable=True)
+    
+    # Action buttons configuration
+    actions = Column(JSONB, nullable=True)
+    
     content = Column(JSON, default=dict)
     
     # Timestamps and user tracking

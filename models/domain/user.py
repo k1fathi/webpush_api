@@ -40,6 +40,12 @@ class UserModel(Base):
     quiet_hours_start = Column(Integer, nullable=True)
     quiet_hours_end = Column(Integer, nullable=True)
     
+    # Web push specific preferences
+    webpush_permission_status = Column(String, nullable=True)  # granted, denied, default
+    webpush_permission_updated_at = Column(DateTime, nullable=True)
+    webpush_frequency_cap = Column(Integer, default=-1)  # -1 means no limit
+    webpush_subscription_count = Column(Integer, default=0)
+    
     # Device and subscription
     subscription_info = Column(JSON, default=dict)
     devices = Column(JSON, default=list)
@@ -68,6 +74,11 @@ class UserModel(Base):
     analytics = relationship("AnalyticsModel", back_populates="user")
     created_templates = relationship("CampaignTemplateModel", back_populates="creator", foreign_keys="CampaignTemplateModel.created_by")
     subscriptions = relationship("SubscriptionModel", back_populates="user")
+    
+    # New relationships for web push
+    web_push_events = relationship("WebPushEventModel", back_populates="user")
+    created_configs = relationship("WebPushConfigModel", foreign_keys="WebPushConfigModel.created_by", back_populates="creator")
+    updated_configs = relationship("WebPushConfigModel", foreign_keys="WebPushConfigModel.updated_by", back_populates="updater")
 
     def __repr__(self):
         return f"<User {self.email}>"

@@ -280,4 +280,4 @@ python -m db.seeder.seed_users
 
 
 
-chmod +x scripts/docker-entrypoint.sh
+chmod +x scripts/docker-entrypoint.sh && chmod +x scripts/postgres_volume_manager.sh

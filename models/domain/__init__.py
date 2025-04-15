@@ -10,7 +10,7 @@ from .campaign import CampaignModel
 from .campaign_template import CampaignTemplateModel
 from .cdp_integration import CdpIntegrationModel
 from .cep_decision import CepDecisionModel
-from .notification import NotificationModel
+from .notification import NotificationModel, DeliveryStatus, InteractionType
 from .permission import PermissionModel
 from .role import RoleModel
 from .segment import SegmentModel
@@ -19,6 +19,8 @@ from .template import TemplateModel, TemplateVersionModel
 from .test_variant import TestVariantModel
 from .trigger import TriggerModel, TriggerExecutionModel
 from .user import UserModel
+from .web_push_config import WebPushConfigModel
+from .web_push_event import WebPushEventModel, InteractionEventType
 
 # Note: UserRoleModel and RolePermissionModel have been removed in favor of 
 # using the association tables directly (user_role and role_permission)
