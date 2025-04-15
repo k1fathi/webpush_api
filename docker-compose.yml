@@ -15,7 +15,7 @@ services:
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     restart: always
-    command: postgres -c 'config_file=/etc/postgresql/postgresql.conf' -c 'hba_file=/etc/postgresql/pg_hba.conf'
+    command: postgres -c 'max_connections=100' -c 'shared_buffers=256MB' -c 'autovacuum=on'
     healthcheck:
       test:
         [
