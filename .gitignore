@@ -1,12 +1,8 @@
-# Byte-compiled / optimized / DLL files
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
-
-# C extensions
 *.so
-
-# Distribution / packaging
 .Python
 build/
 develop-eggs/
@@ -20,46 +16,74 @@ parts/
 sdist/
 var/
 wheels/
-share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
 MANIFEST
 
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
+# Virtual Environment
+venv/
+env/
+ENV/
 
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
 
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
+# Docker
+.docker/
+docker-compose.override.yml
+*.log
+
+# Database
+postgres-data/
+db_backups/
+*.sqlite
+*.sqlite3
+*.db
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Alembic
+alembic/versions/__pycache__/
+
+# Application specific
+logs/
+static/uploads/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+*~
+
+# Cache
 .pytest_cache/
-cover/
+.mypy_cache/
+.coverage
+htmlcov/
+coverage.xml
+.tox/
+nosetests.xml
+.hypothesis/
 
 # Translations
 *.mo
 *.pot
 
 # Django stuff:
-*.log
 local_settings.py
-db.sqlite3
-db.sqlite3-journal
 
 # Flask stuff:
 instance/
@@ -120,21 +144,8 @@ ipython_config.py
 # PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
 __pypackages__/
 
-# Celery stuff
-celerybeat-schedule
-celerybeat.pid
-
 # SageMath parsed files
 *.sage.py
-
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
 
 # Spyder project settings
 .spyderproject
@@ -147,7 +158,6 @@ venv.bak/
 /site
 
 # mypy
-.mypy_cache/
 .dmypy.json
 dmypy.json
 

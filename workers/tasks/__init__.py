@@ -1,4 +1,5 @@
 import sys
+import logging
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)

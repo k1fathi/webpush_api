@@ -53,17 +53,8 @@ services:
       rabbitmq:
         condition: service_healthy
     entrypoint:
-      [
-        "python",
-        "-m",
-        "uvicorn",
-        "api.main:app",
-        "--host",
-        "0.0.0.0",
-        "--port",
-        "8000",
-        "--reload",
-      ]
+      ["python", "-m", "uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    command: []
     security_opt:
       - no-new-privileges:true
     cap_drop:
@@ -86,6 +77,9 @@ services:
     command: redis-server --requirepass ${REDIS_PASSWORD:-redis} --protected-mode yes
     security_opt:
       - no-new-privileges:true
+    cap_drop:
+      - ALL
+    user: redis
 
   rabbitmq:
     image: rabbitmq:3-management-alpine
@@ -130,13 +124,7 @@ services:
       - no-new-privileges:true
     user: app # Explicitly set the user to match Dockerfile
     entrypoint:
-      [
-        "celery",
-        "-A",
-        "workers.celery_worker:celery_app",
-        "worker",
-        "--loglevel=${LOG_LEVEL:-INFO}",
-      ]
+      ["sh", "-c", "celery -A workers.celery_worker:celery_app worker --loglevel=${LOG_LEVEL:-INFO}"]
 
 volumes:
   postgres_data:
