@@ -7,33 +7,33 @@ echo "Starting docker entrypoint script..."
 echo "Current user: $(whoami)"
 echo "Current working directory: $(pwd)"
 
-# Create postgres data directories with more robust permission management
-# Removed reference to problematic directory
-for dir in "/app/postgres-data" "/app/db_backups"; do
-    if [ -d "$dir" ]; then
-        echo "Directory $dir exists, ensuring permissions"
-        chmod -R 777 "$dir" || echo "Warning: Could not chmod $dir"
-    else
-        echo "Creating directory $dir"
-        mkdir -p "$dir" || echo "Warning: Could not create $dir"
-        chmod -R 777 "$dir" || echo "Warning: Could not chmod $dir"
+# Only try to modify directories if SKIP_PERMISSION_CHECKS is not set
+if [ "$SKIP_PERMISSION_CHECKS" != "true" ]; then
+    # Check if directories exist before trying to change permissions
+    for dir in "/app/db_backups"; do
+        if [ -d "$dir" ]; then
+            echo "Directory $dir exists, ensuring permissions"
+            chmod -R 777 "$dir" 2>/dev/null || echo "Warning: Could not chmod $dir"
+        else
+            echo "Creating directory $dir"
+            mkdir -p "$dir" 2>/dev/null || echo "Warning: Could not create $dir"
+            chmod -R 777 "$dir" 2>/dev/null || echo "Warning: Could not chmod $dir"
+        fi
+    done
+
+    # Create static files directory if it doesn't exist
+    if [ ! -d "/app/static" ]; then
+        echo "Creating static directory for FastAPI static files"
+        mkdir -p /app/static 2>/dev/null || echo "Warning: Could not create /app/static"
+        chmod -R 755 /app/static 2>/dev/null || echo "Warning: Could not chmod /app/static"
+        # Create a placeholder file to ensure the directory isn't empty
+        echo "This is a placeholder file for the static directory" > /app/static/placeholder.txt 2>/dev/null || echo "Warning: Could not create placeholder file"
     fi
-done
 
-# Create static files directory if it doesn't exist
-if [ ! -d "/app/static" ]; then
-    echo "Creating static directory for FastAPI static files"
-    mkdir -p /app/static || echo "Warning: Could not create /app/static"
-    chmod -R 755 /app/static || echo "Warning: Could not chmod /app/static"
-    # Create a placeholder file to ensure the directory isn't empty
-    echo "This is a placeholder file for the static directory" > /app/static/placeholder.txt
+    # Ensure static directory exists with proper permissions
+    mkdir -p /app/static/js 2>/dev/null || echo "Warning: Could not create /app/static/js"
+    chmod -R 777 /app/static 2>/dev/null || echo "Warning: Could not chmod /app/static"
 fi
-
-# Ensure static directory exists with proper permissions
-mkdir -p /app/static/js
-chmod -R 777 /app/static
-
-# Removed attempt to fix permissions on parent directory
 
 # Wait for postgres to be ready
 echo "Checking PostgreSQL connection..."
@@ -67,6 +67,14 @@ echo "Database is ready!"
 if [ "${RUN_MIGRATIONS}" = "true" ]; then
     echo "Running database migrations..."
     alembic upgrade head || echo "Warning: Migration failed, but continuing"
+fi
+
+# Verify if uvicorn is available when needed
+if [[ "$*" == *"uvicorn"* ]]; then
+    if ! command -v uvicorn &> /dev/null; then
+        echo "Error: uvicorn command not found. Installing required packages..."
+        pip install --no-cache-dir uvicorn fastapi || echo "Failed to install uvicorn"
+    fi
 fi
 
 # Start the main application
