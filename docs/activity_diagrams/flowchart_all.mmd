@@ -1,0 +1,121 @@
+flowchart TD
+    start([Start]) --> userAuth[User Authentication]
+    userAuth --> permCheck{Permission\nCheck}
+    
+    permCheck -->|Not Authorized| accessDenied[Access Denied]
+    permCheck -->|Authorized| mainMenu[Main System Dashboard]
+    
+    mainMenu --> campaignMgmt[Campaign Management]
+    mainMenu --> segmentMgmt[Segment Management]
+    mainMenu --> templateMgmt[Template Management]
+    mainMenu --> analytics[Analytics Dashboard]
+    mainMenu --> systemConfig[System Configuration]
+    
+    %% Campaign Management Flow
+    campaignMgmt --> createCampaign[Create Campaign]
+    createCampaign --> setCampaignDetails[Set Campaign Details]
+    setCampaignDetails --> selectAudience[Select Target Audience]
+    selectAudience --> chooseTemplate[Choose Notification Template]
+    chooseTemplate --> personalize[Personalize Message]
+    personalize --> scheduleType{Select\nSchedule Type}
+    
+    scheduleType -->|Immediate| sendNow[Send Immediately]
+    scheduleType -->|Scheduled| setSchedule[Set Schedule]
+    scheduleType -->|Trigger-based| configureTrigger[Configure Trigger]
+    
+    sendNow --> validateCampaign[Validate Campaign]
+    setSchedule --> validateCampaign
+    configureTrigger --> validateCampaign
+    
+    validateCampaign --> campaignValid{Campaign\nValid?}
+    campaignValid -->|No| editCampaign[Edit Campaign]
+    campaignValid -->|Yes| activateCampaign[Activate Campaign]
+    editCampaign --> validateCampaign
+    
+    %% Notification Delivery Flow
+    activateCampaign --> deliveryQueue[Add to Delivery Queue]
+    deliveryQueue --> processSubscribers[["For each Subscriber"]]
+    
+    processSubscribers --> checkOptIn{User Opted\nIn?}
+    checkOptIn -->|No| skipUser[Skip User]
+    checkOptIn -->|Yes| checkCEP{CEP\nEnabled?}
+    
+    checkCEP -->|Yes| cepDecision[Get Channel Decision]
+    cepDecision --> isWebPushBest{WebPush is\nBest Channel?}
+    isWebPushBest -->|No| logSkip[Log CEP Decision]
+    isWebPushBest -->|Yes| prepNotification[Prepare Notification]
+    checkCEP -->|No| prepNotification
+    
+    prepNotification --> sendWebPush[Send WebPush Notification]
+    sendWebPush --> logAttempt[Log Delivery Attempt]
+    logAttempt --> deliveryStatus{Delivery\nStatus}
+    
+    deliveryStatus -->|Success| markDelivered[Mark as Delivered]
+    deliveryStatus -->|Failed| checkRetry{Retry\nAllowed?}
+    
+    checkRetry -->|Yes| scheduleRetry[Schedule Retry]
+    checkRetry -->|No| markFailed[Mark as Failed]
+    
+    markDelivered --> setupTracking[Setup Click/Open Tracking]
+    setupTracking --> nextUser
+    markFailed --> nextUser
+    scheduleRetry --> nextUser
+    skipUser --> nextUser
+    logSkip --> nextUser
+    
+    nextUser{More Users?}
+    nextUser -->|Yes| processSubscribers
+    nextUser -->|No| updateStats[Update Campaign Statistics]
+    
+    %% Analytics Tracking Flow
+    updateStats --> triggerWebhooks[Trigger Webhooks]
+    triggerWebhooks --> integrateCDP{CDP\nIntegration?}
+    
+    integrateCDP -->|Yes| sendToCDP[Send Data to CDP]
+    integrateCDP -->|No| endDelivery
+    sendToCDP --> endDelivery
+    
+    %% Analytics Dashboard Flow
+    analytics --> campaignStats[View Campaign Statistics]
+    analytics --> deliveryStats[Delivery Statistics]
+    analytics --> engagementStats[Engagement Statistics]
+    analytics --> conversionStats[Conversion Statistics]
+    analytics --> segmentAnalysis[Segment Analysis]
+    
+    %% Segment Management Flow
+    segmentMgmt --> createSegment[Create Segment]
+    segmentMgmt --> editSegment[Edit Segment]
+    segmentMgmt --> defineRules[Define Segment Rules]
+    defineRules --> testSegment[Test Segment Rules]
+    testSegment --> saveSegment[Save Segment]
+    
+    %% Template Management Flow
+    templateMgmt --> createTemplate[Create Template]
+    templateMgmt --> editTemplate[Edit Template]
+    templateMgmt --> defineContent[Define Template Content]
+    defineContent --> previewTemplate[Preview Template]
+    previewTemplate --> saveTemplate[Save Template]
+    
+    %% System Configuration Flow
+    systemConfig --> manageUsers[Manage Users]
+    systemConfig --> manageRoles[Manage Roles]
+    systemConfig --> configIntegrations[Configure Integrations]
+    systemConfig --> configWebhooks[Configure Webhooks]
+    systemConfig --> configTriggers[Configure Triggers]
+    
+    %% End states
+    accessDenied --> finish([End])
+    endDelivery([End Delivery]) --> finish
+    campaignStats --> finish
+    saveSegment --> finish
+    saveTemplate --> finish
+    configTriggers --> finish
+    
+    %% Styling
+    classDef process fill:#d4f1f9,stroke:#05acda,stroke-width:1px;
+    classDef decision fill:#ffe0b2,stroke:#ffb74d,stroke-width:1px;
+    classDef start_end fill:#f8bbd0,stroke:#ec407a,stroke-width:1px;
+    
+    class start,finish,endDelivery start_end;
+    class permCheck,campaignValid,checkOptIn,checkCEP,isWebPushBest,deliveryStatus,checkRetry,nextUser,integrateCDP decision;
+    class userAuth,mainMenu,campaignMgmt,segmentMgmt,templateMgmt,analytics,systemConfig,createCampaign,setCampaignDetails,selectAudience,chooseTemplate,personalize,validateCampaign,activateCampaign,deliveryQueue,processSubscribers,prepNotification,sendWebPush,logAttempt,markDelivered,setupTracking,updateStats,triggerWebhooks,sendToCDP process;
