@@ -17,7 +17,9 @@ ENV PYTHONUNBUFFERED=1
 RUN pip install --upgrade pip && pip install poetry==1.7.1
 
 # Copy only necessary files for dependency installation
-COPY pyproject.toml poetry.lock ./
+# Copy files individually to potentially get more specific errors if one is missing
+COPY pyproject.toml ./
+COPY poetry.lock ./
 
 # Install dependencies using poetry
 RUN poetry config virtualenvs.create false && \
