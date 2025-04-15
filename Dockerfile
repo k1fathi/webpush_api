@@ -31,9 +31,11 @@ RUN find /app/scripts/ -type f -name "*.sh" -exec dos2unix {} \; && \
 # Copy the rest of the project
 COPY . .
 
-# Create backup directory with proper permissions
+# Create directories with proper permissions
 RUN mkdir -p /app/db_backups && \
-    chmod -R 777 /app/db_backups
+    chmod -R 777 /app/db_backups && \
+    mkdir -p /app/static/js && \
+    chmod -R 777 /app/static
 
 # Set environment variables
 ENV PYTHONPATH=/app

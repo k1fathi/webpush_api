@@ -24,6 +24,7 @@ services:
     volumes:
       - .:/app:delegated
       - ./scripts:/app/scripts:ro
+      - static_files:/app/static
     ports:
       - "8000:8000"
     environment:
@@ -98,4 +99,6 @@ volumes:
   postgres_data:
     name: webpush_postgres_data
   app_data:
+    driver: local
+  static_files:
     driver: local

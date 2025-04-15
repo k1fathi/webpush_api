@@ -29,6 +29,10 @@ if [ ! -d "/app/static" ]; then
     echo "This is a placeholder file for the static directory" > /app/static/placeholder.txt
 fi
 
+# Ensure static directory exists with proper permissions
+mkdir -p /app/static/js
+chmod -R 777 /app/static
+
 # Removed attempt to fix permissions on parent directory
 
 # Wait for postgres to be ready
@@ -50,6 +54,14 @@ until pg_isready -h db -p ${POSTGRES_PORT:-5432} -U postgres; do
     sleep 2
 done
 echo "PostgreSQL check completed - executing command"
+
+# Check if Postgres is available
+until nc -z -v -w30 db 5432
+do
+  echo "Waiting for database connection..."
+  sleep 2
+done
+echo "Database is ready!"
 
 # Run any startup commands or migrations if needed
 if [ "${RUN_MIGRATIONS}" = "true" ]; then
