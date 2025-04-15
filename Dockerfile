@@ -13,17 +13,25 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Install poetry
-RUN pip install --upgrade pip && pip install poetry==1.7.1
+# Create requirements.txt with necessary packages
+RUN echo "fastapi>=0.68.0,<0.69.0\n\
+    uvicorn>=0.15.0,<0.16.0\n\
+    sqlalchemy>=1.4.0\n\
+    psycopg2-binary>=2.9.0\n\
+    asyncpg>=0.25.0\n\
+    celery>=5.2.0\n\
+    redis>=4.0.0\n\
+    pydantic>=1.8.0\n\
+    alembic>=1.7.0\n\
+    python-jose>=3.3.0\n\
+    passlib>=1.7.4\n\
+    python-multipart>=0.0.5\n\
+    aiohttp>=3.8.0\n\
+    " > requirements.txt
 
-# Copy only necessary files for dependency installation
-# Copy files individually to potentially get more specific errors if one is missing
-COPY pyproject.toml ./
-COPY poetry.lock ./
-
-# Install dependencies using poetry
-RUN poetry config virtualenvs.create false && \
-    poetry install --no-dev --no-interaction --no-ansi
+# Install dependencies
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
 # --- Final Stage ---
 FROM python:3.10-slim
