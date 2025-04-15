@@ -64,7 +64,6 @@ services:
         "8000",
         "--reload",
       ]
-    command: []
     security_opt:
       - no-new-privileges:true
     cap_drop:
@@ -112,7 +111,6 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: webpush_celeryworker
-    command: celery -A workers.celery_worker:celery_app worker --loglevel=${LOG_LEVEL:-INFO}
     volumes:
       - .:/app:ro # Mount as read-only
     environment:
@@ -133,9 +131,11 @@ services:
     user: app # Explicitly set the user to match Dockerfile
     entrypoint:
       [
-        "sh",
-        "-c",
-        "celery -A workers.celery_worker:celery_app worker --loglevel=${LOG_LEVEL:-INFO}",
+        "celery",
+        "-A",
+        "workers.celery_worker:celery_app",
+        "worker",
+        "--loglevel=${LOG_LEVEL:-INFO}",
       ]
 
 volumes:
