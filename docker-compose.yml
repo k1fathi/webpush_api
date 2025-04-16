@@ -17,11 +17,7 @@ services:
     restart: always
     command: postgres -c 'max_connections=100' -c 'shared_buffers=256MB' -c 'autovacuum=on'
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-webpush}",
-        ]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-webpush}" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -52,9 +48,8 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-    entrypoint:
-      ["python", "-m", "uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
-    command: []
+    entrypoint: [ "/app/scripts/web-entrypoint.sh" ]
+    command: [ "python", "-m", "uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload" ]
     security_opt:
       - no-new-privileges:true
     cap_drop:
@@ -70,7 +65,7 @@ services:
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD:-redis}
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-redis}", "ping"]
+      test: [ "CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-redis}", "ping" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -93,7 +88,7 @@ services:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
     healthcheck:
-      test: ["CMD", "rabbitmqctl", "status"]
+      test: [ "CMD", "rabbitmqctl", "status" ]
       interval: 10s
       timeout: 10s
       retries: 5
@@ -123,8 +118,7 @@ services:
     security_opt:
       - no-new-privileges:true
     user: app # Explicitly set the user to match Dockerfile
-    entrypoint:
-      ["sh", "-c", "celery -A workers.celery_worker:celery_app worker --loglevel=${LOG_LEVEL:-INFO}"]
+    entrypoint: [ "sh", "-c", "celery -A workers.celery_worker:celery_app worker --loglevel=${LOG_LEVEL:-INFO}" ]
 
 volumes:
   postgres_data:

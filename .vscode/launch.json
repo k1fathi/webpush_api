@@ -8,13 +8,16 @@
             "module": "uvicorn",
             "args": [
                 "main:app",
-                "--reload"
+                "--reload",
+                "--host",
+                "57.129.71.50"
             ],
             "jinja": true,
             "env": {
                 "PYTHONPATH": "${workspaceFolder}:${workspaceFolder}/webpush_api",
                 "PATH": "${workspaceFolder}/.venv/bin:${env:PATH}"
-            }
+            },
+            "python": "${workspaceFolder}/.venv/bin/python"
         }
     ]
 }

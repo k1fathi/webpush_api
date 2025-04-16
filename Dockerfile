@@ -58,14 +58,20 @@ ENV PYTHONPATH=/app
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
+# Install debugpy for debugging
+RUN pip install debugpy
+
 # Switch to non-root user
 USER app
 
 # Expose port
 EXPOSE 8000
 
+# Expose debug port
+EXPOSE 5678
+
 # Use the entrypoint script
 ENTRYPOINT ["/app/scripts/docker-entrypoint.sh"]
 
 # Default command
-CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD [ "python", "-m", "debugpy", "--listen", "0.0.0.0:5678", "-m", "uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload" ]

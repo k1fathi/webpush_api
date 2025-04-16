@@ -1,32 +1,36 @@
 from fastapi import APIRouter
 
-from .endpoints import (
-    users,
-    campaigns,
-    segments,
-    templates,
-    webhooks,
-    notifications,
-    ab_tests,
-    analytics,
-    triggers,
-    external_auth,
-    health  # Now this import will work
-)
+from .users import router as users_router
+from .auth import router as auth_router
+from .roles import router as roles_router
+from .permissions import router as permissions_router
+from .campaigns import router as campaigns_router
+from .templates import router as templates_router
+from .segments import router as segments_router
+from .analytics import router as analytics_router
+from .webhooks import router as webhooks_router
+from .notifications import router as notifications_router
+from .ab_test import router as ab_test_router
+from .cdp import router as cdp_router
+from .cep import router as cep_router
+from .triggers import router as triggers_router
+from .webpush import router as webpush_router
 
-# Define the API router
 api_router = APIRouter()
 
-# Include all endpoint routers
-api_router.include_router(users.router, prefix="/users", tags=["users"])
-api_router.include_router(campaigns.router, prefix="/campaigns", tags=["campaigns"])
-api_router.include_router(segments.router, prefix="/segments", tags=["segments"])
-api_router.include_router(templates.router, prefix="/templates", tags=["templates"])
-api_router.include_router(webhooks.router, prefix="/webhooks", tags=["webhooks"])
-api_router.include_router(notifications.router, prefix="/notifications", tags=["notifications"])
-api_router.include_router(ab_tests.router, prefix="/ab-tests", tags=["ab-tests"])
-api_router.include_router(analytics.router, prefix="/analytics", tags=["analytics"])
-api_router.include_router(triggers.router, prefix="/triggers", tags=["triggers"])
-api_router.include_router(external_auth.router, prefix="/external-auth", tags=["external-auth"])
-api_router.include_router(health.router, prefix="/health", tags=["health"])
+api_router.include_router(auth_router)
+api_router.include_router(users_router)
+api_router.include_router(roles_router)
+api_router.include_router(permissions_router)
+api_router.include_router(campaigns_router)
+api_router.include_router(templates_router)
+api_router.include_router(segments_router)
+api_router.include_router(ab_test_router)
+api_router.include_router(webhooks_router)
+api_router.include_router(cdp_router)
+api_router.include_router(cep_router)
+api_router.include_router(triggers_router)
+api_router.include_router(notifications_router)
+api_router.include_router(analytics_router)
+api_router.include_router(webpush_router)
 
